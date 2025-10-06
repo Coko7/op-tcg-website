@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Achievements API</title>
+</head>
+<body>
+    <h1>Test Achievements API</h1>
+    <button onclick="testAchievements()">Test GET /users/achievements</button>
+    <button onclick="testStats()">Test GET /users/achievements/stats</button>
+    <pre id="result"></pre>
+
+    <script>
+        const API_URL = 'http://localhost:5001/api';
+        const token = localStorage.getItem('accessToken');
+
+        async function testAchievements() {
+            const result = document.getElementById('result');
+            result.textContent = 'Loading...';
+
+            try {
+                const response = await fetch(`${API_URL}/users/achievements`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+                console.log('Achievements:', data);
+            } catch (error) {
+                result.textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            }
+        }
+
+        async function testStats() {
+            const result = document.getElementById('result');
+            result.textContent = 'Loading...';
+
+            try {
+                const response = await fetch(`${API_URL}/users/achievements/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+                console.log('Stats:', data);
+            } catch (error) {
+                result.textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!token) {
+                document.getElementById('result').textContent = 'No access token found in localStorage. Please login first.';
+            } else {
+                document.getElementById('result').textContent = 'Token found: ' + token.substring(0, 20) + '...';
+            }
+        });
+    </script>
+</body>
+</html>

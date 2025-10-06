@@ -6,19 +6,24 @@ export class AchievementController {
   static async getUserAchievements(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
+      console.log('👤 getUserAchievements - User ID:', userId);
+
       if (!userId) {
+        console.log('❌ Utilisateur non authentifié');
         res.status(401).json({ error: 'Utilisateur non authentifié' });
         return;
       }
 
+      console.log('🔍 Récupération des achievements pour user:', userId);
       const achievements = await AchievementModel.getUserAchievements(userId);
+      console.log('✅ Achievements récupérés:', achievements.length);
 
       res.json({
         success: true,
         data: achievements
       });
     } catch (error) {
-      console.error('Erreur lors de la récupération des achievements:', error);
+      console.error('❌ Erreur lors de la récupération des achievements:', error);
       res.status(500).json({ error: 'Erreur serveur' });
     }
   }
@@ -57,19 +62,24 @@ export class AchievementController {
   static async getAchievementStats(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
+      console.log('📊 getAchievementStats - User ID:', userId);
+
       if (!userId) {
+        console.log('❌ Utilisateur non authentifié pour les stats');
         res.status(401).json({ error: 'Utilisateur non authentifié' });
         return;
       }
 
+      console.log('🔍 Récupération des stats pour user:', userId);
       const stats = await AchievementModel.getUserStats(userId);
+      console.log('✅ Stats récupérées:', stats);
 
       res.json({
         success: true,
         data: stats
       });
     } catch (error) {
-      console.error('Erreur lors de la récupération des stats achievements:', error);
+      console.error('❌ Erreur lors de la récupération des stats achievements:', error);
       res.status(500).json({ error: 'Erreur serveur' });
     }
   }

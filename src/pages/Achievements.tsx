@@ -22,12 +22,21 @@ export default function Achievements() {
         apiService.getAchievementStats()
       ]);
 
+      console.log('Achievements Response:', achievementsResponse);
+      console.log('Stats Response:', statsResponse);
+
       if (achievementsResponse.success) {
+        console.log('Setting achievements:', achievementsResponse.data);
         setAchievements(achievementsResponse.data);
+      } else {
+        console.error('Achievements response not successful:', achievementsResponse);
       }
 
       if (statsResponse.success) {
+        console.log('Setting stats:', statsResponse.data);
         setStats(statsResponse.data);
+      } else {
+        console.error('Stats response not successful:', statsResponse);
       }
     } catch (error) {
       console.error('Erreur lors du chargement des achievements:', error);
@@ -78,13 +87,26 @@ export default function Achievements() {
     <>
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
+          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
             <Trophy className="w-10 h-10 text-yellow-500" />
             Achievements
           </h1>
-          <p className="text-gray-600">
+          <p className="text-white text-lg">
             Débloquez des achievements pour gagner des Berrys !
           </p>
+          {!loading && achievements.length === 0 && (
+            <div className="mt-4 p-4 bg-yellow-500/20 border border-yellow-500 rounded-lg">
+              <p className="text-white font-bold mb-2">
+                ℹ️ Aucun achievement disponible
+              </p>
+              <p className="text-white text-sm">
+                Total d'achievements chargés : {achievements.length}
+              </p>
+              <p className="text-white text-sm mt-2">
+                Vérifiez la console du navigateur (F12) pour plus de détails sur la réponse de l'API.
+              </p>
+            </div>
+          )}
         </div>
 
         {stats && (

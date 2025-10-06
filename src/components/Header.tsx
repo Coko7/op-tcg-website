@@ -31,15 +31,7 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-2 sm:px-4">
         <div className="flex items-center justify-between h-14 sm:h-16">
           <div className="flex items-center space-x-1 sm:space-x-2">
-            <img
-              src="/skull-flag.svg"
-              alt="One Piece Logo"
-              className="h-6 w-6 sm:h-8 sm:w-8"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-            <h1 className="text-sm sm:text-xl font-bold text-white">One Piece Boosters</h1>
+            <h1 className="text-sm sm:text-xl font-bold text-white">🏴‍☠️ One Piece Boosters</h1>
           </div>
 
           <nav className="flex items-center space-x-1 sm:space-x-6">
