@@ -33,6 +33,7 @@ interface User {
   id: string;
   username: string;
   is_admin: boolean;
+  berrys: number;
 }
 
 class ApiService {
