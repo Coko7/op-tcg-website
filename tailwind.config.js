@@ -10,17 +10,29 @@ export default {
         'xs': '475px',
       },
       colors: {
-        'op-blue': '#0066CC',
-        'op-red': '#DC2626',
-        'op-gold': '#FFA500',
+        // Palette One Piece
+        'luffy-red': '#E63946',
+        'marine-blue': '#1D3557',
+        'gold-treasure': '#F1C40F',
+        'emerald-sea': '#2A9D8F',
+        'pirate-black': '#1A1A2E',
+        'cloud-white': '#F8F9FA',
+        // Anciennes couleurs pour compatibilité
+        'op-blue': '#1D3557',
+        'op-red': '#E63946',
+        'op-gold': '#F1C40F',
         'op-purple': '#8B5CF6',
         'rare': {
           'common': '#9CA3AF',
           'uncommon': '#22C55E',
-          'rare': '#3B82F6',
+          'rare': '#1D3557',
           'super': '#8B5CF6',
-          'secret': '#F59E0B'
+          'secret': '#F1C40F'
         }
+      },
+      fontFamily: {
+        'pirate': ['"Luckiest Guy"', 'cursive'],
+        'body': ['Montserrat', 'system-ui', 'sans-serif'],
       },
       animation: {
         'flip': 'flip 0.6s ease-in-out',
