@@ -36,7 +36,7 @@ export interface User {
   boosters_opened_today: number;
   total_cards: number;
   unique_cards: number;
-  berrys: number;
+  berrys?: number;
 }
 
 export interface BoosterStatus {
