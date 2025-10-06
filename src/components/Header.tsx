@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Package, BookOpen, User, LogIn, UserPlus } from 'lucide-react';
+import { Home, Package, BookOpen, Trophy, User, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import UserProfile from './UserProfile';
 
@@ -77,6 +77,18 @@ const Header: React.FC = () => {
             >
               <BookOpen size={18} />
               <span className="hidden sm:inline">Collection</span>
+            </Link>
+
+            <Link
+              to="/achievements"
+              className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 rounded-lg transition-colors ${
+                isActive('/achievements')
+                  ? 'bg-blue-600 text-white'
+                  : 'text-blue-200 hover:text-white hover:bg-blue-700/50'
+              }`}
+            >
+              <Trophy size={18} />
+              <span className="hidden sm:inline">Achievements</span>
             </Link>
           </nav>
 

@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Boosters from './pages/Boosters';
 import Collection from './pages/Collection';
+import Achievements from './pages/Achievements';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -44,6 +45,7 @@ function App() {
             <Route index element={<Home />} />
             <Route path="boosters" element={<Boosters />} />
             <Route path="collection" element={<Collection />} />
+            <Route path="achievements" element={<Achievements />} />
           </Route>
         </Routes>
       </Router>

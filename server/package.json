@@ -12,7 +12,8 @@
     "seed": "tsx src/scripts/seed.ts",
     "update-cards": "tsx src/scripts/updateCards.ts",
     "reset-db": "tsx src/scripts/resetDatabase.ts",
-    "import-vegapull": "tsx src/scripts/import-vegapull-data.ts"
+    "import-vegapull": "tsx src/scripts/import-vegapull-data.ts",
+    "init-achievements": "tsx src/scripts/initAchievements.ts"
   },
   "keywords": [
     "api",

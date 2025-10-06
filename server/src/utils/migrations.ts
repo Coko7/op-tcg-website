@@ -383,6 +383,62 @@ export class MigrationManager {
       }
     });
 
+    // Migration 8: Ajouter les tables achievements
+    this.migrations.push({
+      version: 8,
+      name: 'add_achievements_system',
+      up: async () => {
+        console.log('📦 Migration 8: Ajout du système d\'achievements...');
+
+        // Table des achievements (référentiel)
+        await Database.run(`
+          CREATE TABLE IF NOT EXISTS achievements (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            description TEXT NOT NULL,
+            type TEXT NOT NULL, -- 'boosters_opened', 'unique_cards', 'booster_cards'
+            category TEXT NOT NULL, -- catégorie pour grouper les achievements
+            icon TEXT, -- nom d'icône ou emoji
+            threshold INTEGER NOT NULL, -- valeur à atteindre
+            reward_berrys INTEGER DEFAULT 0,
+            booster_id TEXT, -- optionnel, pour les achievements liés à un booster spécifique
+            is_active BOOLEAN DEFAULT TRUE,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (booster_id) REFERENCES boosters(id) ON DELETE SET NULL
+          )
+        `);
+
+        // Table pour suivre la progression des achievements
+        await Database.run(`
+          CREATE TABLE IF NOT EXISTS user_achievements (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            achievement_id TEXT NOT NULL,
+            progress INTEGER DEFAULT 0,
+            completed_at DATETIME,
+            is_claimed BOOLEAN DEFAULT FALSE,
+            claimed_at DATETIME,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (achievement_id) REFERENCES achievements(id) ON DELETE CASCADE,
+            UNIQUE(user_id, achievement_id)
+          )
+        `);
+
+        // Index pour les performances
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_achievements_type ON achievements(type)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_achievements_category ON achievements(category)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id ON user_achievements(user_id)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_user_achievements_achievement_id ON user_achievements(achievement_id)');
+
+        console.log('✅ Système d\'achievements créé');
+      },
+      down: async () => {
+        console.log('🔄 Rollback Migration 8...');
+        await Database.run('DROP TABLE IF EXISTS user_achievements');
+        await Database.run('DROP TABLE IF EXISTS achievements');
+      }
+    });
+
     // Trier les migrations par version
     this.migrations.sort((a, b) => a.version - b.version);
   }

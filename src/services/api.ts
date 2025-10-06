@@ -284,6 +284,21 @@ class ApiService {
     return await this.request('/users/berrys');
   }
 
+  // Méthodes pour les achievements
+  async getAchievements(): Promise<any> {
+    return await this.request('/users/achievements');
+  }
+
+  async getAchievementStats(): Promise<any> {
+    return await this.request('/users/achievements/stats');
+  }
+
+  async claimAchievement(achievementId: string): Promise<any> {
+    return await this.request(`/users/achievements/${achievementId}/claim`, {
+      method: 'POST',
+    });
+  }
+
   // Vérifier si l'utilisateur est connecté
   isAuthenticated(): boolean {
     return !!this.accessToken;

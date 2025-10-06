@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth.js';
 import { UserController } from '../controllers/userController.js';
+import { AchievementController } from '../controllers/achievementController.js';
 
 const router = Router();
 
@@ -23,5 +24,10 @@ router.get('/stats', UserController.getStats);
 router.get('/berrys', UserController.getBerrysBalance);
 router.post('/sell-card', UserController.sellCard);
 router.post('/buy-booster', UserController.buyBoosterWithBerrys);
+
+// Routes pour les achievements
+router.get('/achievements', AchievementController.getUserAchievements);
+router.get('/achievements/stats', AchievementController.getAchievementStats);
+router.post('/achievements/:achievementId/claim', AchievementController.claimAchievement);
 
 export default router;

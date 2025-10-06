@@ -3,6 +3,7 @@ import { UserModel } from '../models/User.js';
 import { CardModel } from '../models/Card.js';
 import { Database } from '../utils/database.js';
 import { BoosterService } from '../services/BoosterService.js';
+import { AchievementService } from '../services/AchievementService.js';
 import { v4 as uuidv4 } from 'uuid';
 
 // Prix de vente des cartes en Berrys selon la rareté
@@ -321,6 +322,9 @@ export class UserController {
           INSERT INTO booster_openings (user_id, booster_id, session_id, seed, opened_at, cards_obtained)
           VALUES (?, ?, ?, 0, datetime('now'), ?)
         `, [userId, boosterId, uuidv4(), JSON.stringify(cards.map(c => c.id))]);
+
+        // Mettre à jour les achievements
+        await AchievementService.updateAfterBoosterOpen(userId, boosterId, cards.map(c => c.id));
       }
 
       res.json({
@@ -573,6 +577,9 @@ export class UserController {
           INSERT INTO booster_openings (user_id, booster_id, session_id, seed, opened_at, cards_obtained)
           VALUES (?, ?, ?, 0, datetime('now'), ?)
         `, [userId, boosterId, uuidv4(), JSON.stringify(cards.map(c => c.id))]);
+
+        // Mettre à jour les achievements
+        await AchievementService.updateAfterBoosterOpen(userId, boosterId, cards.map(c => c.id));
       }
 
       // Récupérer le statut des boosters actualisé

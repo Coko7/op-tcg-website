@@ -85,3 +85,37 @@ export const CARD_SELL_PRICES: Record<Rarity, number> = {
 
 // Prix d'un booster en Berrys
 export const BOOSTER_BERRY_PRICE = 100;
+
+// Types pour les achievements
+export type AchievementType = 'boosters_opened' | 'unique_cards' | 'booster_cards';
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  type: AchievementType;
+  category: string;
+  icon?: string;
+  threshold: number;
+  reward_berrys: number;
+  booster_id?: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface AchievementWithProgress extends Achievement {
+  progress: number;
+  completed_at?: string;
+  is_claimed: boolean;
+  claimed_at?: string;
+  completion_percentage: number;
+}
+
+export interface AchievementStats {
+  total: number;
+  completed: number;
+  claimed: number;
+  unclaimed: number;
+  total_berrys_earned: number;
+  total_berrys_available: number;
+}
