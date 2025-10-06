@@ -159,82 +159,82 @@ const Collection: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
         <Link
           to="/"
-          className="flex items-center space-x-2 text-blue-300 hover:text-white transition-colors"
+          className="flex items-center space-x-2 text-blue-300 hover:text-white transition-colors text-sm sm:text-base"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={18} />
           <span>Retour à l'accueil</span>
         </Link>
 
-        <div className="text-right">
-          <h1 className="text-2xl font-bold text-white">Ma Collection</h1>
-          <p className="text-blue-200">
+        <div className="text-left sm:text-right w-full sm:w-auto">
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Ma Collection</h1>
+          <p className="text-blue-200 text-sm sm:text-base">
             {stats ? `${stats.unique_cards}/${allCards.length} cartes (${stats.collection_completion}%)` : 'Chargement...'}
           </p>
         </div>
       </div>
 
-      <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-6 border border-blue-600/30">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+      <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 text-center">
           <div>
-            <div className="text-2xl font-bold text-white">{stats?.total_cards || 0}</div>
-            <div className="text-blue-200 text-sm">Cartes totales</div>
+            <div className="text-xl sm:text-2xl font-bold text-white">{stats?.total_cards || 0}</div>
+            <div className="text-blue-200 text-xs sm:text-sm">Cartes totales</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-white">{stats?.unique_cards || 0}</div>
-            <div className="text-blue-200 text-sm">Cartes uniques</div>
+            <div className="text-xl sm:text-2xl font-bold text-white">{stats?.unique_cards || 0}</div>
+            <div className="text-blue-200 text-xs sm:text-sm">Cartes uniques</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-white">{stats?.collection_completion || 0}%</div>
-            <div className="text-blue-200 text-sm">Collection</div>
+            <div className="text-xl sm:text-2xl font-bold text-white">{stats?.collection_completion || 0}%</div>
+            <div className="text-blue-200 text-xs sm:text-sm">Collection</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-white">{stats?.missing_cards || 0}</div>
-            <div className="text-blue-200 text-sm">Manquantes</div>
+            <div className="text-xl sm:text-2xl font-bold text-white">{stats?.missing_cards || 0}</div>
+            <div className="text-blue-200 text-xs sm:text-sm">Manquantes</div>
           </div>
-          <div className="border-l border-blue-600/30 pl-4">
-            <div className="text-2xl font-bold text-yellow-400 flex items-center justify-center gap-1">
-              <Coins size={20} />
+          <div className="col-span-2 sm:col-span-1 sm:border-l border-blue-600/30 sm:pl-4">
+            <div className="text-xl sm:text-2xl font-bold text-yellow-400 flex items-center justify-center gap-1">
+              <Coins size={18} />
               {berrysBalance}
             </div>
-            <div className="text-blue-200 text-sm">Berrys</div>
+            <div className="text-blue-200 text-xs sm:text-sm">Berrys</div>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-300" size={20} />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-300" size={18} />
           <input
             type="text"
-            placeholder="Rechercher par nom, personnage..."
+            placeholder="Rechercher..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-blue-800/40 border border-blue-600/30 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-9 pr-3 py-2 sm:py-3 text-sm sm:text-base bg-blue-800/40 border border-blue-600/30 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <button
           onClick={() => setSellMode(!sellMode)}
-          className={`flex items-center space-x-2 px-4 py-3 border border-blue-600/30 rounded-lg transition-colors ${
+          className={`flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-blue-600/30 rounded-lg transition-colors ${
             sellMode
               ? 'bg-yellow-600 text-white hover:bg-yellow-700'
               : 'bg-blue-800/40 text-white hover:bg-blue-700/40'
           }`}
         >
-          <Coins size={20} />
-          <span>{sellMode ? 'Annuler vente' : 'Vendre cartes'}</span>
+          <Coins size={18} />
+          <span className="whitespace-nowrap">{sellMode ? 'Annuler' : 'Vendre'}</span>
         </button>
 
         <div className="relative">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center space-x-2 px-4 py-3 bg-blue-800/40 border border-blue-600/30 rounded-lg text-white hover:bg-blue-700/40 transition-colors"
+            className="flex w-full sm:w-auto items-center justify-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-blue-800/40 border border-blue-600/30 rounded-lg text-white hover:bg-blue-700/40 transition-colors"
           >
-            <Filter size={20} />
+            <Filter size={18} />
             <span>Filtres</span>
             {(selectedFilter !== 'all' || searchQuery) && (
               <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -244,7 +244,7 @@ const Collection: React.FC = () => {
           </button>
 
           {showFilters && (
-            <div className="absolute top-full mt-2 right-0 bg-blue-800 border border-blue-600 rounded-lg shadow-xl z-10 min-w-64 max-h-96 overflow-y-auto">
+            <div className="absolute top-full mt-2 left-0 sm:right-0 sm:left-auto bg-blue-800 border border-blue-600 rounded-lg shadow-xl z-10 w-64 sm:min-w-64 max-h-96 overflow-y-auto">
               <div className="p-4 space-y-3">
                 {/* Filtres généraux */}
                 <div>
@@ -330,10 +330,10 @@ const Collection: React.FC = () => {
       </div>
 
       {filteredCards.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-bold text-white mb-2">Aucune carte trouvée</h3>
-          <p className="text-blue-200">
+        <div className="text-center py-8 sm:py-12 px-4">
+          <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🔍</div>
+          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Aucune carte trouvée</h3>
+          <p className="text-blue-200 text-sm sm:text-base">
             {searchQuery || selectedFilter !== 'all'
               ? 'Essayez de modifier vos filtres de recherche.'
               : 'Commencez à ouvrir des boosters pour construire votre collection !'}
@@ -341,7 +341,7 @@ const Collection: React.FC = () => {
           {(searchQuery || selectedFilter !== 'all') && (
             <button
               onClick={clearFilters}
-              className="mt-4 btn-primary"
+              className="mt-4 py-2 px-4 sm:py-3 sm:px-6 text-sm sm:text-base rounded-lg font-bold btn-primary"
             >
               Effacer les filtres
             </button>
@@ -349,23 +349,23 @@ const Collection: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between">
-            <div className="text-blue-200">
-              {filteredCards.length} carte(s) affichée(s)
+          <div className="flex items-center justify-between px-1">
+            <div className="text-blue-200 text-xs sm:text-sm">
+              {filteredCards.length} carte(s)
             </div>
 
             {(searchQuery || selectedFilter !== 'all') && (
               <button
                 onClick={clearFilters}
-                className="flex items-center space-x-2 text-blue-300 hover:text-white transition-colors"
+                className="flex items-center space-x-1 sm:space-x-2 text-blue-300 hover:text-white transition-colors text-xs sm:text-sm"
               >
-                <X size={16} />
+                <X size={14} />
                 <span>Effacer filtres</span>
               </button>
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
             {filteredCards.map((card) => {
               const userCard = userCards.find(uc => uc.card_id === card.id);
               const isOwned = !!userCard;
@@ -401,10 +401,10 @@ const Collection: React.FC = () => {
                       )}
                       {sellMode && !canSell && userCard.quantity === 1 && (
                         <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                          <div className="text-center text-white p-4">
-                            <div className="text-2xl mb-2">⚠️</div>
-                            <div className="font-bold text-sm">Dernière carte</div>
-                            <div className="text-xs text-gray-300">Gardez au moins 1 exemplaire</div>
+                          <div className="text-center text-white p-2 sm:p-4">
+                            <div className="text-xl sm:text-2xl mb-1 sm:mb-2">⚠️</div>
+                            <div className="font-bold text-xs sm:text-sm">Dernière carte</div>
+                            <div className="text-xs text-gray-300 hidden sm:block">Gardez au moins 1 exemplaire</div>
                           </div>
                         </div>
                       )}
@@ -418,10 +418,10 @@ const Collection: React.FC = () => {
                         className="hover:shadow-2xl"
                       />
                       <div className="absolute inset-0 bg-black/70 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                        <div className="text-center text-white p-4">
-                          <div className="text-5xl mb-3">🔒</div>
-                          <div className="font-bold text-lg mb-1">Non obtenue</div>
-                          <div className="text-sm text-gray-300">Ouvrez des boosters pour débloquer</div>
+                        <div className="text-center text-white p-2 sm:p-4">
+                          <div className="text-3xl sm:text-5xl mb-2 sm:mb-3">🔒</div>
+                          <div className="font-bold text-sm sm:text-lg mb-1">Non obtenue</div>
+                          <div className="text-xs sm:text-sm text-gray-300 hidden sm:block">Ouvrez des boosters</div>
                         </div>
                       </div>
                     </div>
@@ -437,10 +437,10 @@ const Collection: React.FC = () => {
         <div className="text-center">
           <button
             onClick={() => setSelectedFilter('favorites')}
-            className="flex items-center space-x-2 mx-auto text-yellow-300 hover:text-yellow-100 transition-colors"
+            className="flex items-center space-x-2 mx-auto text-yellow-300 hover:text-yellow-100 transition-colors text-sm sm:text-base"
           >
-            <Star size={16} />
-            <span>Voir mes cartes favorites</span>
+            <Star size={14} />
+            <span>Voir mes favoris</span>
           </button>
         </div>
       )}

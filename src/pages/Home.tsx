@@ -84,25 +84,25 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <section className="text-center">
-        <h1 className="text-4xl font-bold text-white mb-4">
+    <div className="space-y-6 sm:space-y-8">
+      <section className="text-center px-2">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
           Bienvenue sur One Piece TCG!
         </h1>
-        <p className="text-blue-200 text-lg">
+        <p className="text-blue-200 text-sm sm:text-base md:text-lg">
           Explorez les mers de Grand Line et collectionnez les cartes légendaires !
         </p>
       </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-6 border border-blue-600/30">
-          <div className="flex items-center space-x-3 mb-4">
-            <Package className="text-blue-300" size={24} />
-            <h2 className="text-xl font-semibold text-white">Boosters</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30">
+          <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+            <Package className="text-blue-300" size={20} />
+            <h2 className="text-lg sm:text-xl font-semibold text-white">Boosters</h2>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex justify-between items-center text-sm sm:text-base">
               <span className="text-blue-200">Disponibles:</span>
               <span className="text-white font-bold">
                 {boosterStatus?.available_boosters || 0}/{boosterStatus?.max_daily_boosters || 3}
@@ -110,18 +110,18 @@ const Home: React.FC = () => {
             </div>
 
             {timeUntilNext > 0 && boosterStatus?.next_booster_time && (
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center text-sm sm:text-base">
                 <span className="text-blue-200">Prochain dans:</span>
                 <Timer
                   targetTime={boosterStatus.next_booster_time}
-                  className="text-sm"
+                  className="text-xs sm:text-sm"
                 />
               </div>
             )}
 
             <Link
               to="/boosters"
-              className={`block w-full text-center py-3 px-4 rounded-lg font-bold transition-all ${
+              className={`block w-full text-center py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base rounded-lg font-bold transition-all ${
                 canOpenBooster
                   ? 'btn-primary hover:scale-105'
                   : 'btn-disabled'
@@ -132,24 +132,24 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-6 border border-blue-600/30">
-          <div className="flex items-center space-x-3 mb-4">
-            <BookOpen className="text-green-300" size={24} />
-            <h2 className="text-xl font-semibold text-white">Collection</h2>
+        <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30">
+          <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+            <BookOpen className="text-green-300" size={20} />
+            <h2 className="text-lg sm:text-xl font-semibold text-white">Collection</h2>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex justify-between items-center text-sm sm:text-base">
               <span className="text-blue-200">Cartes totales:</span>
               <span className="text-white font-bold">{stats.total_cards}</span>
             </div>
 
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center text-sm sm:text-base">
               <span className="text-blue-200">Cartes uniques:</span>
               <span className="text-white font-bold">{stats.unique_cards}</span>
             </div>
 
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center text-sm sm:text-base">
               <span className="text-blue-200">Progression:</span>
               <span className="text-white font-bold">
                 {stats.collection_completion}%
@@ -158,22 +158,22 @@ const Home: React.FC = () => {
 
             <Link
               to="/collection"
-              className="block w-full text-center btn-primary"
+              className="block w-full text-center py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base rounded-lg font-bold btn-primary"
             >
               Voir Collection
             </Link>
           </div>
         </div>
 
-        <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-6 border border-blue-600/30">
-          <div className="flex items-center space-x-3 mb-4">
-            <TrendingUp className="text-yellow-300" size={24} />
-            <h2 className="text-xl font-semibold text-white">Statistiques</h2>
+        <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30">
+          <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+            <TrendingUp className="text-yellow-300" size={20} />
+            <h2 className="text-lg sm:text-xl font-semibold text-white">Statistiques</h2>
           </div>
 
-          <div className="space-y-3">
-            <div className="text-blue-200 text-sm mb-2">Répartition par rareté:</div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="text-blue-200 text-xs sm:text-sm mb-2">Répartition par rareté:</div>
+            <div className="grid grid-cols-2 gap-1 sm:gap-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-gray-300">Communes:</span>
                 <span className="text-white">{stats.rarity_breakdown?.common || 0}</span>
@@ -199,24 +199,24 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      <section className="text-center py-12">
-        <div className="text-6xl mb-4">🏴‍☠️</div>
-        <h2 className="text-2xl font-bold text-white mb-2">
+      <section className="text-center py-8 sm:py-12 px-2">
+        <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🏴‍☠️</div>
+        <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
           Prêt pour l'aventure ?
         </h2>
-        <p className="text-blue-200 mb-6">
+        <p className="text-blue-200 text-sm sm:text-base mb-4 sm:mb-6">
           Ouvrez des boosters pour agrandir votre collection de cartes légendaires !
         </p>
-        <div className="flex gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
           <Link
             to="/boosters"
-            className={`inline-block ${canOpenBooster ? 'btn-primary' : 'btn-disabled'}`}
+            className={`inline-block py-3 px-6 text-sm sm:text-base rounded-lg font-bold transition-all ${canOpenBooster ? 'btn-primary' : 'btn-disabled'}`}
           >
             {canOpenBooster ? 'Ouvrir un Booster!' : 'Patience, moussaillon...'}
           </Link>
           <Link
             to="/collection"
-            className="inline-block btn-secondary"
+            className="inline-block py-3 px-6 text-sm sm:text-base rounded-lg font-bold bg-green-600 hover:bg-green-700 text-white transition-all"
           >
             Voir ma Collection
           </Link>

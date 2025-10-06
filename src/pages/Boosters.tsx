@@ -238,86 +238,86 @@ const Boosters: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
         <Link
           to="/"
-          className="flex items-center space-x-2 text-blue-300 hover:text-white transition-colors"
+          className="flex items-center space-x-2 text-blue-300 hover:text-white transition-colors text-sm sm:text-base"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={18} />
           <span>Retour à l'accueil</span>
         </Link>
 
-        <div className="text-right">
-          <div className="text-white font-semibold">
-            Boosters disponibles: {boosterStatus?.available_boosters || 0}/3
+        <div className="text-left sm:text-right w-full sm:w-auto">
+          <div className="text-white font-semibold text-sm sm:text-base">
+            Boosters: {boosterStatus?.available_boosters || 0}/3
           </div>
-          <div className="text-yellow-400 font-semibold flex items-center justify-end gap-1 mt-1">
-            <Coins size={18} />
+          <div className="text-yellow-400 font-semibold flex items-center sm:justify-end gap-1 mt-1 text-sm sm:text-base">
+            <Coins size={16} />
             {berrysBalance} Berrys
           </div>
           {timeUntilNext > 0 && boosterStatus && (
             <Timer
               targetTime={boosterStatus.next_booster_time || null}
-              className="justify-end"
+              className="sm:justify-end text-xs sm:text-sm"
             />
           )}
         </div>
       </div>
 
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-white mb-4">
+      <div className="text-center px-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
           Ouvrir un Booster Pack
         </h1>
-        <p className="text-blue-200 mb-6">
+        <p className="text-blue-200 text-sm sm:text-base mb-4 sm:mb-6">
           Chaque booster contient 5 cartes avec au moins 1 carte rare !
         </p>
 
         {/* Sélecteur de booster */}
-        <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-6 border border-blue-600/30 mb-8 max-w-2xl mx-auto">
-          <div className="flex items-center justify-between">
+        <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30 mb-6 sm:mb-8 max-w-2xl mx-auto">
+          <div className="flex items-center justify-between gap-2">
             <button
               onClick={prevBooster}
-              className="p-2 text-blue-300 hover:text-white transition-colors"
+              className="p-1 sm:p-2 text-blue-300 hover:text-white transition-colors shrink-0"
               disabled={animationPhase !== 'idle'}
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={20} />
             </button>
 
-            <div className="text-center flex-1">
+            <div className="text-center flex-1 min-w-0">
               {loading ? (
-                <div className="animate-pulse">
-                  <div className="h-6 bg-blue-600 rounded mb-2"></div>
-                  <div className="h-4 bg-blue-700 rounded mb-2"></div>
-                  <div className="h-4 bg-blue-700 rounded mb-3"></div>
-                  <div className="h-3 bg-blue-800 rounded"></div>
+                <div className="animate-pulse px-2">
+                  <div className="h-5 sm:h-6 bg-blue-600 rounded mb-2"></div>
+                  <div className="h-3 sm:h-4 bg-blue-700 rounded mb-2"></div>
+                  <div className="h-3 sm:h-4 bg-blue-700 rounded mb-3"></div>
+                  <div className="h-2 sm:h-3 bg-blue-800 rounded"></div>
                 </div>
               ) : selectedBooster ? (
                 <>
-                  <h3 className="text-xl font-bold text-white mb-2">{selectedBooster.name}</h3>
-                  <div className="text-sm text-blue-200 mb-2">
+                  <h3 className="text-base sm:text-xl font-bold text-white mb-1 sm:mb-2 truncate px-2">{selectedBooster.name}</h3>
+                  <div className="text-xs sm:text-sm text-blue-200 mb-1 sm:mb-2">
                     <span className="font-semibold">{selectedBooster.code}</span> • {selectedBooster.series}
                   </div>
-                  <p className="text-sm text-blue-300 mb-3">{selectedBooster.description}</p>
+                  <p className="text-xs sm:text-sm text-blue-300 mb-2 sm:mb-3 line-clamp-2 px-2">{selectedBooster.description}</p>
                   <div className="text-xs text-blue-400">
-                    {selectedBooster.cardCount} cartes • Sortie: {new Date(selectedBooster.releaseDate).toLocaleDateString('fr-FR')}
+                    {selectedBooster.cardCount} cartes • {new Date(selectedBooster.releaseDate).toLocaleDateString('fr-FR')}
                   </div>
                 </>
               ) : (
-                <div className="text-red-400">Erreur de chargement des boosters</div>
+                <div className="text-red-400 text-sm">Erreur de chargement</div>
               )}
             </div>
 
             <button
               onClick={nextBooster}
-              className="p-2 text-blue-300 hover:text-white transition-colors"
+              className="p-1 sm:p-2 text-blue-300 hover:text-white transition-colors shrink-0"
               disabled={animationPhase !== 'idle'}
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={20} />
             </button>
           </div>
 
-          <div className="flex justify-center mt-4 space-x-1">
+          <div className="flex justify-center mt-3 sm:mt-4 space-x-1">
             {availableBoosters.map((_, index) => (
               <div
                 key={index}
@@ -331,24 +331,24 @@ const Boosters: React.FC = () => {
       </div>
 
       {animationPhase === 'idle' && (
-        <div className="text-center space-y-8">
+        <div className="text-center space-y-6 sm:space-y-8">
           <BoosterPack onClick={handleOpenBooster} />
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4 px-4">
             <button
               onClick={handleOpenBooster}
               disabled={!canOpen}
-              className={`text-lg px-8 py-4 rounded-lg font-bold transition-all ${
+              className={`text-sm sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold transition-all w-full sm:w-auto ${
                 canOpen
                   ? 'btn-primary hover:scale-105'
                   : 'btn-disabled cursor-not-allowed'
               }`}
             >
               {canOpen ? (
-                <span className="flex items-center space-x-2">
-                  <Sparkles size={20} />
+                <span className="flex items-center justify-center space-x-2">
+                  <Sparkles size={18} />
                   <span>Ouvrir le Booster gratuit!</span>
-                  <Sparkles size={20} />
+                  <Sparkles size={18} />
                 </span>
               ) : (
                 'Booster gratuit indisponible'
@@ -357,29 +357,29 @@ const Boosters: React.FC = () => {
 
             {!canOpen && (
               <div className="text-center">
-                <div className="text-blue-300 mb-2">ou</div>
+                <div className="text-blue-300 mb-2 text-sm sm:text-base">ou</div>
                 <button
                   onClick={handleBuyWithBerrys}
                   disabled={berrysBalance < BOOSTER_BERRY_PRICE}
-                  className={`text-lg px-8 py-4 rounded-lg font-bold transition-all flex items-center gap-2 mx-auto ${
+                  className={`text-sm sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold transition-all flex items-center justify-center gap-2 w-full sm:w-auto sm:mx-auto ${
                     berrysBalance >= BOOSTER_BERRY_PRICE
                       ? 'bg-yellow-600 hover:bg-yellow-700 text-white hover:scale-105'
                       : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  <Coins size={20} />
-                  <span>Acheter avec {BOOSTER_BERRY_PRICE} Berrys</span>
+                  <Coins size={18} />
+                  <span>Acheter ({BOOSTER_BERRY_PRICE} Berrys)</span>
                 </button>
                 {berrysBalance < BOOSTER_BERRY_PRICE && (
-                  <p className="text-red-400 text-sm mt-2">
-                    Pas assez de Berrys (besoin de {BOOSTER_BERRY_PRICE - berrysBalance} de plus)
+                  <p className="text-red-400 text-xs sm:text-sm mt-2">
+                    Besoin de {BOOSTER_BERRY_PRICE - berrysBalance} Berrys de plus
                   </p>
                 )}
               </div>
             )}
 
             {!canOpen && timeUntilNext > 0 && boosterStatus && (
-              <p className="text-blue-300 text-sm">
+              <p className="text-blue-300 text-xs sm:text-sm">
                 Prochain booster gratuit dans{' '}
                 <Timer targetTime={boosterStatus.next_booster_time || null} />
               </p>
@@ -404,15 +404,15 @@ const Boosters: React.FC = () => {
       )}
 
       {animationPhase === 'deck' && boosterResult && (
-        <div className="w-full max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4">
+        <div className="w-full max-w-6xl mx-auto px-2">
+          <div className="text-center mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
               🃏 Révélez vos cartes !
             </h2>
-            <div className="text-blue-300">
+            <div className="text-blue-300 text-sm sm:text-base">
               {boosterResult.new_cards.length > 0 && (
                 <p>
-                  {boosterResult.new_cards.length} nouvelle(s) carte(s) ajoutée(s) à votre collection !
+                  {boosterResult.new_cards.length} nouvelle(s) carte(s) ajoutée(s) !
                 </p>
               )}
             </div>
@@ -427,37 +427,37 @@ const Boosters: React.FC = () => {
       )}
 
       {animationPhase === 'complete' && boosterResult && (
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8 px-2">
           <div className="text-center">
-            <div className="text-6xl mb-4">🎉</div>
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🎉</div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
               Félicitations !
             </h2>
-            <div className="text-blue-300 text-lg mb-2">
+            <div className="text-blue-300 text-base sm:text-lg mb-2">
               Vous avez révélé toutes vos cartes !
             </div>
             {boosterResult.new_cards.length > 0 && (
-              <div className="text-green-400 font-semibold">
-                {boosterResult.new_cards.length} nouvelle(s) carte(s) ajoutée(s) à votre collection !
+              <div className="text-green-400 font-semibold text-sm sm:text-base">
+                {boosterResult.new_cards.length} nouvelle(s) carte(s) ajoutée(s) !
               </div>
             )}
           </div>
 
           {/* Résumé des raretés obtenues */}
-          <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-6 border border-blue-600/30 max-w-2xl mx-auto">
-            <h3 className="text-lg font-semibold text-white mb-4 text-center">
+          <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30 max-w-2xl mx-auto">
+            <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 text-center">
               📊 Résumé de votre ouverture
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 text-center">
               {Object.entries(
                 boosterResult.cards.reduce((acc, card) => {
                   acc[card.rarity] = (acc[card.rarity] || 0) + 1;
                   return acc;
                 }, {} as Record<string, number>)
               ).map(([rarity, count]) => (
-                <div key={rarity} className="p-3 bg-blue-700/30 rounded-lg">
-                  <div className="text-white font-bold text-lg">{count}</div>
-                  <div className={`text-sm ${
+                <div key={rarity} className="p-2 sm:p-3 bg-blue-700/30 rounded-lg">
+                  <div className="text-white font-bold text-base sm:text-lg">{count}</div>
+                  <div className={`text-xs sm:text-sm ${
                     rarity === 'secret_rare' ? 'text-yellow-300' :
                     rarity === 'super_rare' ? 'text-purple-300' :
                     rarity === 'rare' ? 'text-blue-300' :
@@ -475,35 +475,35 @@ const Boosters: React.FC = () => {
             </div>
           </div>
 
-          <div className="text-center space-y-4">
-            <div className="space-x-4">
+          <div className="text-center space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
               <button
                 onClick={resetAnimation}
-                className="btn-primary text-lg px-8 py-4"
+                className="btn-primary text-sm sm:text-lg px-6 sm:px-8 py-3 sm:py-4"
               >
-                {canOpen ? '🎲 Ouvrir un autre booster' : '← Retour'}
+                {canOpen ? '🎲 Ouvrir un autre' : '← Retour'}
               </button>
 
               <Link
                 to="/collection"
-                className="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg transition-colors text-lg"
+                className="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-lg transition-colors text-sm sm:text-lg"
               >
-                📚 Voir ma collection
+                📚 Voir collection
               </Link>
             </div>
 
-            <div className="text-blue-300 text-sm">
-              Toutes vos cartes ont été automatiquement ajoutées à votre collection
+            <div className="text-blue-300 text-xs sm:text-sm">
+              Cartes ajoutées à votre collection
             </div>
           </div>
         </div>
       )}
 
-      <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-6 border border-blue-600/30">
-        <h3 className="text-lg font-semibold text-white mb-4">
+      <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30">
+        <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">
           🎯 Taux de drop
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 text-xs sm:text-sm">
           <div className="text-center">
             <div className="text-gray-300">Commune</div>
             <div className="text-white font-bold">60%</div>

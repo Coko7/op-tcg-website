@@ -31,31 +31,31 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mb-4">
-            <span className="text-2xl font-bold text-white">OP</span>
+          <div className="mx-auto h-12 w-12 sm:h-16 sm:w-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mb-3 sm:mb-4">
+            <span className="text-xl sm:text-2xl font-bold text-white">OP</span>
           </div>
-          <h2 className="text-3xl font-extrabold text-white">
-            Connexion à votre compte
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+            Connexion
           </h2>
-          <p className="mt-2 text-sm text-gray-300">
+          <p className="mt-2 text-xs sm:text-sm text-gray-300">
             Ou{' '}
             <Link
               to="/register"
               className="font-medium text-yellow-400 hover:text-yellow-300 transition-colors"
             >
-              créez un nouveau compte
+              créez un compte
             </Link>
           </p>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-2xl p-8 border border-white/20">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-2xl p-6 sm:p-8 border border-white/20">
+          <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-                <p className="text-red-200 text-sm text-center">{error}</p>
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-2 sm:p-3">
+                <p className="text-red-200 text-xs sm:text-sm text-center">{error}</p>
               </div>
             )}
 
@@ -69,7 +69,7 @@ const Login: React.FC = () => {
                 type="text"
                 autoComplete="username"
                 required
-                className="relative block w-full px-3 py-3 border border-white/30 rounded-lg placeholder-gray-400 text-white bg-white/10 backdrop-blur focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent focus:z-10 sm:text-sm transition-all"
+                className="relative block w-full px-3 py-2 sm:py-3 border border-white/30 rounded-lg placeholder-gray-400 text-white bg-white/10 backdrop-blur focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent focus:z-10 text-sm sm:text-base transition-all"
                 placeholder="Nom d'utilisateur"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -87,7 +87,7 @@ const Login: React.FC = () => {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="relative block w-full px-3 py-3 border border-white/30 rounded-lg placeholder-gray-400 text-white bg-white/10 backdrop-blur focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent focus:z-10 sm:text-sm transition-all"
+                className="relative block w-full px-3 py-2 sm:py-3 border border-white/30 rounded-lg placeholder-gray-400 text-white bg-white/10 backdrop-blur focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent focus:z-10 text-sm sm:text-base transition-all"
                 placeholder="Mot de passe"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -99,12 +99,12 @@ const Login: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="group relative w-full flex justify-center py-2 sm:py-3 px-4 border border-transparent text-sm sm:text-base font-medium rounded-lg text-white bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Connexion en cours...</span>
+                    <span>Connexion...</span>
                   </div>
                 ) : (
                   'Se connecter'
@@ -115,7 +115,7 @@ const Login: React.FC = () => {
             <div className="text-center">
               <Link
                 to="/"
-                className="text-gray-300 hover:text-white transition-colors text-sm"
+                className="text-gray-300 hover:text-white transition-colors text-xs sm:text-sm"
               >
                 ← Retour à l'accueil
               </Link>
@@ -124,10 +124,9 @@ const Login: React.FC = () => {
         </div>
 
         {/* Informations de connexion */}
-        <div className="bg-white/5 backdrop-blur-lg rounded-lg p-4 border border-white/10">
+        <div className="bg-white/5 backdrop-blur-lg rounded-lg p-3 sm:p-4 border border-white/10">
           <p className="text-xs text-gray-300 text-center mb-2">Création de compte :</p>
           <div className="text-xs text-gray-400 space-y-1 text-center">
-            <div>Utilisez votre nom d'utilisateur et mot de passe</div>
             <div>Pas de compte ? Créez-en un gratuitement !</div>
           </div>
         </div>
