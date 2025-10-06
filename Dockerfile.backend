@@ -53,6 +53,10 @@ COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 # Copier les scripts si nécessaire
 COPY --chown=nodejs:nodejs server/src/scripts ./src/scripts
 
+# Copier le script d'entrypoint
+COPY --chown=nodejs:nodejs server/scripts/docker-entrypoint.sh ./scripts/
+RUN chmod +x ./scripts/docker-entrypoint.sh
+
 # Créer les répertoires nécessaires avec les bonnes permissions
 RUN mkdir -p data public/data/vegapull public/images && \
     chown -R nodejs:nodejs /app
@@ -77,5 +81,5 @@ ENV NODE_ENV=production \
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://localhost:5000/health || exit 1
 
-# Commande par défaut
-CMD ["node", "dist/index.js"]
+# Commande par défaut - utiliser le script d'entrypoint
+ENTRYPOINT ["/app/scripts/docker-entrypoint.sh"]

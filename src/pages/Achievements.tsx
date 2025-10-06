@@ -22,21 +22,12 @@ export default function Achievements() {
         apiService.getAchievementStats()
       ]);
 
-      console.log('Achievements Response:', achievementsResponse);
-      console.log('Stats Response:', statsResponse);
-
       if (achievementsResponse.success) {
-        console.log('Setting achievements:', achievementsResponse.data);
         setAchievements(achievementsResponse.data);
-      } else {
-        console.error('Achievements response not successful:', achievementsResponse);
       }
 
       if (statsResponse.success) {
-        console.log('Setting stats:', statsResponse.data);
         setStats(statsResponse.data);
-      } else {
-        console.error('Stats response not successful:', statsResponse);
       }
     } catch (error) {
       console.error('Erreur lors du chargement des achievements:', error);

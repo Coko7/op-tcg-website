@@ -89,6 +89,8 @@ export class AchievementModel {
 
   // Obtenir les achievements d'un utilisateur avec progression
   static async getUserAchievements(userId: string): Promise<AchievementWithProgress[]> {
+    console.log('🔍 getUserAchievements model - userId:', userId);
+
     const achievements = await Database.all<any>(`
       SELECT
         a.*,
@@ -102,11 +104,19 @@ export class AchievementModel {
       ORDER BY a.category, a.threshold
     `, [userId]);
 
-    return achievements.map(a => ({
+    console.log('📊 Raw achievements from DB:', achievements.length);
+    if (achievements.length > 0) {
+      console.log('First achievement:', achievements[0]);
+    }
+
+    const result = achievements.map(a => ({
       ...a,
       is_claimed: a.is_claimed === 1,
       completion_percentage: Math.min(100, Math.round((a.progress / a.threshold) * 100))
     }));
+
+    console.log('✅ Mapped achievements:', result.length);
+    return result;
   }
 
   // Mettre à jour la progression d'un achievement
