@@ -21,8 +21,11 @@ const CATEGORY_MAPPING = {
 };
 class VegapullImporter {
     dataPath;
-    constructor() {
-        this.dataPath = path.join(process.cwd(), '..', 'data', 'vegapull');
+    constructor(customPath) {
+        // Utiliser le chemin personnalisé, ou la variable d'environnement, ou le chemin par défaut
+        this.dataPath = customPath ||
+            process.env.VEGAPULL_DATA_PATH ||
+            path.join(process.cwd(), 'public', 'data', 'vegapull');
     }
     async importData() {
         console.log('🏴‍☠️ Début de l\'importation des données Vegapull...');
@@ -168,8 +171,8 @@ async function main() {
         process.exit(1);
     }
 }
-// Exécuter si appelé directement
-if (require.main === module) {
+// Exécuter si appelé directement (syntaxe ES modules)
+if (import.meta.url === `file://${process.argv[1]}`) {
     main();
 }
 export { VegapullImporter };

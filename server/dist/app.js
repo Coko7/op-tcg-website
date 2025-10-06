@@ -4,12 +4,16 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { Database } from './utils/database.js';
 import { MigrationManager } from './utils/migrations.js';
+import { VegapullImporter } from './scripts/import-vegapull-data.js';
+import { BoosterModel } from './models/Booster.js';
 // Routes
 import authRoutes from './routes/auth.js';
 import cardRoutes from './routes/cards.js';
 import adminRoutes from './routes/admin.js';
 import userRoutes from './routes/users.js';
 const app = express();
+// Trust proxy pour obtenir la vraie IP derrière Docker/reverse proxy
+app.set('trust proxy', 1);
 // Configuration CORS
 const corsOptions = {
     origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:5173'],
@@ -24,12 +28,16 @@ app.use(cors(corsOptions));
 // Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.NODE_ENV === 'production' ? 100 : 1000, // 100 requests par IP en prod, 1000 en dev
+    max: process.env.NODE_ENV === 'production' ? 300 : 1000, // Augmenté à 300 pour gérer plusieurs utilisateurs
     message: {
         error: 'Trop de requêtes depuis cette IP, veuillez réessayer plus tard.'
     },
     standardHeaders: true,
     legacyHeaders: false,
+    // Utiliser l'IP réelle du client si disponible
+    keyGenerator: (req) => {
+        return req.ip || req.socket.remoteAddress || 'unknown';
+    },
 });
 // Rate limiting plus strict pour l'authentification
 const authLimiter = rateLimit({
@@ -101,6 +109,23 @@ export const initializeApp = async () => {
         const migrationManager = new MigrationManager();
         await migrationManager.migrate();
         console.log('✅ Migrations terminées');
+        // Vérifier si la base de données contient des boosters
+        const boosterCount = await BoosterModel.count();
+        console.log(`📊 Nombre de boosters dans la DB: ${boosterCount}`);
+        // Si pas de boosters, tenter d'importer les données Vegapull
+        if (boosterCount === 0) {
+            console.log('📦 Aucun booster trouvé, tentative d\'importation Vegapull...');
+            try {
+                const importer = new VegapullImporter();
+                await importer.importData();
+                await importer.cleanup();
+                console.log('✅ Importation Vegapull terminée avec succès');
+            }
+            catch (importError) {
+                console.warn('⚠️ Impossible d\'importer les données Vegapull:', importError);
+                console.warn('💡 Vous pouvez importer manuellement avec: npm run import-vegapull');
+            }
+        }
         console.log('🎉 Application initialisée avec succès');
         return app;
     }

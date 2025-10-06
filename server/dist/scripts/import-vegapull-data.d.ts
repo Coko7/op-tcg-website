@@ -1,6 +1,6 @@
 declare class VegapullImporter {
     private dataPath;
-    constructor();
+    constructor(customPath?: string);
     importData(): Promise<void>;
     private importBookers;
     private importCards;

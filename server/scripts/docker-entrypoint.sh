@@ -9,11 +9,11 @@ if [ ! -f "/app/data/database.sqlite" ]; then
 
   # Exécuter les migrations
   echo "🔄 Exécution des migrations..."
-  npm run migrate
+  node scripts/run-migrations.js
 
   # Initialiser les achievements
   echo "🏆 Initialisation des achievements..."
-  npm run init-achievements
+  node scripts/init-achievements.js
 
   echo "✅ Initialisation terminée!"
 else
@@ -21,14 +21,14 @@ else
 
   # Exécuter les migrations pour s'assurer que la DB est à jour
   echo "🔄 Vérification et exécution des migrations..."
-  npm run migrate || echo "⚠️ Erreur lors des migrations (peut être normale si déjà à jour)"
+  node scripts/run-migrations.js || echo "⚠️ Erreur lors des migrations (peut être normale si déjà à jour)"
 
   # Vérifier si les achievements existent
   ACHIEVEMENT_COUNT=$(sqlite3 /app/data/database.sqlite "SELECT COUNT(*) FROM achievements;" 2>/dev/null || echo "0")
 
   if [ "$ACHIEVEMENT_COUNT" = "0" ]; then
     echo "🏆 Aucun achievement trouvé. Initialisation..."
-    npm run init-achievements
+    node scripts/init-achievements.js
   else
     echo "✅ $ACHIEVEMENT_COUNT achievements trouvés dans la base"
   fi

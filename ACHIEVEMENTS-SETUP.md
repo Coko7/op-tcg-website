@@ -51,11 +51,11 @@ docker-compose up -d
 Si vous souhaitez réinitialiser les achievements manuellement :
 
 ```bash
-# Se connecter au container
-docker exec -it op-game-backend sh
+# Exécuter les migrations
+docker exec op-game-backend node scripts/run-migrations.js
 
-# Exécuter l'initialisation
-npm run init-achievements
+# Exécuter l'initialisation des achievements
+docker exec op-game-backend node scripts/init-achievements.js
 ```
 
 ## Vérifier que les achievements existent

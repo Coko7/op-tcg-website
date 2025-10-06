@@ -2,7 +2,18 @@ import { UserModel } from '../models/User.js';
 import { CardModel } from '../models/Card.js';
 import { Database } from '../utils/database.js';
 import { BoosterService } from '../services/BoosterService.js';
+import { AchievementService } from '../services/AchievementService.js';
 import { v4 as uuidv4 } from 'uuid';
+// Prix de vente des cartes en Berrys selon la rareté
+const CARD_SELL_PRICES = {
+    common: 10,
+    uncommon: 25,
+    rare: 50,
+    super_rare: 150,
+    secret_rare: 500,
+};
+// Prix d'un booster en Berrys
+const BOOSTER_BERRY_PRICE = 100;
 // Fonction pour transformer les cartes en camelCase
 function transformCardToCamelCase(card) {
     return {
@@ -277,6 +288,8 @@ export class UserController {
           INSERT INTO booster_openings (user_id, booster_id, session_id, seed, opened_at, cards_obtained)
           VALUES (?, ?, ?, 0, datetime('now'), ?)
         `, [userId, boosterId, uuidv4(), JSON.stringify(cards.map(c => c.id))]);
+                // Mettre à jour les achievements
+                await AchievementService.updateAfterBoosterOpen(userId, boosterId, cards.map(c => c.id));
             }
             res.json({
                 success: true,
@@ -378,6 +391,173 @@ export class UserController {
         }
         catch (error) {
             console.error('Erreur lors de la récupération des stats:', error);
+            res.status(500).json({ error: 'Erreur serveur' });
+        }
+    }
+    // Vendre une carte
+    static async sellCard(req, res) {
+        try {
+            const userId = req.user?.id;
+            const { cardId, quantity = 1 } = req.body;
+            if (!userId) {
+                res.status(401).json({ error: 'Utilisateur non authentifié' });
+                return;
+            }
+            if (!cardId || quantity < 1) {
+                res.status(400).json({ error: 'Données invalides' });
+                return;
+            }
+            // Vérifier que l'utilisateur possède cette carte
+            const userCard = await Database.get(`
+        SELECT uc.*, c.rarity
+        FROM user_collections uc
+        JOIN cards c ON uc.card_id = c.id
+        WHERE uc.user_id = ? AND uc.card_id = ?
+      `, [userId, cardId]);
+            if (!userCard) {
+                res.status(404).json({ error: 'Carte non trouvée dans votre collection' });
+                return;
+            }
+            // Vérifier que l'utilisateur a assez de cartes (garder au moins 1)
+            if (userCard.quantity <= quantity) {
+                res.status(400).json({ error: 'Vous devez garder au moins une carte de chaque type' });
+                return;
+            }
+            // Calculer les Berrys gagnés
+            const sellPrice = CARD_SELL_PRICES[userCard.rarity] || 0;
+            const berrysEarned = sellPrice * quantity;
+            // Mettre à jour la quantité de cartes et les Berrys
+            await Database.run(`
+        UPDATE user_collections
+        SET quantity = quantity - ?
+        WHERE user_id = ? AND card_id = ?
+      `, [quantity, userId, cardId]);
+            await Database.run(`
+        UPDATE users
+        SET berrys = COALESCE(berrys, 0) + ?
+        WHERE id = ?
+      `, [berrysEarned, userId]);
+            // Récupérer le nouveau solde
+            const user = await UserModel.findById(userId);
+            const newBalance = user?.berrys || 0;
+            res.json({
+                success: true,
+                data: {
+                    berrys_earned: berrysEarned,
+                    new_balance: newBalance
+                }
+            });
+        }
+        catch (error) {
+            console.error('Erreur lors de la vente de la carte:', error);
+            res.status(500).json({ error: 'Erreur serveur' });
+        }
+    }
+    // Acheter un booster avec des Berrys
+    static async buyBoosterWithBerrys(req, res) {
+        try {
+            const userId = req.user?.id;
+            if (!userId) {
+                res.status(401).json({ error: 'Utilisateur non authentifié' });
+                return;
+            }
+            const user = await UserModel.findById(userId);
+            if (!user) {
+                res.status(404).json({ error: 'Utilisateur non trouvé' });
+                return;
+            }
+            // Vérifier que l'utilisateur a assez de Berrys
+            const currentBerrys = user.berrys || 0;
+            if (currentBerrys < BOOSTER_BERRY_PRICE) {
+                res.status(400).json({ error: `Pas assez de Berrys (besoin de ${BOOSTER_BERRY_PRICE}, vous avez ${currentBerrys})` });
+                return;
+            }
+            // Déduire les Berrys
+            await Database.run(`
+        UPDATE users
+        SET berrys = berrys - ?
+        WHERE id = ?
+      `, [BOOSTER_BERRY_PRICE, userId]);
+            // Sélectionner un booster aléatoire
+            const randomBooster = await Database.get(`
+        SELECT id FROM boosters WHERE is_active = 1 ORDER BY RANDOM() LIMIT 1
+      `);
+            const boosterId = randomBooster?.id || null;
+            // Générer les cartes du booster
+            const cards = await BoosterService.generateBoosterCards(boosterId || undefined);
+            // Déterminer quelles cartes sont nouvelles
+            const newCards = [];
+            // Ajouter les cartes à la collection
+            for (const card of cards) {
+                const existing = await Database.get(`
+          SELECT * FROM user_collections
+          WHERE user_id = ? AND card_id = ?
+        `, [userId, card.id]);
+                if (existing) {
+                    await Database.run(`
+            UPDATE user_collections
+            SET quantity = quantity + 1
+            WHERE user_id = ? AND card_id = ?
+          `, [userId, card.id]);
+                }
+                else {
+                    newCards.push(card.id);
+                    await Database.run(`
+            INSERT INTO user_collections (user_id, card_id, quantity, obtained_at, is_favorite)
+            VALUES (?, ?, 1, datetime('now'), 0)
+          `, [userId, card.id]);
+                }
+            }
+            // Enregistrer l'ouverture
+            if (boosterId) {
+                await Database.run(`
+          INSERT INTO booster_openings (user_id, booster_id, session_id, seed, opened_at, cards_obtained)
+          VALUES (?, ?, ?, 0, datetime('now'), ?)
+        `, [userId, boosterId, uuidv4(), JSON.stringify(cards.map(c => c.id))]);
+                // Mettre à jour les achievements
+                await AchievementService.updateAfterBoosterOpen(userId, boosterId, cards.map(c => c.id));
+            }
+            // Récupérer le statut des boosters actualisé
+            const updatedUser = await UserModel.findById(userId);
+            const availableBoosters = updatedUser?.available_boosters || 0;
+            const nextBoosterTime = updatedUser?.next_booster_time;
+            res.json({
+                success: true,
+                data: {
+                    cards: cards.map(transformCardToCamelCase),
+                    new_cards: newCards,
+                    available_boosters: availableBoosters,
+                    next_booster_time: nextBoosterTime
+                }
+            });
+        }
+        catch (error) {
+            console.error('Erreur lors de l\'achat du booster:', error);
+            res.status(500).json({ error: 'Erreur serveur' });
+        }
+    }
+    // Obtenir le solde de Berrys
+    static async getBerrysBalance(req, res) {
+        try {
+            const userId = req.user?.id;
+            if (!userId) {
+                res.status(401).json({ error: 'Utilisateur non authentifié' });
+                return;
+            }
+            const user = await UserModel.findById(userId);
+            if (!user) {
+                res.status(404).json({ error: 'Utilisateur non trouvé' });
+                return;
+            }
+            res.json({
+                success: true,
+                data: {
+                    berrys: user.berrys || 0
+                }
+            });
+        }
+        catch (error) {
+            console.error('Erreur lors de la récupération du solde de Berrys:', error);
             res.status(500).json({ error: 'Erreur serveur' });
         }
     }

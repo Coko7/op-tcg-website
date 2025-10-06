@@ -11,6 +11,7 @@ export interface User {
     next_booster_time?: Date | null;
     boosters_opened_today?: number;
     last_booster_opened?: Date | null;
+    berrys?: number;
 }
 export interface UserCreate {
     username: string;

@@ -50,8 +50,9 @@ RUN npm ci --only=production && npm cache clean --force
 # Copier le code compilé depuis le builder
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 
-# Copier les scripts si nécessaire
-COPY --chown=nodejs:nodejs server/src/scripts ./src/scripts
+# Copier les scripts JavaScript d'initialisation
+COPY --chown=nodejs:nodejs server/scripts/init-achievements.js ./scripts/
+COPY --chown=nodejs:nodejs server/scripts/run-migrations.js ./scripts/
 
 # Copier le script d'entrypoint
 COPY --chown=nodejs:nodejs server/scripts/docker-entrypoint.sh ./scripts/
