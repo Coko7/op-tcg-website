@@ -454,7 +454,7 @@ const Boosters: React.FC = () => {
                   <Card
                     card={card}
                     showStats={false}
-                    onClick={() => handleCardClick(card)}
+                    onCardClick={handleCardClick}
                     className="cursor-pointer hover:scale-105 transition-transform"
                   />
                   {boosterResult.new_cards.includes(card.id) && (
