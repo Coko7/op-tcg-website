@@ -175,19 +175,32 @@ export default function Achievements() {
                       </div>
 
                       <div className="mb-3">
-                        <div className="flex justify-between text-sm mb-1">
+                        <div className="flex justify-between items-center text-sm mb-2">
                           <span className="text-gray-600">Progression</span>
-                          <span className="font-semibold">
-                            {achievement.progress} / {achievement.threshold}
-                          </span>
+                          <div className="flex items-center gap-3">
+                            <span className="font-semibold text-gray-700">
+                              {achievement.progress} / {achievement.threshold}
+                            </span>
+                            <span className={`font-bold text-lg ${
+                              isCompleted ? 'text-green-600' : 'text-blue-600'
+                            }`}>
+                              {achievement.completion_percentage}%
+                            </span>
+                          </div>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                           <div
-                            className={`h-2 rounded-full transition-all ${
+                            className={`h-3 rounded-full transition-all flex items-center justify-center ${
                               isCompleted ? 'bg-green-500' : 'bg-blue-500'
                             }`}
                             style={{ width: `${achievement.completion_percentage}%` }}
-                          />
+                          >
+                            {achievement.completion_percentage > 15 && (
+                              <span className="text-xs font-bold text-white">
+                                {achievement.completion_percentage}%
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
