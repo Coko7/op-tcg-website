@@ -1,0 +1,237 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Heart, RotateCcw } from 'lucide-react';
+import { Card as CardType } from '../types';
+import { RARITY_COLORS, RARITY_LABELS } from '../data/cards';
+
+interface CardModalProps {
+  card: CardType;
+  isOpen: boolean;
+  onClose: () => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
+  quantity?: number;
+}
+
+const CardModal: React.FC<CardModalProps> = ({
+  card,
+  isOpen,
+  onClose,
+  isFavorite = false,
+  onToggleFavorite,
+  quantity = 1
+}) => {
+  const [tiltX, setTiltX] = useState(0);
+  const [tiltY, setTiltY] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTiltX(0);
+      setTiltY(0);
+      setIsHovering(false);
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+
+    const rect = cardRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const maxTilt = 15;
+    const newTiltX = ((e.clientY - centerY) / (rect.height / 2)) * maxTilt;
+    const newTiltY = ((e.clientX - centerX) / (rect.width / 2)) * -maxTilt;
+
+    setTiltX(newTiltX);
+    setTiltY(newTiltY);
+  };
+
+  const resetTilt = () => {
+    setTiltX(0);
+    setTiltY(0);
+  };
+
+  const handleCardMouseEnter = () => {
+    setIsHovering(true);
+  };
+
+  const handleCardMouseLeave = () => {
+    setIsHovering(false);
+    setTimeout(() => {
+      resetTilt();
+    }, 100);
+  };
+
+  const transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(${isHovering ? 1.05 : 1})`;
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div className="relative max-w-4xl w-full bg-gray-900 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors z-10"
+        >
+          <X size={24} className="text-white" />
+        </button>
+
+        <div className="grid md:grid-cols-2 gap-8 items-start">
+          <div className="relative">
+            <div
+              ref={cardRef}
+              className="relative w-full max-w-md mx-auto transition-transform duration-300 ease-out"
+              style={{ transform }}
+              onMouseMove={handleCardMouseMove}
+              onMouseEnter={handleCardMouseEnter}
+              onMouseLeave={handleCardMouseLeave}
+            >
+              <div className={`relative aspect-[2.5/3.5] rounded-xl overflow-hidden shadow-2xl card-${card.rarity.replace('_', '-')}`}>
+                {card.image_url ? (
+                  <img
+                    src={card.image_url}
+                    alt={card.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (card.fallback_image_url && target.src !== card.fallback_image_url) {
+                        target.src = card.fallback_image_url;
+                      } else {
+                        target.style.display = 'none';
+                        target.nextElementSibling?.classList.remove('hidden');
+                      }
+                    }}
+                  />
+                ) : null}
+                <div className={`absolute inset-0 flex flex-col items-center justify-center text-white/80 bg-gradient-to-br ${RARITY_COLORS[card.rarity]} ${card.image_url ? 'hidden' : ''}`}>
+                  <div className="text-6xl mb-4">🏴‍☠️</div>
+                  <div className="text-lg font-bold text-center px-4">{card.character}</div>
+                  <div className="text-sm mt-2">{RARITY_LABELS[card.rarity]}</div>
+                  {card.image_url && (
+                    <div className="text-xs mt-2 text-red-400">Image indisponible</div>
+                  )}
+                </div>
+
+                {(card.rarity === 'super_rare' || card.rarity === 'secret_rare') && (
+                  <div className="absolute -inset-2 ring-4 ring-yellow-400 ring-opacity-50 rounded-xl pointer-events-none animate-pulse"></div>
+                )}
+              </div>
+            </div>
+
+            {quantity > 1 && (
+              <div className="absolute top-4 left-4 bg-black/80 text-white text-lg px-4 py-2 rounded-full font-bold">
+                x{quantity}
+              </div>
+            )}
+
+            {onToggleFavorite && (
+              <button
+                onClick={onToggleFavorite}
+                className="absolute top-4 right-4 p-3 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
+              >
+                <Heart
+                  size={24}
+                  className={isFavorite ? 'fill-red-500 text-red-500' : 'text-white'}
+                />
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-2">{card.name}</h2>
+              <p className="text-xl text-white/80 mb-4">{card.character}</p>
+
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  card.rarity === 'secret_rare' ? 'bg-purple-600 text-white' :
+                  card.rarity === 'super_rare' ? 'bg-yellow-600 text-white' :
+                  card.rarity === 'rare' ? 'bg-blue-600 text-white' :
+                  card.rarity === 'uncommon' ? 'bg-green-600 text-white' :
+                  'bg-gray-600 text-white'
+                }`}>
+                  {RARITY_LABELS[card.rarity]}
+                </span>
+                {card.type && (
+                  <span className="bg-gray-700 text-white/90 px-3 py-1 rounded-full text-sm">{card.type}</span>
+                )}
+              </div>
+
+              {card.color && card.color.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {card.color.map((color, index) => (
+                    <span
+                      key={index}
+                      className={`text-sm px-3 py-1 rounded-full font-medium ${
+                        color === 'Red' ? 'bg-red-600 text-white' :
+                        color === 'Blue' ? 'bg-blue-600 text-white' :
+                        color === 'Green' ? 'bg-green-600 text-white' :
+                        color === 'Yellow' ? 'bg-yellow-600 text-white' :
+                        color === 'Purple' ? 'bg-purple-600 text-white' :
+                        color === 'Black' ? 'bg-gray-800 text-white' :
+                        color === 'White' ? 'bg-gray-200 text-gray-800' :
+                        'bg-gray-600 text-white'
+                      }`}
+                    >
+                      {color}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {(card.cost !== undefined || card.power !== undefined || card.counter !== undefined) && (
+              <div className="grid grid-cols-3 gap-4">
+                {card.cost !== undefined && (
+                  <div className="bg-gray-800 rounded-lg p-4 text-center">
+                    <div className="text-white/60 text-sm font-medium mb-1">COST</div>
+                    <div className="text-white font-bold text-2xl">{card.cost}</div>
+                  </div>
+                )}
+                {card.power !== undefined && (
+                  <div className="bg-gray-800 rounded-lg p-4 text-center">
+                    <div className="text-white/60 text-sm font-medium mb-1">POWER</div>
+                    <div className="text-white font-bold text-2xl">{card.power}</div>
+                  </div>
+                )}
+                {card.counter !== undefined && (
+                  <div className="bg-gray-800 rounded-lg p-4 text-center">
+                    <div className="text-white/60 text-sm font-medium mb-1">COUNTER</div>
+                    <div className="text-white font-bold text-2xl">{card.counter}</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {card.description && (
+              <div className="bg-gray-800/50 rounded-lg p-4">
+                <h3 className="text-white font-semibold mb-2">Description</h3>
+                <p className="text-white/90 leading-relaxed">{card.description}</p>
+              </div>
+            )}
+
+            {card.special_ability && (
+              <div className="bg-yellow-900/30 border border-yellow-600/30 rounded-lg p-4">
+                <h3 className="text-yellow-400 font-semibold mb-2 flex items-center gap-2">
+                  🌟 Capacité Spéciale
+                </h3>
+                <p className="text-white/90 leading-relaxed">{card.special_ability}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CardModal;

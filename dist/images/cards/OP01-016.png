@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ja">
+<head prefix="og: http://ogp.me/ns#">
+  <meta charset="utf-8">
+  <title>MAINTENANCE｜ONE PIECE CARD GAME - Official Web Site</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="Keywords" content="ONE PIECE,Luffy,Zolo,Nami,Usopp,Sanji,Chopper,Robin,Franky,Brook,Jimbei,Shanks,CARD GAME,Straw hat,Bandai,Eiichiro Oda,Oda-sensei,TCG">
+  <meta name="Description" content="New ONE PIECE CARD GAME setting sail for a simultaneous worldwide release! Check out the official website of ONE PIECE CARD GAME for the latest information!">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="MAINTENANCE｜ONE PIECE CARD GAME - Official Web Site">
+  <meta property="og:image" content="https://onepiece-cardgame.com/ogp.png?0307">
+  <meta property="og:url" content="https://onepiece-cardgame.com/">
+  <meta property="og:site_name" content="MAINTENANCE｜ONE PIECE CARD GAME - Official Web Site">
+  <meta property="og:description" content="New ONE PIECE CARD GAME setting sail for a simultaneous worldwide release! Check out the official website of ONE PIECE CARD GAME for the latest information!">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MAINTENANCE｜ONE PIECE CARD GAME - Official Web Site">
+  <meta name="twitter:description" content="New ONE PIECE CARD GAME setting sail for a simultaneous worldwide release! Check out the official website of ONE PIECE CARD GAME for the latest information!">
+  <meta name="twitter:image" content="https://onepiece-cardgame.com/ogp.png?0307">
+  <meta name="theme-color" content="#fff">
+  <link rel="shortcut icon" type="image/png" href="https://onepiece-cardgame.com/favicon.ico">
+  <link rel="apple-touch-icon" href="https://onepiece-cardgame.com/webclip.png">
+  <link href="https://onepiece-cardgame.com/favicon.ico" rel="shortcut icon">
+  <link rel="alternate" hreflang="ja" href="https://www.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://www.onepiece-cardgame.cn">
+  <link rel="alternate" hreflang="zh-HK" href="https://asia-hk.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="zh-TW" href="https://asia-tw.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="th" href="https://asia-th.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-sg" href="https://asia-en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-my" href="https://asia-en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-id" href="https://asia-en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ph" href="https://asia-en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-us" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-aw" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-vi" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ca" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-cw" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-gl" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-do" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-bm" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-pr" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-mq" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-sv" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-bo" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-au" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-gu" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-as" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ws" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-sb" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-sb" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-tv" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-to" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-nr" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-nz" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-vu" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-pw" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-mh" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ag" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-uy" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ec" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-gy" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-cu" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-gt" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-cr" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-co" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-jm" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-sr" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-vc" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-kn" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-lc" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-cl" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-dm" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-tt" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ni" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-pa" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-bs" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-bb" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-br" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ve" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-bz" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-pe" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-hn" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-mx" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ar" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="fr" href="https://fr.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="fr-be" href="https://fr.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="fr-ch" href="https://fr.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-is" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ie" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-al" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ad" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-gb" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-it" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ua" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-at" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-nl" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-mk" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-hr" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-sm" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-gi" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-se" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-es" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-sk" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-si" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-rs" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-dk" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-de" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-no" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-va" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-hu" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-fi" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-fo" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-gf" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-bg" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-by" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-pl" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ba" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-mt" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-mc" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-md" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-me" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-lv" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-lt" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ro" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-lu" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-ru" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-gr" href="https://en.onepiece-cardgame.com/">
+  <link rel="alternate" hreflang="en-pt" href="https://en.onepiece-cardgame.com/">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/global.css?ver2">
+  <script src="/js/common.js"></script>
+</head>
+
+<body>
+  <header>
+    <h1 class="logo"><img src="../images/common/logo_op.png" alt="ONE PIECE CARD GAME"></h1>
+  </header>
+
+  <main class="mainCol globalCol">
+    <h2 class="categoryTitle">MAINTENANCE</h2>
+    <div class="txtCol txtCenter mtL">
+      <p>During the following period, <br>English (US/Europe/LatAm/Oceania) and French sites are undergoing scheduled maintenance.</p>
+      <p class="txtStrong mtS">2025.09.28 17:00～00:00(PT)</p>
+      <p class="mtS">
+        The website may be temporarily unavailable.<br>
+        We apologize for the inconvenience and thank you for your understanding.
+      </p>
+    </div>
+    <div class="txtCol txtCenter mtS">
+      <p>
+        Le site en version française est en maintenance durant la période suivante.<br>
+        Pendant la maintenance, le site sera indisponible.
+      </p>
+      <p class="txtStrong mtS">29/09/2025 03:00～10:00(CET)</p>
+      <p class="mtS">Nous vous prions de nous excuser pour la gêne occasionnée et vous remercions de votre compréhension et de votre coopération.</p>
+    </div>
+    <div class="contentsWrap">
+      <section class="contentsLCol">
+        <h3 class="mediumTit">Asia</h3>
+        <ul class="globalList">
+          <li><a href="https://www.onepiece-cardgame.com/">Japan</a></li>
+          <li><a href="https://www.onepiece-cardgame.cn">Mainland China</a></li>
+          <li><a href="https://asia-hk.onepiece-cardgame.com/">Hong Kong S.A.R.</a></li>
+          <li><a href="https://asia-tw.onepiece-cardgame.com/">Taiwan</a></li>
+          <li><a href="https://asia-en.onepiece-cardgame.com/">Singapore </a></li>
+          <li><a href="https://asia-en.onepiece-cardgame.com/">Malaysia</a></li>
+          <li><a href="https://asia-en.onepiece-cardgame.com/">Indonesia </a></li>
+          <li><a href="https://asia-th.onepiece-cardgame.com/">Thailand</a></li>
+          <li><a href="https://asia-en.onepiece-cardgame.com/">Philippines</a></li>
+          <li><a href="https://onepiece-cardgame.kr/">Korea</a></li>
+        </ul>
+      </section>
+      <section class="contentsLCol">
+        <h3 class="mediumTit">North America (English ver.)</h3>
+        <ul class="globalList">
+          <li><a href="https://en.onepiece-cardgame.com/">United States</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Canada</a></li>
+        </ul>
+      </section>
+      <section class="contentsLCol">
+        <h3 class="mediumTit">Latin America (English ver.)</h3>
+        <ul class="globalList">
+          <li><a href="https://en.onepiece-cardgame.com/">Mexico</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Guatemala</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">El Salvador</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Nicaragua</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Costa Rica</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Panama</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Colombia</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Ecuador</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Peru</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Chile</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Barbados</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Bolivia</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Argentina</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Brazil</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Uruguay</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Honduras</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Jamaica</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Dominican Republic</a></li>
+        </ul>
+      </section>
+      <section class="contentsLCol">
+        <h3 class="mediumTit">Europe (English ver.)</h3>
+        <ul class="globalList">
+          <li><a href="https://en.onepiece-cardgame.com/">United Kingdom</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Belgium</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Netherlands</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Austria</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Ireland</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Spain</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Switzerland</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Greece</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Germany</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">France</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Norway</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Sweden</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Denmark</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Portugal</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Italy</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">Poland</a></li>
+        </ul>
+      </section>
+      <section class="contentsLCol">
+        <h3 class="mediumTit">Europe (French ver.)</h3>
+        <ul class="globalList">
+          <li><a href="https://fr.onepiece-cardgame.com/">France</a></li>
+          <li><a href="https://fr.onepiece-cardgame.com/">Belgium</a></li>
+          <li><a href="https://fr.onepiece-cardgame.com/">Switzerland</a></li>
+        </ul>
+      </section>
+      <section class="contentsLCol">
+        <h3 class="mediumTit">Oceania (English ver.)</h3>
+        <ul class="globalList">
+          <li><a href="https://en.onepiece-cardgame.com/">Australia</a></li>
+          <li><a href="https://en.onepiece-cardgame.com/">New Zealand</a></li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footerCopyrightCol">
+      <p class="txtCol">
+        All images, text and data on this website may not be reproduced without permission.<br>
+        Please note that the images used on this website may differ from the actual product as it is still under development.
+      </p>
+      <div class="logoCol">
+        <a href="https://www.carddass.com/bcg/" target="_blank" rel="noopener" class="bcg"><img src="/images/common/logo_bcg.png" alt="BANDAI CARD GAMES"></a>
+        <a href="https://www.bandai.co.jp/" target="_blank" rel="noopener" class="bandai"><img src="/images/common/logo_bandai.png" alt="BANDAI"></a>
+        <a href="https://www.bandainamco.co.jp/group/" target="_blank" rel="noopener" class="bandai_namco"><img src="/images/common/logo_bandai_namco.png" alt="BANDAI NAMCO"></a>
+      </div>
+      <small>&copy;Eiichiro Oda/Shueisha &copy;Eiichiro Oda/Shueisha, Toei Animation</small>
+    </div>
+  </footer>
+
+</body>
+</html>

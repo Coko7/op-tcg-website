@@ -1,0 +1,52 @@
+{
+  "name": "one-piece-booster-api",
+  "version": "1.0.0",
+  "description": "API backend pour l'application One Piece Booster Game",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "migrate": "tsx src/scripts/migrate.ts",
+    "seed": "tsx src/scripts/seed.ts",
+    "update-cards": "tsx src/scripts/updateCards.ts",
+    "reset-db": "tsx src/scripts/resetDatabase.ts",
+    "import-vegapull": "tsx src/scripts/import-vegapull-data.ts"
+  },
+  "keywords": [
+    "api",
+    "one-piece",
+    "tcg",
+    "booster",
+    "cards"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^20.10.6",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "sqlite3": "^5.1.6",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "uuid": "^13.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/sqlite3": "^3.1.11",
+    "@types/uuid": "^10.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

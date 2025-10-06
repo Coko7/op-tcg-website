@@ -1,0 +1,91 @@
+# Dépendances
+node_modules/
+server/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+# Note: package-lock.json est nécessaire pour npm ci
+
+# Fichiers de build
+dist/
+build/
+server/dist/
+.cache/
+.next/
+
+# Fichiers de développement
+.env
+.env.local
+.env.development
+.env.test
+.env.production.local
+*.log
+
+# Fichiers de configuration IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (sauf README principal)
+TROUBLESHOOTING.md
+INSTALLATION-MANUELLE.md
+GUIDE-DEMARRAGE.md
+NOUVELLES-FONCTIONNALITES.md
+IMAGES-SETUP.md
+DEPLOYMENT.md
+docs/
+
+# Fichiers temporaires
+tmp/
+temp/
+*.tmp
+.tmp/
+
+# Tests
+coverage/
+.nyc_output/
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+__tests__/
+test/
+tests/
+
+# Base de données de développement
+server/migration_backup_*.sqlite
+server/database.sqlite
+
+# Scripts de développement
+diagnostic.bat
+debug.bat
+check-errors.ps1
+deploy.sh
+debug-images.html
+
+# Fichiers de configuration spécifiques
+# tsconfig.node.json est nécessaire pour le build
+vite.config.ts.timestamp-*
+
+# Cargo/Rust (si présent)
+vegapull/target/
+vegapull/Cargo.lock
+
+# Token et fichiers sensibles
+token.json
+
+# Autres
+*.bak
+*.backup
+.pnp.*
+.yarn/

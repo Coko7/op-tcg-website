@@ -1,0 +1,252 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-gray-600;
+  }
+  body {
+    @apply bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white min-h-screen;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  .card-common {
+    @apply bg-gradient-to-br from-gray-400 to-gray-600 border-gray-500;
+  }
+
+  .card-uncommon {
+    @apply bg-gradient-to-br from-green-400 to-green-600 border-green-500;
+  }
+
+  .card-rare {
+    @apply bg-gradient-to-br from-blue-400 to-blue-600 border-blue-500;
+  }
+
+  .card-super-rare {
+    @apply bg-gradient-to-br from-purple-400 to-purple-600 border-purple-500;
+  }
+
+  .card-secret-rare {
+    @apply bg-gradient-to-br from-yellow-400 to-orange-500 border-yellow-500;
+    animation: rainbow-glow 2s ease-in-out infinite alternate;
+  }
+
+  .booster-pack {
+    @apply relative w-32 h-44 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg border-2 border-blue-400 cursor-pointer transition-transform hover:scale-105;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl;
+  }
+
+  .btn-disabled {
+    @apply bg-gray-600 text-gray-400 cursor-not-allowed py-3 px-6 rounded-lg;
+  }
+}
+
+@layer utilities {
+  /* Animation pour les cartes */
+  @keyframes bounce-in {
+    0% {
+      transform: scale(0.3) rotate(6deg);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.1) rotate(-3deg);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(1) rotate(0deg);
+      opacity: 1;
+    }
+  }
+
+  @keyframes rainbow-glow {
+    0% {
+      box-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000, 0 0 15px #ff0000;
+    }
+    16% {
+      box-shadow: 0 0 5px #ff8000, 0 0 10px #ff8000, 0 0 15px #ff8000;
+    }
+    32% {
+      box-shadow: 0 0 5px #ffff00, 0 0 10px #ffff00, 0 0 15px #ffff00;
+    }
+    48% {
+      box-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 15px #00ff00;
+    }
+    64% {
+      box-shadow: 0 0 5px #0080ff, 0 0 10px #0080ff, 0 0 15px #0080ff;
+    }
+    80% {
+      box-shadow: 0 0 5px #8000ff, 0 0 10px #8000ff, 0 0 15px #8000ff;
+    }
+    100% {
+      box-shadow: 0 0 5px #ff0080, 0 0 10px #ff0080, 0 0 15px #ff0080;
+    }
+  }
+
+  .animate-bounce-in {
+    animation: bounce-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  /* Animations pour le système de deck */
+  @keyframes card-slide-out {
+    0% {
+      transform: translateX(0) rotate(0deg) scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: translateX(-60px) rotate(-10deg) scale(0.95);
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateX(-120%) rotate(-15deg) scale(0.9);
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes deck-shuffle {
+    0%, 100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-2px) rotate(1deg);
+    }
+    50% {
+      transform: translateY(-4px) rotate(0deg);
+    }
+    75% {
+      transform: translateY(-2px) rotate(-1deg);
+    }
+  }
+
+  @keyframes card-hover-glow {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+  }
+
+  @keyframes rare-shimmer {
+    0%, 100% {
+      filter: brightness(1) saturate(1);
+    }
+    50% {
+      filter: brightness(1.2) saturate(1.3);
+    }
+  }
+
+  @keyframes super-rare-shimmer {
+    0%, 100% {
+      filter: brightness(1) saturate(1) hue-rotate(0deg);
+    }
+    33% {
+      filter: brightness(1.3) saturate(1.4) hue-rotate(5deg);
+    }
+    66% {
+      filter: brightness(1.2) saturate(1.5) hue-rotate(-5deg);
+    }
+  }
+
+  @keyframes secret-rare-shimmer {
+    0% {
+      filter: brightness(1) saturate(1) hue-rotate(0deg);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    25% {
+      filter: brightness(1.4) saturate(1.6) hue-rotate(10deg);
+      box-shadow: 0 0 20px rgba(255, 100, 255, 0.6);
+    }
+    50% {
+      filter: brightness(1.5) saturate(1.7) hue-rotate(0deg);
+      box-shadow: 0 0 25px rgba(100, 200, 255, 0.7);
+    }
+    75% {
+      filter: brightness(1.4) saturate(1.6) hue-rotate(-10deg);
+      box-shadow: 0 0 20px rgba(255, 200, 100, 0.6);
+    }
+    100% {
+      filter: brightness(1) saturate(1) hue-rotate(0deg);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+  }
+
+  @keyframes sparkle-animation {
+    0% {
+      opacity: 0;
+      transform: scale(0) rotate(0deg);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1) rotate(180deg);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.5) rotate(360deg);
+    }
+  }
+
+  .card-slide-out {
+    animation: card-slide-out 0.6s ease-out forwards;
+  }
+
+  .deck-shuffle {
+    animation: deck-shuffle 2s ease-in-out infinite;
+  }
+
+  .card-hover-glow {
+    animation: card-hover-glow 2s ease-in-out infinite;
+  }
+
+  .rare-shimmer {
+    animation: rare-shimmer 2s ease-in-out infinite;
+  }
+
+  .super-rare-shimmer {
+    animation: super-rare-shimmer 2.5s ease-in-out infinite;
+  }
+
+  .secret-rare-shimmer {
+    animation: secret-rare-shimmer 3s ease-in-out infinite;
+  }
+
+  .sparkle-effect {
+    animation: sparkle-animation 1s ease-in-out infinite;
+  }
+
+  /* Effets de particules pour les cartes rares - désactivés */
+
+  /* Responsive optimisations for mobile */
+  @media (max-width: 768px) {
+    @keyframes card-slide-out {
+      0% {
+        transform: translateX(0) rotate(0deg) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(-100%) rotate(-10deg) scale(0.9);
+        opacity: 0.7;
+      }
+    }
+  }
+
+  /* Effets spéciaux pour cartes secrètes rares */
+  .secret-rare-effect {
+    position: relative;
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+  }
+
+  .secret-rare-effect::after {
+    content: '✨';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    animation: sparkle-animation 1.5s ease-in-out infinite;
+  }
+}

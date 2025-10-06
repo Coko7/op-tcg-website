@@ -1,0 +1,81 @@
+# Multi-stage build pour optimiser la taille et la vitesse
+FROM node:18-alpine AS builder
+
+# Installer les dépendances système nécessaires pour la compilation
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app
+
+# Copier les fichiers de dépendances
+COPY server/package*.json ./
+COPY server/tsconfig.json ./
+
+# Installer toutes les dépendances (dev + prod) pour le build
+RUN npm ci
+
+# Copier le code source
+COPY server/src ./src
+
+# Compiler TypeScript
+RUN npm run build
+
+# Stage de production - image finale légère
+FROM node:18-alpine
+
+# Métadonnées
+LABEL maintainer="OP Game Team"
+LABEL description="One Piece Booster Game - Backend API"
+LABEL version="1.0.0"
+
+# Installer uniquement les dépendances système nécessaires à l'exécution
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    sqlite \
+    curl
+
+# Créer un utilisateur non-root pour la sécurité
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 -G nodejs
+
+WORKDIR /app
+
+# Copier les fichiers de dépendances
+COPY --chown=nodejs:nodejs server/package*.json ./
+
+# Installer uniquement les dépendances de production
+RUN npm ci --only=production && npm cache clean --force
+
+# Copier le code compilé depuis le builder
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+
+# Copier les scripts si nécessaire
+COPY --chown=nodejs:nodejs server/src/scripts ./src/scripts
+
+# Créer les répertoires nécessaires avec les bonnes permissions
+RUN mkdir -p data public/data/vegapull public/images && \
+    chown -R nodejs:nodejs /app
+
+# Copier les données Vegapull (packs et cartes)
+COPY --chown=nodejs:nodejs public/data/vegapull ./public/data/vegapull
+
+# Passer à l'utilisateur non-root
+USER nodejs
+
+# Exposer le port
+EXPOSE 5000
+
+# Variables d'environnement par défaut
+ENV NODE_ENV=production \
+    DATABASE_PATH=/app/data/database.sqlite \
+    VEGAPULL_DATA_PATH=/app/public/data/vegapull \
+    VEGAPULL_IMAGES_PATH=/app/public/images/cards \
+    PORT=5000
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:5000/health || exit 1
+
+# Commande par défaut
+CMD ["node", "dist/index.js"]
