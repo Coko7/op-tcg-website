@@ -1,5 +1,5 @@
 # Multi-stage build pour optimiser la taille finale
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Installer les dépendances système nécessaires
 RUN apk add --no-cache git
@@ -8,15 +8,16 @@ RUN apk add --no-cache git
 WORKDIR /app
 
 # Copier les fichiers de dépendances
-COPY package*.json ./
+COPY package.json package-lock.json ./
 COPY tsconfig.json ./
 COPY tsconfig.node.json ./
 COPY vite.config.ts ./
+COPY eslint.config.js ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
 
 # Installer toutes les dépendances (y compris dev pour le build)
-RUN npm ci
+RUN npm ci --prefer-offline --no-audit
 
 # Copier le code source
 COPY src ./src
