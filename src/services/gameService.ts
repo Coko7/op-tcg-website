@@ -70,7 +70,7 @@ export class GameService {
 
   static async openBooster(boosterId?: string): Promise<BoosterResult | null> {
     try {
-      const response = await apiService.openBooster();
+      const response = await apiService.openBooster(boosterId);
       if (response.success) {
         return {
           cards: response.data.cards || [],

@@ -258,9 +258,10 @@ class ApiService {
     return await this.request('/users/booster-status');
   }
 
-  async openBooster(): Promise<any> {
+  async openBooster(boosterId?: string): Promise<any> {
     return await this.request('/users/open-booster', {
       method: 'POST',
+      body: JSON.stringify({ boosterId }),
     });
   }
 

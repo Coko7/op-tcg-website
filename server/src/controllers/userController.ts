@@ -261,11 +261,15 @@ export class UserController {
         return;
       }
 
-      // Sélectionner un booster aléatoire
-      const randomBooster = await Database.get(`
-        SELECT id FROM boosters WHERE is_active = 1 ORDER BY RANDOM() LIMIT 1
-      `);
-      const boosterId = randomBooster?.id || null;
+      // Utiliser le booster sélectionné par l'utilisateur, ou un booster aléatoire si non spécifié
+      let boosterId = req.body.boosterId;
+
+      if (!boosterId) {
+        const randomBooster = await Database.get(`
+          SELECT id FROM boosters WHERE is_active = 1 ORDER BY RANDOM() LIMIT 1
+        `);
+        boosterId = randomBooster?.id || null;
+      }
 
       // Générer les cartes du booster avec filtrage
       const cards = await BoosterService.generateBoosterCards(boosterId || undefined);
