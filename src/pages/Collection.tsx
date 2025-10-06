@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Search, Filter, Heart, X, Star, Coins, DollarSign } from 'lucide-react';
 import { GameService } from '../services/gameService';
@@ -8,6 +8,8 @@ import CardModal from '../components/CardModal';
 import { RARITY_LABELS } from '../data/cards';
 
 type FilterType = 'all' | 'favorites' | Rarity | string; // string pour les IDs de boosters
+
+const CARDS_PER_PAGE = 20;
 
 const Collection: React.FC = () => {
   const [userCards, setUserCards] = useState<UserCard[]>([]);
@@ -22,6 +24,8 @@ const Collection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [berrysBalance, setBerrysBalance] = useState<number>(0);
   const [sellMode, setSellMode] = useState(false);
+  const [displayedCards, setDisplayedCards] = useState(CARDS_PER_PAGE);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -96,6 +100,38 @@ const Collection: React.FC = () => {
       return rarityOrder.indexOf(a.rarity) - rarityOrder.indexOf(b.rarity);
     });
   }, [allCards, userCards, searchQuery, selectedFilter]);
+
+  // Reset displayedCards when filters change
+  useEffect(() => {
+    setDisplayedCards(CARDS_PER_PAGE);
+  }, [searchQuery, selectedFilter]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && displayedCards < filteredCards.length) {
+          setDisplayedCards(prev => Math.min(prev + CARDS_PER_PAGE, filteredCards.length));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [displayedCards, filteredCards.length]);
+
+  const visibleCards = useMemo(() => {
+    return filteredCards.slice(0, displayedCards);
+  }, [filteredCards, displayedCards]);
 
   const toggleFavorite = async (cardId: string) => {
     try {
@@ -366,7 +402,7 @@ const Collection: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
-            {filteredCards.map((card) => {
+            {visibleCards.map((card) => {
               const userCard = userCards.find(uc => uc.card_id === card.id);
               const isOwned = !!userCard;
               const canSell = isOwned && userCard.quantity > 1;
@@ -430,6 +466,14 @@ const Collection: React.FC = () => {
               );
             })}
           </div>
+
+          {/* Infinite scroll trigger */}
+          {displayedCards < filteredCards.length && (
+            <div ref={observerTarget} className="py-8 text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <p className="text-blue-300 mt-2">Chargement...</p>
+            </div>
+          )}
         </>
       )}
 

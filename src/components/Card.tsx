@@ -66,13 +66,18 @@ const Card: React.FC<CardProps> = ({
       )}
 
       {/* Full-size card image */}
-      <div className="w-full aspect-[2.5/3.5] relative overflow-hidden">
+      <div className="w-full aspect-[2.5/3.5] relative overflow-hidden bg-gray-800">
         {card.image_url ? (
           <img
             src={card.image_url}
             alt={card.name}
             loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover"
+            style={{
+              contentVisibility: 'auto',
+              willChange: 'transform'
+            }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               // Essaie l'URL de fallback si disponible
