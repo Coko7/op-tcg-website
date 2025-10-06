@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Trophy, Award, Gift, CheckCircle, Circle } from 'lucide-react';
 import { apiService } from '../services/api';
 import { AchievementWithProgress, AchievementStats } from '../types';
-import Layout from '../components/Layout';
 
 export default function Achievements() {
   const [achievements, setAchievements] = useState<AchievementWithProgress[]>([]);
@@ -69,16 +68,14 @@ export default function Achievements() {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-xl text-gray-600">Chargement des achievements...</div>
-        </div>
-      </Layout>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl text-white">Chargement des achievements...</div>
+      </div>
     );
   }
 
   return (
-    <Layout>
+    <>
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
@@ -239,6 +236,6 @@ export default function Achievements() {
           </div>
         )}
       </div>
-    </Layout>
+    </>
   );
 }
