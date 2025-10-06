@@ -443,35 +443,59 @@ const Boosters: React.FC = () => {
             )}
           </div>
 
-          {/* Résumé des raretés obtenues */}
-          <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30 max-w-2xl mx-auto">
-            <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 text-center">
-              📊 Résumé de votre ouverture
+          {/* Affichage des 5 cartes obtenues */}
+          <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30 max-w-4xl mx-auto">
+            <h3 className="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6 text-center">
+              🃏 Vos cartes obtenues
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 text-center">
-              {Object.entries(
-                boosterResult.cards.reduce((acc, card) => {
-                  acc[card.rarity] = (acc[card.rarity] || 0) + 1;
-                  return acc;
-                }, {} as Record<string, number>)
-              ).map(([rarity, count]) => (
-                <div key={rarity} className="p-2 sm:p-3 bg-blue-700/30 rounded-lg">
-                  <div className="text-white font-bold text-base sm:text-lg">{count}</div>
-                  <div className={`text-xs sm:text-sm ${
-                    rarity === 'secret_rare' ? 'text-yellow-300' :
-                    rarity === 'super_rare' ? 'text-purple-300' :
-                    rarity === 'rare' ? 'text-blue-300' :
-                    rarity === 'uncommon' ? 'text-green-300' :
-                    'text-gray-300'
-                  }`}>
-                    {rarity === 'secret_rare' ? 'Secrète Rare' :
-                     rarity === 'super_rare' ? 'Super Rare' :
-                     rarity === 'rare' ? 'Rare' :
-                     rarity === 'uncommon' ? 'Peu Commune' :
-                     'Commune'}
-                  </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
+              {boosterResult.cards.map((card, index) => (
+                <div key={`summary-${card.id}-${index}`} className="relative group">
+                  <Card
+                    card={card}
+                    showStats={false}
+                    onClick={() => handleCardClick(card)}
+                    className="cursor-pointer hover:scale-105 transition-transform"
+                  />
+                  {boosterResult.new_cards.includes(card.id) && (
+                    <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold shadow-lg">
+                      NEW
+                    </div>
+                  )}
                 </div>
               ))}
+            </div>
+
+            {/* Résumé des raretés */}
+            <div className="mt-6 border-t border-blue-600/30 pt-4">
+              <h4 className="text-sm sm:text-base font-semibold text-white mb-3 text-center">
+                📊 Résumé des raretés
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3 text-center text-xs sm:text-sm">
+                {Object.entries(
+                  boosterResult.cards.reduce((acc, card) => {
+                    acc[card.rarity] = (acc[card.rarity] || 0) + 1;
+                    return acc;
+                  }, {} as Record<string, number>)
+                ).map(([rarity, count]) => (
+                  <div key={rarity} className="p-2 bg-blue-700/30 rounded-lg">
+                    <div className="text-white font-bold">{count}x</div>
+                    <div className={`${
+                      rarity === 'secret_rare' ? 'text-yellow-300' :
+                      rarity === 'super_rare' ? 'text-purple-300' :
+                      rarity === 'rare' ? 'text-blue-300' :
+                      rarity === 'uncommon' ? 'text-green-300' :
+                      'text-gray-300'
+                    }`}>
+                      {rarity === 'secret_rare' ? 'Secrète' :
+                       rarity === 'super_rare' ? 'Super' :
+                       rarity === 'rare' ? 'Rare' :
+                       rarity === 'uncommon' ? 'Peu Com.' :
+                       'Commune'}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 

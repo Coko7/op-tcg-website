@@ -173,33 +173,7 @@ const CardDeck: React.FC<CardDeckProps> = ({ cards, onComplete, onCardRevealed }
         onTouchEnd={onTouchEnd}
         onClick={revealNextCard}
       >
-        {/* Cartes révélées (à gauche) */}
-        {revealedCards.map((card, index) => (
-          <div
-            key={`revealed-${card.id}-${index}`}
-            className={`absolute ${getCardClassName(index, true, card)}`}
-            style={{
-              transform: getCardTransform(index, true),
-              zIndex: getCardZIndex(index, true),
-              opacity: 0.7,
-              position: 'absolute',
-              top: 0,
-              left: 0
-            }}
-          >
-            <Card
-              card={card}
-              showStats={false}
-              className="pointer-events-none select-none"
-            />
-            {/* Badge "Révélée" avec effet sparkle pour les cartes rares */}
-            <div className={`absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold ${
-              card.rarity === 'secret_rare' || card.rarity === 'super_rare' ? 'sparkle-effect' : ''
-            }`}>
-              {card.rarity === 'secret_rare' ? '🌟' : card.rarity === 'super_rare' ? '⭐' : '✓'}
-            </div>
-          </div>
-        ))}
+        {/* Cartes révélées masquées pour focus sur la pile */}
 
         {/* Cartes restantes dans la pile */}
         {cards.slice(currentCardIndex).map((card, index) => {
