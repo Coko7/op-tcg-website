@@ -1,5 +1,5 @@
 # Multi-stage build pour optimiser la taille et la vitesse
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Installer les dépendances système nécessaires pour la compilation
 RUN apk add --no-cache python3 make g++
@@ -7,11 +7,11 @@ RUN apk add --no-cache python3 make g++
 WORKDIR /app
 
 # Copier les fichiers de dépendances
-COPY server/package*.json ./
+COPY server/package.json server/package-lock.json ./
 COPY server/tsconfig.json ./
 
 # Installer toutes les dépendances (dev + prod) pour le build
-RUN npm ci
+RUN npm ci --prefer-offline --no-audit
 
 # Copier le code source
 COPY server/src ./src
@@ -20,7 +20,7 @@ COPY server/src ./src
 RUN npm run build
 
 # Stage de production - image finale légère
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Métadonnées
 LABEL maintainer="OP Game Team"
@@ -42,10 +42,10 @@ RUN addgroup -g 1001 -S nodejs && \
 WORKDIR /app
 
 # Copier les fichiers de dépendances
-COPY --chown=nodejs:nodejs server/package*.json ./
+COPY --chown=nodejs:nodejs server/package.json server/package-lock.json ./
 
 # Installer uniquement les dépendances de production
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --omit=dev --prefer-offline --no-audit && npm cache clean --force
 
 # Copier le code compilé depuis le builder
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
