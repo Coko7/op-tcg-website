@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiService } from '../services/api';
 
 interface LeaderboardEntry {
   rank: number;
@@ -40,18 +40,13 @@ const Leaderboard: React.FC = () => {
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/leaderboard', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiService.getLeaderboard();
 
-      if (response.data.success) {
-        setLeaderboard(response.data.leaderboard);
+      if (response.success) {
+        setLeaderboard(response.leaderboard);
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Erreur lors du chargement du leaderboard');
+      setError(err.message || 'Erreur lors du chargement du leaderboard');
       console.error('Erreur leaderboard:', err);
     } finally {
       setLoading(false);

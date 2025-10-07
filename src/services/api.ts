@@ -311,6 +311,11 @@ class ApiService {
     });
   }
 
+  // Méthodes pour le leaderboard
+  async getLeaderboard(): Promise<any> {
+    return await this.request('/leaderboard');
+  }
+
   // Vérifier si l'utilisateur est connecté
   isAuthenticated(): boolean {
     return !!this.accessToken;
