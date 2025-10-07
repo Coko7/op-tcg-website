@@ -632,4 +632,100 @@ export class UserController {
       res.status(500).json({ error: 'Erreur serveur' });
     }
   }
+
+  // Réclamer la récompense quotidienne
+  static async claimDailyReward(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({ error: 'Utilisateur non authentifié' });
+        return;
+      }
+
+      const user = await UserModel.findById(userId);
+      if (!user) {
+        res.status(404).json({ error: 'Utilisateur non trouvé' });
+        return;
+      }
+
+      // Vérifier si l'utilisateur a déjà réclamé sa récompense aujourd'hui
+      const now = new Date();
+      const today = now.toISOString().split('T')[0]; // Format YYYY-MM-DD
+
+      const lastDailyReward = (user as any).last_daily_reward;
+      const lastRewardDate = lastDailyReward ? lastDailyReward.split('T')[0] : null;
+
+      if (lastRewardDate === today) {
+        res.status(400).json({
+          error: 'Récompense quotidienne déjà réclamée aujourd\'hui',
+          next_reward_available: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
+        });
+        return;
+      }
+
+      // Donner 10 Berrys à l'utilisateur
+      const DAILY_REWARD_BERRYS = 10;
+      await Database.run(`
+        UPDATE users
+        SET berrys = COALESCE(berrys, 0) + ?,
+            last_daily_reward = datetime('now')
+        WHERE id = ?
+      `, [DAILY_REWARD_BERRYS, userId]);
+
+      // Récupérer le nouveau solde
+      const updatedUser = await UserModel.findById(userId);
+      const newBalance = updatedUser?.berrys || 0;
+
+      res.json({
+        success: true,
+        data: {
+          berrys_earned: DAILY_REWARD_BERRYS,
+          new_balance: newBalance,
+          next_reward_available: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('Erreur lors de la réclamation de la récompense quotidienne:', error);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  }
+
+  // Vérifier si la récompense quotidienne est disponible
+  static async checkDailyReward(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({ error: 'Utilisateur non authentifié' });
+        return;
+      }
+
+      const user = await UserModel.findById(userId);
+      if (!user) {
+        res.status(404).json({ error: 'Utilisateur non trouvé' });
+        return;
+      }
+
+      const now = new Date();
+      const today = now.toISOString().split('T')[0]; // Format YYYY-MM-DD
+
+      const lastDailyReward = (user as any).last_daily_reward;
+      const lastRewardDate = lastDailyReward ? lastDailyReward.split('T')[0] : null;
+
+      const isAvailable = lastRewardDate !== today;
+      const nextRewardDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+      res.json({
+        success: true,
+        data: {
+          is_available: isAvailable,
+          last_claimed: lastDailyReward,
+          next_reward_available: isAvailable ? now.toISOString() : nextRewardDate.toISOString(),
+          reward_amount: 10
+        }
+      });
+    } catch (error) {
+      console.error('Erreur lors de la vérification de la récompense quotidienne:', error);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  }
 }

@@ -180,34 +180,53 @@ export class AchievementService {
 
   // Créer des achievements spécifiques à un booster
   static async createBoosterAchievements(boosterId: string, boosterName: string): Promise<void> {
+    // Récupérer le nombre total de cartes dans ce booster
+    const totalCardsResult = await Database.get<{ count: number }>(`
+      SELECT COUNT(*) as count
+      FROM cards
+      WHERE booster_id = ? AND is_active = 1
+    `, [boosterId]);
+
+    const totalCards = totalCardsResult?.count || 0;
+
+    if (totalCards === 0) {
+      console.log(`  ⚠️ Aucune carte trouvée pour le booster ${boosterName}, achievements non créés`);
+      return;
+    }
+
+    // Calculer les seuils de complétion (20%, 50%, 100%)
+    const threshold20 = Math.ceil(totalCards * 0.2);
+    const threshold50 = Math.ceil(totalCards * 0.5);
+    const threshold100 = totalCards;
+
     const boosterAchievements = [
       {
         name: `${boosterName} - Explorateur`,
-        description: `Obtenez 10 cartes différentes du booster ${boosterName}`,
+        description: `Débloquez 20% des cartes du booster ${boosterName} (${threshold20}/${totalCards})`,
         type: 'booster_cards' as AchievementType,
-        category: 'Boosters Spécifiques',
+        category: 'Complétion de Boosters',
         icon: '🔍',
-        threshold: 10,
+        threshold: threshold20,
         reward_berrys: 100,
         booster_id: boosterId
       },
       {
         name: `${boosterName} - Collectionneur`,
-        description: `Obtenez 25 cartes différentes du booster ${boosterName}`,
+        description: `Débloquez 50% des cartes du booster ${boosterName} (${threshold50}/${totalCards})`,
         type: 'booster_cards' as AchievementType,
-        category: 'Boosters Spécifiques',
+        category: 'Complétion de Boosters',
         icon: '🎯',
-        threshold: 25,
+        threshold: threshold50,
         reward_berrys: 250,
         booster_id: boosterId
       },
       {
-        name: `${boosterName} - Maître`,
-        description: `Obtenez 50 cartes différentes du booster ${boosterName}`,
+        name: `${boosterName} - Maître Complet`,
+        description: `Débloquez 100% des cartes du booster ${boosterName} (${threshold100}/${totalCards})`,
         type: 'booster_cards' as AchievementType,
-        category: 'Boosters Spécifiques',
-        icon: '🌟',
-        threshold: 50,
+        category: 'Complétion de Boosters',
+        icon: '👑',
+        threshold: threshold100,
         reward_berrys: 500,
         booster_id: boosterId
       }
@@ -220,7 +239,28 @@ export class AchievementService {
 
       if (!existing) {
         await AchievementModel.create(achData);
+        console.log(`  ✅ Achievement créé: ${achData.name}`);
       }
     }
+  }
+
+  // Créer les achievements pour tous les boosters existants
+  static async createAllBoosterAchievements(): Promise<void> {
+    console.log('🏆 Création des achievements de complétion des boosters...');
+
+    const boosters = await Database.all<{ id: string; name: string }>(`
+      SELECT id, name FROM boosters WHERE is_active = 1
+    `);
+
+    if (boosters.length === 0) {
+      console.log('  ⚠️ Aucun booster trouvé');
+      return;
+    }
+
+    for (const booster of boosters) {
+      await this.createBoosterAchievements(booster.id, booster.name);
+    }
+
+    console.log(`🏆 Achievements créés pour ${boosters.length} boosters`);
   }
 }

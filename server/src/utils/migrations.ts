@@ -439,6 +439,27 @@ export class MigrationManager {
       }
     });
 
+    // Migration 9: Ajouter la colonne last_daily_reward pour les récompenses quotidiennes
+    this.migrations.push({
+      version: 9,
+      name: 'add_daily_reward_to_users',
+      up: async () => {
+        console.log('📦 Migration 9: Ajout du système de récompense quotidienne...');
+
+        try {
+          await Database.run(`
+            ALTER TABLE users ADD COLUMN last_daily_reward TEXT
+          `);
+          console.log('✅ Colonne last_daily_reward ajoutée à la table users');
+        } catch (error) {
+          console.log('  ℹ️ Colonne last_daily_reward déjà présente');
+        }
+      },
+      down: async () => {
+        console.log('⚠️ Rollback non supporté pour cette migration (SQLite limitation)');
+      }
+    });
+
     // Trier les migrations par version
     this.migrations.sort((a, b) => a.version - b.version);
   }
@@ -481,14 +502,13 @@ export class MigrationManager {
     console.log(`🛡️ Backup créé: ${backupPath}`);
 
     try {
-      await Database.transaction(async () => {
-        for (const migration of migrationsToRun) {
-          console.log(`▶️ Exécution de la migration ${migration.version}: ${migration.name}`);
-          await migration.up();
-          await Database.updateSchemaVersion(migration.version);
-          console.log(`✅ Migration ${migration.version} terminée`);
-        }
-      });
+      // Exécuter les migrations sans transaction (better-sqlite3 ne supporte pas les async dans les transactions)
+      for (const migration of migrationsToRun) {
+        console.log(`▶️ Exécution de la migration ${migration.version}: ${migration.name}`);
+        await migration.up();
+        await Database.updateSchemaVersion(migration.version);
+        console.log(`✅ Migration ${migration.version} terminée`);
+      }
 
       const newVersion = await this.getCurrentVersion();
       console.log(`🎉 Migration terminée! Version: ${newVersion}`);
@@ -519,19 +539,18 @@ export class MigrationManager {
     console.log(`🛡️ Backup créé: ${backupPath}`);
 
     try {
-      await Database.transaction(async () => {
-        for (const migration of migrationsToRollback) {
-          if (migration.down) {
-            console.log(`◀️ Rollback de la migration ${migration.version}: ${migration.name}`);
-            await migration.down();
-          } else {
-            throw new Error(`Migration ${migration.version} n'a pas de fonction de rollback`);
-          }
+      // Exécuter les rollbacks sans transaction (better-sqlite3 ne supporte pas les async dans les transactions)
+      for (const migration of migrationsToRollback) {
+        if (migration.down) {
+          console.log(`◀️ Rollback de la migration ${migration.version}: ${migration.name}`);
+          await migration.down();
+        } else {
+          throw new Error(`Migration ${migration.version} n'a pas de fonction de rollback`);
         }
+      }
 
-        // Mettre à jour la version du schéma
-        await Database.run('DELETE FROM schema_version WHERE version > ?', [targetVersion]);
-      });
+      // Mettre à jour la version du schéma
+      await Database.run('DELETE FROM schema_version WHERE version > ?', [targetVersion]);
 
       console.log(`🎉 Rollback terminé! Version: ${targetVersion}`);
 

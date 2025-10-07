@@ -11,6 +11,9 @@ async function initializeAchievements() {
     // Initialiser les achievements par défaut
     await AchievementService.initializeDefaultAchievements();
 
+    // Créer les achievements de complétion pour tous les boosters
+    await AchievementService.createAllBoosterAchievements();
+
     console.log('\n✅ Achievements initialisés avec succès!');
     process.exit(0);
   } catch (error) {

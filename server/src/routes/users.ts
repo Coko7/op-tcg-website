@@ -25,6 +25,10 @@ router.get('/berrys', UserController.getBerrysBalance);
 router.post('/sell-card', UserController.sellCard);
 router.post('/buy-booster', UserController.buyBoosterWithBerrys);
 
+// Routes pour les récompenses quotidiennes
+router.get('/daily-reward/check', UserController.checkDailyReward);
+router.post('/daily-reward/claim', UserController.claimDailyReward);
+
 // Routes pour les achievements
 router.get('/achievements', AchievementController.getUserAchievements);
 router.get('/achievements/stats', AchievementController.getAchievementStats);

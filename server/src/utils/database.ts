@@ -79,7 +79,7 @@ export class Database {
 
   // Mettre à jour la version du schéma
   static async updateSchemaVersion(version: number): Promise<void> {
-    await this.run('INSERT INTO schema_version (version, applied_at) VALUES (?, datetime("now"))', [version]);
+    await this.run("INSERT INTO schema_version (version, applied_at) VALUES (?, datetime('now'))", [version]);
   }
 
   // Backup de la base de données

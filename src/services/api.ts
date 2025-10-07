@@ -285,6 +285,17 @@ class ApiService {
     return await this.request('/users/berrys');
   }
 
+  // Méthodes pour les récompenses quotidiennes
+  async checkDailyReward(): Promise<any> {
+    return await this.request('/users/daily-reward/check');
+  }
+
+  async claimDailyReward(): Promise<any> {
+    return await this.request('/users/daily-reward/claim', {
+      method: 'POST',
+    });
+  }
+
   // Méthodes pour les achievements
   async getAchievements(): Promise<any> {
     return await this.request('/users/achievements');

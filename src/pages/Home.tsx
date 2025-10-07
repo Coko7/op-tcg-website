@@ -4,6 +4,8 @@ import { Package, BookOpen, TrendingUp, RotateCcw } from 'lucide-react';
 import { GameService } from '../services/gameService';
 import { BoosterStatus, User } from '../types';
 import Timer from '../components/Timer';
+import DailyRewardModal from '../components/DailyRewardModal';
+import { apiService } from '../services/api';
 
 const Home: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -15,6 +17,7 @@ const Home: React.FC = () => {
     rarity_breakdown: { common: 0, uncommon: 0, rare: 0, super_rare: 0, secret_rare: 0 }
   });
   const [loading, setLoading] = useState(true);
+  const [showDailyReward, setShowDailyReward] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -27,6 +30,16 @@ const Home: React.FC = () => {
 
         setBoosterStatus(boosterStatusData);
         setStats(statsData);
+
+        // Vérifier si la récompense quotidienne est disponible
+        try {
+          const dailyRewardCheck = await apiService.checkDailyReward();
+          if (dailyRewardCheck.success && dailyRewardCheck.data.is_available) {
+            setShowDailyReward(true);
+          }
+        } catch (error) {
+          console.error('Erreur lors de la vérification de la récompense quotidienne:', error);
+        }
       } catch (error) {
         console.error('Error loading home data:', error);
       } finally {
@@ -85,6 +98,15 @@ const Home: React.FC = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8">
+      <DailyRewardModal
+        isOpen={showDailyReward}
+        onClose={() => setShowDailyReward(false)}
+        onClaim={() => {
+          // Rafraîchir les statistiques après la réclamation
+          GameService.getCollectionStats().then(setStats);
+        }}
+      />
+
       <section className="text-center px-2">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
           Bienvenue sur One Piece TCG!
