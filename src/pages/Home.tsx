@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, BookOpen, TrendingUp, RotateCcw } from 'lucide-react';
+import { Package, BookOpen, TrendingUp, RotateCcw, Gift } from 'lucide-react';
 import { GameService } from '../services/gameService';
 import { BoosterStatus, User } from '../types';
 import Timer from '../components/Timer';
@@ -18,6 +18,47 @@ const Home: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [showDailyReward, setShowDailyReward] = useState(false);
+  const [dailyRewardAvailable, setDailyRewardAvailable] = useState(false);
+  const [dailyRewardData, setDailyRewardData] = useState<any>(null);
+
+  // Vérifier si le modal a déjà été affiché aujourd'hui
+  const checkIfModalShownToday = () => {
+    const lastShown = localStorage.getItem('dailyRewardModalLastShown');
+    if (!lastShown) return false;
+
+    const today = new Date().toISOString().split('T')[0];
+    const lastShownDate = new Date(lastShown).toISOString().split('T')[0];
+
+    return today === lastShownDate;
+  };
+
+  const markModalAsShown = () => {
+    localStorage.setItem('dailyRewardModalLastShown', new Date().toISOString());
+  };
+
+  // Fonction pour vérifier manuellement la récompense quotidienne
+  const checkDailyRewardStatus = async () => {
+    try {
+      const dailyRewardCheck = await apiService.checkDailyReward();
+      if (dailyRewardCheck.success) {
+        setDailyRewardAvailable(dailyRewardCheck.data.is_available);
+        setDailyRewardData(dailyRewardCheck.data);
+        return dailyRewardCheck.data.is_available;
+      }
+      return false;
+    } catch (error) {
+      console.error('Erreur lors de la vérification de la récompense quotidienne:', error);
+      return false;
+    }
+  };
+
+  // Ouvrir manuellement le modal de récompense
+  const handleOpenDailyReward = () => {
+    if (dailyRewardAvailable) {
+      setShowDailyReward(true);
+      markModalAsShown();
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -31,14 +72,14 @@ const Home: React.FC = () => {
         setBoosterStatus(boosterStatusData);
         setStats(statsData);
 
-        // Vérifier si la récompense quotidienne est disponible
-        try {
-          const dailyRewardCheck = await apiService.checkDailyReward();
-          if (dailyRewardCheck.success && dailyRewardCheck.data.is_available) {
-            setShowDailyReward(true);
-          }
-        } catch (error) {
-          console.error('Erreur lors de la vérification de la récompense quotidienne:', error);
+        // Vérifier l'état de la récompense quotidienne
+        const isAvailable = await checkDailyRewardStatus();
+
+        // Afficher automatiquement le modal si la récompense est disponible
+        // ET si le modal n'a pas déjà été affiché aujourd'hui
+        if (isAvailable && !checkIfModalShownToday()) {
+          setShowDailyReward(true);
+          markModalAsShown();
         }
       } catch (error) {
         console.error('Error loading home data:', error);
@@ -102,6 +143,8 @@ const Home: React.FC = () => {
         isOpen={showDailyReward}
         onClose={() => setShowDailyReward(false)}
         onClaim={() => {
+          // Marquer comme non disponible
+          setDailyRewardAvailable(false);
           // Rafraîchir les statistiques après la réclamation
           GameService.getCollectionStats().then(setStats);
         }}
@@ -116,7 +159,51 @@ const Home: React.FC = () => {
         </p>
       </section>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {/* Carte Récompense Quotidienne */}
+        <div className="bg-gradient-to-br from-yellow-800/40 to-orange-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border-2 border-yellow-500/50">
+          <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+            <Gift className="text-yellow-300" size={20} />
+            <h2 className="text-lg sm:text-xl font-semibold text-white">Récompense Quotidienne</h2>
+          </div>
+
+          <div className="space-y-2 sm:space-y-3">
+            {dailyRewardAvailable ? (
+              <>
+                <div className="flex justify-center items-center text-4xl animate-pulse mb-2">
+                  🎁
+                </div>
+                <div className="text-center">
+                  <p className="text-yellow-200 text-sm mb-2">Récompense disponible !</p>
+                  <p className="text-white font-bold text-xl mb-3">10 Berrys</p>
+                </div>
+                <button
+                  onClick={handleOpenDailyReward}
+                  className="block w-full text-center py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base rounded-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white transition-all transform hover:scale-105"
+                >
+                  Réclamer maintenant
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-center items-center text-4xl mb-2 opacity-50">
+                  ✓
+                </div>
+                <div className="text-center">
+                  <p className="text-blue-200 text-sm mb-2">Déjà réclamée aujourd'hui</p>
+                  <p className="text-white/70 text-xs mb-3">Revenez demain pour une nouvelle récompense !</p>
+                </div>
+                <button
+                  disabled
+                  className="block w-full text-center py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base rounded-lg font-bold bg-gray-600 text-gray-300 cursor-not-allowed opacity-50"
+                >
+                  Indisponible
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
         <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30">
           <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
             <Package className="text-blue-300" size={20} />

@@ -6,9 +6,18 @@
 Les joueurs peuvent maintenant recevoir **10 Berrys gratuits** en se connectant pour la première fois chaque jour.
 
 ### Fonctionnement
-- Un modal s'affiche automatiquement sur la page d'accueil lorsque la récompense quotidienne est disponible
+- Un modal s'affiche automatiquement sur la page d'accueil lorsque la récompense quotidienne est disponible (une seule fois par jour)
 - L'utilisateur peut réclamer 10 Berrys gratuitement une fois par jour
+- Un bouton permanent sur la page d'accueil permet de :
+  - **Voir si la récompense est disponible** (bouton doré avec icône 🎁)
+  - **Réclamer la récompense manuellement** si le modal a été fermé
+  - **Voir l'état "Déjà réclamée"** avec un message pour revenir demain
 - La récompense se réinitialise chaque jour à minuit
+
+### Protection contre les abus
+- **Côté frontend** : Le modal ne s'affiche qu'une seule fois par jour (localStorage)
+- **Côté backend** : L'API vérifie que la récompense n'a pas déjà été réclamée aujourd'hui
+- **Double sécurité** : Impossible de réclamer plusieurs fois même en rechargeant la page
 
 ### Mise en place
 1. Exécutez les migrations pour ajouter la colonne `last_daily_reward` :
