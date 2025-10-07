@@ -209,20 +209,53 @@ const Boosters: React.FC = () => {
   const BoosterPack: React.FC<{ onClick: () => void }> = ({ onClick }) => (
     <div
       onClick={onClick}
-      className={`booster-pack mx-auto cursor-pointer transition-all duration-1000 ${
-        animationPhase === 'opening' ? 'animate-pulse scale-110' : ''
+      className={`relative mx-auto cursor-pointer transition-all duration-1000 w-64 h-64 ${
+        animationPhase === 'opening' ? 'animate-pulse scale-110' : 'hover:scale-105'
       } ${animationPhase === 'revealing' ? 'opacity-0 scale-0' : ''}`}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg opacity-20"></div>
-      <div className="relative z-10 p-4 text-center">
-        <Package size={32} className="mx-auto mb-2 text-blue-200" />
-        <div className="text-white font-bold text-sm">Booster Pack</div>
-        <div className="text-blue-200 text-xs">One Piece</div>
-      </div>
+      {/* Coffre au trésor */}
+      <div className="relative w-full h-full">
+        {/* Ombre du coffre */}
+        <div className="absolute inset-0 bg-black opacity-20 blur-xl transform translate-y-4"></div>
 
-      {animationPhase === 'opening' && (
-        <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-ping"></div>
-      )}
+        {/* Corps du coffre */}
+        <div className="relative w-full h-full bg-gradient-to-br from-yellow-700 via-yellow-600 to-yellow-800 rounded-2xl border-8 border-yellow-900 shadow-2xl overflow-hidden">
+          {/* Texture bois */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-900 to-transparent"></div>
+          </div>
+
+          {/* Bandes métalliques */}
+          <div className="absolute top-1/4 left-0 right-0 h-3 bg-gradient-to-r from-yellow-900 via-yellow-600 to-yellow-900 border-y-2 border-yellow-950"></div>
+          <div className="absolute bottom-1/4 left-0 right-0 h-3 bg-gradient-to-r from-yellow-900 via-yellow-600 to-yellow-900 border-y-2 border-yellow-950"></div>
+
+          {/* Serrure centrale */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+            <div className="w-16 h-20 bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-700 rounded-lg border-4 border-yellow-900 flex items-center justify-center shadow-lg">
+              <Gem size={40} className="text-yellow-900 animate-pulse" />
+            </div>
+          </div>
+
+          {/* Effet de brillance */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-transparent opacity-30"></div>
+
+          {/* Animation d'ouverture */}
+          {animationPhase === 'opening' && (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-200 to-transparent opacity-50 animate-ping"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Sparkles size={48} className="text-yellow-300 animate-spin" />
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Texte en dessous */}
+        <div className="absolute -bottom-12 left-0 right-0 text-center">
+          <div className="text-yellow-400 font-bold text-lg drop-shadow-lg">Coffre au Trésor</div>
+          <div className="text-yellow-200 text-sm">Cliquez pour ouvrir</div>
+        </div>
+      </div>
     </div>
   );
 
@@ -338,29 +371,20 @@ const Boosters: React.FC = () => {
             <button
               onClick={handleOpenBooster}
               disabled={!canOpen}
-              className={`relative text-sm sm:text-lg px-6 sm:px-8 py-6 sm:py-8 rounded-2xl font-bold transition-all w-full sm:w-auto group ${
+              className={`text-sm sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold transition-all w-full sm:w-auto ${
                 canOpen
-                  ? 'bg-gradient-to-br from-yellow-600 via-yellow-500 to-orange-600 hover:from-yellow-500 hover:via-yellow-400 hover:to-orange-500 text-white shadow-2xl hover:shadow-yellow-500/50 hover:scale-105'
-                  : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  ? 'btn-primary hover:scale-105'
+                  : 'btn-disabled cursor-not-allowed'
               }`}
             >
               {canOpen ? (
-                <span className="flex items-center justify-center space-x-3">
-                  <Gem size={32} className="animate-pulse" />
-                  <div className="flex flex-col items-start">
-                    <span className="text-xl">Ouvrir le Coffre</span>
-                    <span className="text-xs text-yellow-100 font-normal">Booster gratuit disponible!</span>
-                  </div>
-                  <Sparkles size={24} className="animate-pulse" />
+                <span className="flex items-center justify-center space-x-2">
+                  <Sparkles size={18} />
+                  <span>Ouvrir le Booster gratuit!</span>
+                  <Sparkles size={18} />
                 </span>
               ) : (
-                <span className="flex items-center justify-center space-x-2">
-                  <Gem size={24} className="opacity-50" />
-                  <span>Coffre indisponible</span>
-                </span>
-              )}
-              {canOpen && (
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-pulse"></div>
+                'Booster gratuit indisponible'
               )}
             </button>
 

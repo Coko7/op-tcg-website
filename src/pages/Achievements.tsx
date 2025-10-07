@@ -148,8 +148,8 @@ export default function Achievements() {
         <div className="space-y-8">
           {Object.entries(groupedAchievements).map(([category, categoryAchievements]) => (
             <div key={category}>
-              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                <Award className="w-6 h-6" />
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-white">
+                <Award className="w-6 h-6 text-yellow-400" />
                 {category}
               </h2>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -168,23 +168,23 @@ export default function Achievements() {
                           : 'border-gray-200'
                       }`}
                     >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="text-4xl">{achievement.icon || '🏆'}</div>
-                          <div>
-                            <h3 className="font-bold text-lg">{achievement.name}</h3>
-                            <p className="text-sm text-gray-600">{achievement.description}</p>
+                      <div className="mb-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="text-3xl">{achievement.icon || '🏆'}</div>
+                            <h3 className="font-bold text-lg text-gray-900">{achievement.name}</h3>
+                          </div>
+                          <div className="flex-shrink-0">
+                            {isClaimed ? (
+                              <CheckCircle className="w-6 h-6 text-purple-600" />
+                            ) : isCompleted ? (
+                              <CheckCircle className="w-6 h-6 text-green-600" />
+                            ) : (
+                              <Circle className="w-6 h-6 text-gray-300" />
+                            )}
                           </div>
                         </div>
-                        <div>
-                          {isClaimed ? (
-                            <CheckCircle className="w-6 h-6 text-purple-600" />
-                          ) : isCompleted ? (
-                            <CheckCircle className="w-6 h-6 text-green-600" />
-                          ) : (
-                            <Circle className="w-6 h-6 text-gray-300" />
-                          )}
-                        </div>
+                        <p className="text-sm text-gray-600 ml-11">{achievement.description}</p>
                       </div>
 
                       <div className="mb-3">
