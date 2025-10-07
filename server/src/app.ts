@@ -90,7 +90,7 @@ app.use('/images', express.static('public/images'));
 app.use('/boosters', express.static('public/images/boosters'));
 
 // Gestion des erreurs 404
-app.use('*', (req, res) => {
+app.use('(.*)', (req, res) => {
   res.status(404).json({
     error: 'Route non trouvée',
     path: req.originalUrl
