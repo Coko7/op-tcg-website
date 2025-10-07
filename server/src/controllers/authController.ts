@@ -128,11 +128,12 @@ export class AuthController {
       }
 
       const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as { userId: string, sessionId: string };
+      const now = new Date().toISOString();
 
       const session = await Database.get(`
         SELECT * FROM user_sessions
-        WHERE id = ? AND refresh_token = ? AND is_active = 1 AND expires_at > datetime('now')
-      `, [decoded.sessionId, refreshToken]);
+        WHERE id = ? AND refresh_token = ? AND is_active = 1 AND expires_at > ?
+      `, [decoded.sessionId, refreshToken, now]);
 
       if (!session) {
         res.status(401).json({
@@ -151,9 +152,9 @@ export class AuthController {
 
       await Database.run(`
         UPDATE user_sessions
-        SET last_used_at = datetime('now')
+        SET last_used_at = ?
         WHERE id = ?
-      `, [decoded.sessionId]);
+      `, [now, decoded.sessionId]);
 
       const newAccessToken = jwt.sign(
         { userId: user.id, username: user.username, is_admin: user.is_admin },

@@ -78,9 +78,10 @@ export class UserModel {
   }
 
   static async updateLastLogin(id: string): Promise<void> {
+    const now = new Date().toISOString();
     await Database.run(
-      'UPDATE users SET last_login = datetime("now") WHERE id = ?',
-      [id]
+      'UPDATE users SET last_login = ? WHERE id = ?',
+      [now, id]
     );
   }
 
@@ -113,7 +114,9 @@ export class UserModel {
       return await this.findById(id);
     }
 
-    fields.push('updated_at = datetime("now")');
+    const now = new Date().toISOString();
+    fields.push('updated_at = ?');
+    values.push(now);
     values.push(id);
 
     await Database.run(
@@ -126,9 +129,10 @@ export class UserModel {
 
   static async delete(id: string): Promise<void> {
     // Soft delete
+    const now = new Date().toISOString();
     await Database.run(
-      'UPDATE users SET is_active = 0, updated_at = datetime("now") WHERE id = ?',
-      [id]
+      'UPDATE users SET is_active = 0, updated_at = ? WHERE id = ?',
+      [now, id]
     );
   }
 

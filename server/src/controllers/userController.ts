@@ -126,10 +126,11 @@ export class UserController {
           `, [userId, cardId]);
         } else {
           // Ajouter nouvelle carte
+          const now = new Date().toISOString();
           await Database.run(`
             INSERT INTO user_collections (user_id, card_id, quantity, obtained_at, is_favorite)
-            VALUES (?, ?, 1, datetime('now'), 0)
-          `, [userId, cardId]);
+            VALUES (?, ?, 1, ?, 0)
+          `, [userId, cardId, now]);
         }
 
         // Récupérer les détails de la carte
@@ -293,10 +294,11 @@ export class UserController {
         } else {
           // Nouvelle carte
           newCards.push(card.id);
+          const nowCard = new Date().toISOString();
           await Database.run(`
             INSERT INTO user_collections (user_id, card_id, quantity, obtained_at, is_favorite)
-            VALUES (?, ?, 1, datetime('now'), 0)
-          `, [userId, card.id]);
+            VALUES (?, ?, 1, ?, 0)
+          `, [userId, card.id, nowCard]);
         }
       }
 
@@ -311,21 +313,22 @@ export class UserController {
       }
 
       // Mettre à jour l'utilisateur
+      const nowBooster = new Date().toISOString();
       await Database.run(`
         UPDATE users
         SET available_boosters = ?,
             next_booster_time = ?,
             boosters_opened_today = boosters_opened_today + 1,
-            last_booster_opened = datetime('now')
+            last_booster_opened = ?
         WHERE id = ?
-      `, [newAvailableBoosters, nextBoosterTime?.toISOString() || null, userId]);
+      `, [newAvailableBoosters, nextBoosterTime?.toISOString() || null, nowBooster, userId]);
 
       // Enregistrer l'ouverture de booster avec un booster aléatoire
       if (boosterId) {
         await Database.run(`
           INSERT INTO booster_openings (user_id, booster_id, session_id, seed, opened_at, cards_obtained)
-          VALUES (?, ?, ?, 0, datetime('now'), ?)
-        `, [userId, boosterId, uuidv4(), JSON.stringify(cards.map(c => c.id))]);
+          VALUES (?, ?, ?, 0, ?, ?)
+        `, [userId, boosterId, uuidv4(), nowBooster, JSON.stringify(cards.map(c => c.id))]);
 
         // Mettre à jour les achievements
         await AchievementService.updateAfterBoosterOpen(userId, boosterId, cards.map(c => c.id));
@@ -568,19 +571,21 @@ export class UserController {
           `, [userId, card.id]);
         } else {
           newCards.push(card.id);
+          const nowCollection = new Date().toISOString();
           await Database.run(`
             INSERT INTO user_collections (user_id, card_id, quantity, obtained_at, is_favorite)
-            VALUES (?, ?, 1, datetime('now'), 0)
-          `, [userId, card.id]);
+            VALUES (?, ?, 1, ?, 0)
+          `, [userId, card.id, nowCollection]);
         }
       }
 
       // Enregistrer l'ouverture
       if (boosterId) {
+        const nowOpening = new Date().toISOString();
         await Database.run(`
           INSERT INTO booster_openings (user_id, booster_id, session_id, seed, opened_at, cards_obtained)
-          VALUES (?, ?, ?, 0, datetime('now'), ?)
-        `, [userId, boosterId, uuidv4(), JSON.stringify(cards.map(c => c.id))]);
+          VALUES (?, ?, ?, 0, ?, ?)
+        `, [userId, boosterId, uuidv4(), nowOpening, JSON.stringify(cards.map(c => c.id))]);
 
         // Mettre à jour les achievements
         await AchievementService.updateAfterBoosterOpen(userId, boosterId, cards.map(c => c.id));
