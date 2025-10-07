@@ -1,10 +1,10 @@
-import sqlite3 from 'sqlite3';
+import Database_BetterSqlite3 from 'better-sqlite3';
 export declare class Database {
     private static instance;
     private static dbPath;
-    static initialize(dbPath?: string): Promise<sqlite3.Database>;
-    static getInstance(): sqlite3.Database;
-    static run(sql: string, params?: any[]): Promise<sqlite3.RunResult>;
+    static initialize(dbPath?: string): Promise<Database_BetterSqlite3.Database>;
+    static getInstance(): Database_BetterSqlite3.Database;
+    static run(sql: string, params?: any[]): Promise<Database_BetterSqlite3.RunResult>;
     static get<T = any>(sql: string, params?: any[]): Promise<T | undefined>;
     static all<T = any>(sql: string, params?: any[]): Promise<T[]>;
     static transaction<T>(callback: () => Promise<T>): Promise<T>;

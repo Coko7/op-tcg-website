@@ -1,37 +1,27 @@
-import sqlite3 from 'sqlite3';
+import Database_BetterSqlite3 from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 export class Database {
     static instance = null;
     static dbPath;
-    static initialize(dbPath) {
-        return new Promise((resolve, reject) => {
-            this.dbPath = dbPath || process.env.DATABASE_PATH || './database.sqlite';
-            // Créer le dossier parent si nécessaire
-            const dir = path.dirname(this.dbPath);
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir, { recursive: true });
-            }
-            this.instance = new sqlite3.Database(this.dbPath, (err) => {
-                if (err) {
-                    console.error('❌ Erreur lors de l\'ouverture de la base de données:', err.message);
-                    reject(err);
-                }
-                else {
-                    console.log('✅ Base de données SQLite connectée:', this.dbPath);
-                    // Activer les clés étrangères
-                    this.instance.run('PRAGMA foreign_keys = ON;', (pragmaErr) => {
-                        if (pragmaErr) {
-                            console.error('❌ Erreur lors de l\'activation des clés étrangères:', pragmaErr.message);
-                            reject(pragmaErr);
-                        }
-                        else {
-                            resolve(this.instance);
-                        }
-                    });
-                }
-            });
-        });
+    static async initialize(dbPath) {
+        this.dbPath = dbPath || process.env.DATABASE_PATH || './database.sqlite';
+        // Créer le dossier parent si nécessaire
+        const dir = path.dirname(this.dbPath);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        try {
+            this.instance = new Database_BetterSqlite3(this.dbPath);
+            console.log('✅ Base de données SQLite connectée:', this.dbPath);
+            // Activer les clés étrangères
+            this.instance.pragma('foreign_keys = ON');
+            return this.instance;
+        }
+        catch (err) {
+            console.error('❌ Erreur lors de l\'ouverture de la base de données:', err.message);
+            throw err;
+        }
     }
     static getInstance() {
         if (!this.instance) {
@@ -40,76 +30,29 @@ export class Database {
         return this.instance;
     }
     // Exécuter une requête avec promesses
-    static run(sql, params = []) {
-        return new Promise((resolve, reject) => {
-            this.getInstance().run(sql, params, function (err) {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(this);
-                }
-            });
-        });
+    static async run(sql, params = []) {
+        return this.getInstance().prepare(sql).run(...params);
     }
     // Récupérer une ligne
-    static get(sql, params = []) {
-        return new Promise((resolve, reject) => {
-            this.getInstance().get(sql, params, (err, row) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(row);
-                }
-            });
-        });
+    static async get(sql, params = []) {
+        return this.getInstance().prepare(sql).get(...params);
     }
     // Récupérer toutes les lignes
-    static all(sql, params = []) {
-        return new Promise((resolve, reject) => {
-            this.getInstance().all(sql, params, (err, rows) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(rows);
-                }
-            });
-        });
+    static async all(sql, params = []) {
+        return this.getInstance().prepare(sql).all(...params);
     }
     // Transaction
     static async transaction(callback) {
-        await this.run('BEGIN');
-        try {
-            const result = await callback();
-            await this.run('COMMIT');
-            return result;
-        }
-        catch (error) {
-            await this.run('ROLLBACK');
-            throw error;
-        }
+        const txn = this.getInstance().transaction(callback);
+        return txn();
     }
     // Fermer la base de données
-    static close() {
-        return new Promise((resolve, reject) => {
-            if (this.instance) {
-                this.instance.close((err) => {
-                    if (err) {
-                        reject(err);
-                    }
-                    else {
-                        console.log('🔒 Base de données fermée');
-                        this.instance = null;
-                        resolve();
-                    }
-                });
-            }
-            else {
-                resolve();
-            }
-        });
+    static async close() {
+        if (this.instance) {
+            this.instance.close();
+            console.log('🔒 Base de données fermée');
+            this.instance = null;
+        }
     }
     // Obtenir la version du schéma actuel
     static async getSchemaVersion() {
