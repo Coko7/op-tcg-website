@@ -97,11 +97,17 @@ export class AchievementModel {
         COALESCE(ua.progress, 0) as progress,
         ua.completed_at,
         COALESCE(ua.is_claimed, 0) as is_claimed,
-        ua.claimed_at
+        ua.claimed_at,
+        b.name as booster_name
       FROM achievements a
       LEFT JOIN user_achievements ua ON a.id = ua.achievement_id AND ua.user_id = ?
+      LEFT JOIN boosters b ON a.booster_id = b.id
       WHERE a.is_active = 1
-      ORDER BY a.category, a.threshold
+      ORDER BY
+        a.category,
+        CASE WHEN a.booster_id IS NULL THEN 0 ELSE 1 END,
+        b.name,
+        a.threshold
     `, [userId]);
 
     console.log('📊 Raw achievements from DB:', achievements.length);

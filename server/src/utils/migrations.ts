@@ -460,6 +460,36 @@ export class MigrationManager {
       }
     });
 
+    // Migration 10: Augmenter les récompenses des achievements de boosters
+    this.migrations.push({
+      version: 10,
+      name: 'update_booster_achievement_rewards',
+      up: async () => {
+        console.log('📦 Migration 10: Augmentation des récompenses des achievements de boosters...');
+
+        // Mettre à jour les achievements 50% (Collectionneur): 250 -> 500 Berrys
+        await Database.run(`
+          UPDATE achievements
+          SET reward_berrys = 500
+          WHERE type = 'booster_cards' AND icon = '🎯'
+        `);
+        console.log('  ✅ Achievements "Collectionneur" (50%) mis à jour: 250 -> 500 Berrys');
+
+        // Mettre à jour les achievements 100% (Maître Complet): 500 -> 1000 Berrys
+        await Database.run(`
+          UPDATE achievements
+          SET reward_berrys = 1000
+          WHERE type = 'booster_cards' AND icon = '👑'
+        `);
+        console.log('  ✅ Achievements "Maître Complet" (100%) mis à jour: 500 -> 1000 Berrys');
+
+        console.log('✅ Récompenses des achievements de boosters augmentées');
+      },
+      down: async () => {
+        console.log('⚠️ Rollback non supporté pour cette migration');
+      }
+    });
+
     // Trier les migrations par version
     this.migrations.sort((a, b) => a.version - b.version);
   }

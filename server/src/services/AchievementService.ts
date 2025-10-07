@@ -217,7 +217,7 @@ export class AchievementService {
         category: 'Complétion de Boosters',
         icon: '🎯',
         threshold: threshold50,
-        reward_berrys: 250,
+        reward_berrys: 500,
         booster_id: boosterId
       },
       {
@@ -227,7 +227,7 @@ export class AchievementService {
         category: 'Complétion de Boosters',
         icon: '👑',
         threshold: threshold100,
-        reward_berrys: 500,
+        reward_berrys: 1000,
         booster_id: boosterId
       }
     ];

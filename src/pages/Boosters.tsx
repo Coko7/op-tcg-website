@@ -365,7 +365,9 @@ const Boosters: React.FC = () => {
 
       {animationPhase === 'idle' && (
         <div className="text-center space-y-6 sm:space-y-8">
-          <BoosterPack onClick={handleOpenBooster} />
+          <div className="mb-20">
+            <BoosterPack onClick={handleOpenBooster} />
+          </div>
 
           <div className="space-y-3 sm:space-y-4 px-4">
             <button
