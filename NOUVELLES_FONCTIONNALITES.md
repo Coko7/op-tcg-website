@@ -15,9 +15,19 @@ Les joueurs peuvent maintenant recevoir **10 Berrys gratuits** en se connectant 
 - La récompense se réinitialise chaque jour à minuit
 
 ### Protection contre les abus
-- **Côté frontend** : Le modal ne s'affiche qu'une seule fois par jour (localStorage)
-- **Côté backend** : L'API vérifie que la récompense n'a pas déjà été réclamée aujourd'hui
-- **Double sécurité** : Impossible de réclamer plusieurs fois même en rechargeant la page
+- **Côté frontend** :
+  - Le modal ne s'affiche qu'une seule fois par jour (localStorage : `dailyRewardModalLastShown`)
+  - L'état de disponibilité est revérifié après chaque réclamation
+  - Le bouton se met à jour automatiquement après réclamation
+- **Côté backend** :
+  - L'API vérifie la colonne `last_daily_reward` dans la base de données
+  - Comparaison de dates (jour uniquement, pas l'heure)
+  - Mise à jour automatique de `last_daily_reward` lors de la réclamation
+  - Retourne une erreur 400 si déjà réclamée aujourd'hui
+- **Triple sécurité** : Impossible de réclamer plusieurs fois même en :
+  - Rechargeant la page
+  - Ouvrant plusieurs onglets
+  - Manipulant le localStorage
 
 ### Mise en place
 1. Exécutez les migrations pour ajouter la colonne `last_daily_reward` :

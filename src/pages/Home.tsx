@@ -142,11 +142,15 @@ const Home: React.FC = () => {
       <DailyRewardModal
         isOpen={showDailyReward}
         onClose={() => setShowDailyReward(false)}
-        onClaim={() => {
-          // Marquer comme non disponible
+        onClaim={async () => {
+          // Marquer comme non disponible immédiatement dans l'UI
           setDailyRewardAvailable(false);
+
           // Rafraîchir les statistiques après la réclamation
-          GameService.getCollectionStats().then(setStats);
+          await GameService.getCollectionStats().then(setStats);
+
+          // Revérifier l'état de la récompense quotidienne depuis le backend
+          await checkDailyRewardStatus();
         }}
       />
 

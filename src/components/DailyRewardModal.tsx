@@ -14,6 +14,16 @@ export default function DailyRewardModal({ isOpen, onClose, onClaim }: DailyRewa
   const [berrysEarned, setBerrysEarned] = useState(0);
   const [newBalance, setNewBalance] = useState(0);
 
+  // Réinitialiser l'état quand le modal s'ouvre/ferme
+  useEffect(() => {
+    if (!isOpen) {
+      // Reset l'état quand le modal se ferme
+      setClaimed(false);
+      setBerrysEarned(0);
+      setNewBalance(0);
+    }
+  }, [isOpen]);
+
   const handleClaim = async () => {
     try {
       setClaiming(true);
@@ -33,6 +43,8 @@ export default function DailyRewardModal({ isOpen, onClose, onClaim }: DailyRewa
     } catch (error: any) {
       console.error('Erreur lors de la réclamation de la récompense quotidienne:', error);
       alert(error.message || 'Erreur lors de la réclamation de la récompense');
+      // Fermer le modal en cas d'erreur
+      onClose();
     } finally {
       setClaiming(false);
     }
