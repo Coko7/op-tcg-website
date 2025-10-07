@@ -655,7 +655,10 @@ export class UserController {
       const lastDailyReward = (user as any).last_daily_reward;
       const lastRewardDate = lastDailyReward ? lastDailyReward.split('T')[0] : null;
 
+      console.log(`[DAILY REWARD] User ${userId} - Last reward: ${lastDailyReward}, Today: ${today}, Last date: ${lastRewardDate}`);
+
       if (lastRewardDate === today) {
+        console.log(`[DAILY REWARD] User ${userId} already claimed today - REJECTED`);
         res.status(400).json({
           error: 'Récompense quotidienne déjà réclamée aujourd\'hui',
           next_reward_available: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
@@ -665,16 +668,24 @@ export class UserController {
 
       // Donner 10 Berrys à l'utilisateur
       const DAILY_REWARD_BERRYS = 10;
-      await Database.run(`
+      const nowISO = new Date().toISOString();
+
+      console.log(`[DAILY REWARD] User ${userId} claiming reward - Setting last_daily_reward to: ${nowISO}`);
+
+      const result = await Database.run(`
         UPDATE users
         SET berrys = COALESCE(berrys, 0) + ?,
-            last_daily_reward = datetime('now')
+            last_daily_reward = ?
         WHERE id = ?
-      `, [DAILY_REWARD_BERRYS, userId]);
+      `, [DAILY_REWARD_BERRYS, nowISO, userId]);
+
+      console.log(`[DAILY REWARD] Update result:`, result);
 
       // Récupérer le nouveau solde
       const updatedUser = await UserModel.findById(userId);
       const newBalance = updatedUser?.berrys || 0;
+
+      console.log(`[DAILY REWARD] User ${userId} successfully claimed - New balance: ${newBalance}, last_daily_reward: ${(updatedUser as any)?.last_daily_reward}`);
 
       res.json({
         success: true,
