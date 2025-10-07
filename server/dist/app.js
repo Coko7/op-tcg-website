@@ -34,10 +34,6 @@ const limiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
-    // Utiliser l'IP réelle du client si disponible
-    keyGenerator: (req) => {
-        return req.ip || req.socket.remoteAddress || 'unknown';
-    },
 });
 // Rate limiting plus strict pour l'authentification
 const authLimiter = rateLimit({
@@ -77,7 +73,7 @@ app.get('/health', (req, res) => {
 app.use('/images', express.static('public/images'));
 app.use('/boosters', express.static('public/images/boosters'));
 // Gestion des erreurs 404
-app.use('(.*)', (req, res) => {
+app.use((req, res, next) => {
     res.status(404).json({
         error: 'Route non trouvée',
         path: req.originalUrl
