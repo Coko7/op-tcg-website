@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Gift, X, Coins } from 'lucide-react';
+import { X, Coins } from 'lucide-react';
+import { Gem } from 'lucide-react';
 import { apiService } from '../services/api';
 
 interface DailyRewardModalProps {
@@ -66,7 +67,7 @@ export default function DailyRewardModal({ isOpen, onClose, onClaim }: DailyRewa
           {!claimed ? (
             <>
               <div className="mb-4 flex justify-center">
-                <Gift className="w-24 h-24 text-yellow-600 animate-pulse" />
+                <Gem className="w-24 h-24 text-yellow-600 animate-pulse" />
               </div>
               <h2 className="text-3xl font-bold text-gray-800 mb-4">
                 Récompense Quotidienne
@@ -101,7 +102,7 @@ export default function DailyRewardModal({ isOpen, onClose, onClaim }: DailyRewa
                 Nouveau solde : <span className="font-bold text-yellow-700">{newBalance} Berrys</span>
               </p>
               <div className="flex items-center justify-center gap-2 text-sm text-gray-600 bg-white bg-opacity-50 rounded-lg p-3">
-                <Gift className="w-5 h-5" />
+                <Gem className="w-5 h-5" />
                 <span>Revenez demain pour une nouvelle récompense !</span>
               </div>
             </>
