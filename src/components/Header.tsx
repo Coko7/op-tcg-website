@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Package, BookOpen, Trophy, User, LogIn, UserPlus } from 'lucide-react';
+import { Home, Package, BookOpen, Trophy, User, LogIn, UserPlus, Medal } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import UserProfile from './UserProfile';
 
@@ -81,6 +81,18 @@ const Header: React.FC = () => {
             >
               <Trophy size={18} />
               <span className="hidden sm:inline font-semibold">Achievements</span>
+            </Link>
+
+            <Link
+              to="/leaderboard"
+              className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 rounded-lg transition-all duration-200 ${
+                isActive('/leaderboard')
+                  ? 'bg-luffy-red border-2 border-gold-treasure text-white shadow-lg shadow-luffy-red/50'
+                  : 'text-cloud-white/80 hover:text-gold-treasure hover:bg-pirate-black/30 border-2 border-transparent'
+              }`}
+            >
+              <Medal size={18} />
+              <span className="hidden sm:inline font-semibold">Leaderboard</span>
             </Link>
           </nav>
 

@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import Boosters from './pages/Boosters';
 import Collection from './pages/Collection';
 import Achievements from './pages/Achievements';
+import Leaderboard from './pages/Leaderboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -46,6 +47,7 @@ function App() {
             <Route path="boosters" element={<Boosters />} />
             <Route path="collection" element={<Collection />} />
             <Route path="achievements" element={<Achievements />} />
+            <Route path="leaderboard" element={<Leaderboard />} />
           </Route>
         </Routes>
       </Router>

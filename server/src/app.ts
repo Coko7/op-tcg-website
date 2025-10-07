@@ -14,6 +14,7 @@ import authRoutes from './routes/auth.js';
 import cardRoutes from './routes/cards.js';
 import adminRoutes from './routes/admin.js';
 import userRoutes from './routes/users.js';
+import leaderboardRoutes from './routes/leaderboard.js';
 
 const app = express();
 
@@ -72,6 +73,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api', cardRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 
 // Route de santé
 app.get('/health', (req, res) => {
