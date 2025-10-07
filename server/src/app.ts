@@ -6,6 +6,8 @@ import { Database } from './utils/database.js';
 import { MigrationManager } from './utils/migrations.js';
 import { VegapullImporter } from './scripts/import-vegapull-data.js';
 import { BoosterModel } from './models/Booster.js';
+import { AchievementService } from './services/AchievementService.js';
+import { AchievementModel } from './models/Achievement.js';
 
 // Routes
 import authRoutes from './routes/auth.js';
@@ -142,6 +144,40 @@ export const initializeApp = async (): Promise<express.Application> => {
         console.warn('⚠️ Impossible d\'importer les données Vegapull:', importError);
         console.warn('💡 Vous pouvez importer manuellement avec: npm run import-vegapull');
       }
+    }
+
+    // Initialiser les achievements
+    console.log('🏆 Vérification et initialisation des achievements...');
+    try {
+      // Vérifier si les achievements de base existent
+      const achievementCount = await Database.get<{ count: number }>(`
+        SELECT COUNT(*) as count FROM achievements WHERE is_active = 1
+      `);
+
+      if (!achievementCount || achievementCount.count === 0) {
+        console.log('📋 Aucun achievement trouvé, initialisation...');
+        await AchievementService.initializeDefaultAchievements();
+        await AchievementService.createAllBoosterAchievements();
+        console.log('✅ Achievements initialisés avec succès');
+      } else {
+        console.log(`✅ ${achievementCount.count} achievements déjà présents`);
+
+        // Vérifier si tous les boosters ont leurs achievements
+        const boosterAchievementCount = await Database.get<{ count: number }>(`
+          SELECT COUNT(*) as count FROM achievements WHERE type = 'booster_cards' AND is_active = 1
+        `);
+
+        const expectedBoosterAchievements = boosterCount * 3; // 3 achievements par booster
+
+        if (boosterAchievementCount && boosterAchievementCount.count < expectedBoosterAchievements) {
+          console.log(`📋 Achievements de boosters incomplets (${boosterAchievementCount.count}/${expectedBoosterAchievements}), mise à jour...`);
+          await AchievementService.createAllBoosterAchievements();
+          console.log('✅ Achievements de boosters mis à jour');
+        }
+      }
+    } catch (achievementError) {
+      console.warn('⚠️ Erreur lors de l\'initialisation des achievements:', achievementError);
+      console.warn('💡 Vous pouvez initialiser manuellement avec: npm run init-achievements');
     }
 
     console.log('🎉 Application initialisée avec succès');

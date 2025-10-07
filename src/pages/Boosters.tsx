@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, ArrowLeft, Sparkles, ChevronLeft, ChevronRight, Coins } from 'lucide-react';
+import { Package, ArrowLeft, Sparkles, ChevronLeft, ChevronRight, Coins, Gem } from 'lucide-react';
 import { GameService } from '../services/gameService';
 import { BoosterResult, Card as CardType, BOOSTER_BERRY_PRICE } from '../types';
 import { BoosterPack } from '../data/onePieceCards';
@@ -338,20 +338,29 @@ const Boosters: React.FC = () => {
             <button
               onClick={handleOpenBooster}
               disabled={!canOpen}
-              className={`text-sm sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold transition-all w-full sm:w-auto ${
+              className={`relative text-sm sm:text-lg px-6 sm:px-8 py-6 sm:py-8 rounded-2xl font-bold transition-all w-full sm:w-auto group ${
                 canOpen
-                  ? 'btn-primary hover:scale-105'
-                  : 'btn-disabled cursor-not-allowed'
+                  ? 'bg-gradient-to-br from-yellow-600 via-yellow-500 to-orange-600 hover:from-yellow-500 hover:via-yellow-400 hover:to-orange-500 text-white shadow-2xl hover:shadow-yellow-500/50 hover:scale-105'
+                  : 'bg-gray-600 text-gray-400 cursor-not-allowed'
               }`}
             >
               {canOpen ? (
-                <span className="flex items-center justify-center space-x-2">
-                  <Sparkles size={18} />
-                  <span>Ouvrir le Booster gratuit!</span>
-                  <Sparkles size={18} />
+                <span className="flex items-center justify-center space-x-3">
+                  <Gem size={32} className="animate-pulse" />
+                  <div className="flex flex-col items-start">
+                    <span className="text-xl">Ouvrir le Coffre</span>
+                    <span className="text-xs text-yellow-100 font-normal">Booster gratuit disponible!</span>
+                  </div>
+                  <Sparkles size={24} className="animate-pulse" />
                 </span>
               ) : (
-                'Booster gratuit indisponible'
+                <span className="flex items-center justify-center space-x-2">
+                  <Gem size={24} className="opacity-50" />
+                  <span>Coffre indisponible</span>
+                </span>
+              )}
+              {canOpen && (
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-pulse"></div>
               )}
             </button>
 
