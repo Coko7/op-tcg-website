@@ -29,10 +29,6 @@ LABEL version="1.0.0"
 
 # Installer uniquement les dépendances système nécessaires à l'exécution
 RUN apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    sqlite \
     curl
 
 # Créer un utilisateur non-root pour la sécurité
