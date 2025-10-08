@@ -54,6 +54,11 @@ COPY --chown=nodejs:nodejs server/scripts/run-migrations.js ./scripts/
 COPY --chown=nodejs:nodejs server/diagnose-database.js ./
 COPY --chown=nodejs:nodejs server/verify-migration-state.js ./
 COPY --chown=nodejs:nodejs server/quick-check.js ./
+COPY --chown=nodejs:nodejs server/test-collections.js ./
+COPY --chown=nodejs:nodejs server/fix-schema-version.js ./
+COPY --chown=nodejs:nodejs server/compare-backups.js ./
+COPY --chown=nodejs:nodejs server/emergency-restore.js ./
+COPY --chown=nodejs:nodejs server/restore-from-backup.js ./
 
 # Copier les scripts d'entrypoint
 COPY --chown=nodejs:nodejs server/scripts/docker-entrypoint.sh ./scripts/
