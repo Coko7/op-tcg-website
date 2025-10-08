@@ -66,7 +66,12 @@ export class UserController {
 
       const collection = await Database.all(`
         SELECT
-          uc.*,
+          uc.user_id,
+          uc.card_id,
+          uc.quantity,
+          uc.obtained_at,
+          uc.is_favorite,
+          c.id,
           c.name,
           c.character,
           c.rarity,
@@ -75,10 +80,15 @@ export class UserController {
           c.cost,
           c.power,
           c.counter,
+          c.attack,
+          c.defense,
           c.description,
           c.special_ability,
           c.image_url,
-          c.fallback_image_url
+          c.fallback_image_url,
+          c.booster_id,
+          c.vegapull_id,
+          c.is_active
         FROM user_collections uc
         JOIN cards c ON uc.card_id = c.id
         WHERE uc.user_id = ?

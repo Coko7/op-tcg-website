@@ -50,9 +50,13 @@ COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --chown=nodejs:nodejs server/scripts/init-achievements.js ./scripts/
 COPY --chown=nodejs:nodejs server/scripts/run-migrations.js ./scripts/
 
-# Copier le script d'entrypoint
+# Copier le script de diagnostic
+COPY --chown=nodejs:nodejs server/diagnose-database.js ./
+
+# Copier les scripts d'entrypoint
 COPY --chown=nodejs:nodejs server/scripts/docker-entrypoint.sh ./scripts/
-RUN chmod +x ./scripts/docker-entrypoint.sh
+COPY --chown=nodejs:nodejs server/docker-init.sh ./
+RUN chmod +x ./scripts/docker-entrypoint.sh ./docker-init.sh
 
 # Créer les répertoires nécessaires avec les bonnes permissions
 RUN mkdir -p data public/data/vegapull public/images && \

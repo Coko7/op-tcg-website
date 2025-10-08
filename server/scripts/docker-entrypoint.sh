@@ -19,6 +19,11 @@ if [ ! -f "/app/data/database.sqlite" ]; then
 else
   echo "✅ Base de données existante trouvée"
 
+  # Diagnostic de la base de données
+  echo "🔍 Diagnostic de la base de données..."
+  node diagnose-database.js || echo "⚠️ Diagnostic échoué (non bloquant)"
+  echo ""
+
   # Exécuter les migrations pour s'assurer que la DB est à jour
   echo "🔄 Vérification et exécution des migrations..."
   node scripts/run-migrations.js || echo "⚠️ Erreur lors des migrations (peut être normale si déjà à jour)"
