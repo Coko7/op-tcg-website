@@ -5,7 +5,8 @@ import { apiService } from './api';
 export class GameService {
   static async getAllCards(): Promise<Card[]> {
     try {
-      const response = await apiService.getCards({ limit: 5000 });
+      // Pas de limite - récupère toutes les cartes
+      const response = await apiService.getCards();
       return response.data || [];
     } catch (error) {
       console.error('Erreur lors de la récupération des cartes:', error);
@@ -124,7 +125,7 @@ export class GameService {
 
   static async searchCards(query: string): Promise<Card[]> {
     try {
-      const response = await apiService.getCards({ search: query, limit: 100 });
+      const response = await apiService.getCards({ search: query });
       return response.data || [];
     } catch (error) {
       console.error('Erreur lors de la recherche de cartes:', error);
@@ -134,7 +135,7 @@ export class GameService {
 
   static async getCardsByBooster(boosterId: string): Promise<Card[]> {
     try {
-      const response = await apiService.getCards({ booster_id: boosterId, limit: 500 });
+      const response = await apiService.getCards({ booster_id: boosterId });
       return response.data || [];
     } catch (error) {
       console.error('Erreur lors de la récupération des cartes du booster:', error);
@@ -144,7 +145,7 @@ export class GameService {
 
   static async getCardsByRarity(rarity: string, boosterId?: string): Promise<Card[]> {
     try {
-      const params: any = { rarity, limit: 500 };
+      const params: any = { rarity };
       if (boosterId) params.booster_id = boosterId;
 
       const response = await apiService.getCards(params);

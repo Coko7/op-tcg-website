@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 import { CardUpdateService } from '../services/CardUpdateService.js';
 import { Database } from '../utils/database.js';
+import { NotificationController } from '../controllers/notificationController.js';
+import { DashboardController } from '../controllers/dashboardController.js';
 
 const router = Router();
 
@@ -360,5 +362,31 @@ router.post('/restore-cards', async (req, res) => {
     });
   }
 });
+
+// ========================================
+// ROUTES NOTIFICATIONS
+// ========================================
+
+// Créer une notification globale
+router.post('/notifications', NotificationController.createNotification);
+
+// Récupérer toutes les notifications
+router.get('/notifications', NotificationController.getAllNotifications);
+
+// Désactiver une notification
+router.delete('/notifications/:notificationId', NotificationController.deactivateNotification);
+
+// ========================================
+// ROUTES DASHBOARD
+// ========================================
+
+// Statistiques du dashboard
+router.get('/dashboard/stats', DashboardController.getDashboardStats);
+
+// Utilisateurs en ligne
+router.get('/dashboard/online-users', DashboardController.getOnlineUsers);
+
+// Activité récente
+router.get('/dashboard/activity', DashboardController.getRecentActivity);
 
 export default router;

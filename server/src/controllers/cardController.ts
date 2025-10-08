@@ -48,7 +48,7 @@ export class CardController {
     try {
       // Validation stricte des inputs
       const page = Math.max(1, parseInt(req.query.page as string) || 1);
-      const limit = Math.max(1, Math.min(parseInt(req.query.limit as string) || 50, 100));
+      const limit = parseInt(req.query.limit as string) || 10000; // Par défaut, toutes les cartes
       const offset = (page - 1) * limit;
 
       const boosterId = req.query.booster_id as string;

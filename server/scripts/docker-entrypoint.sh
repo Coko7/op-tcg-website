@@ -39,6 +39,19 @@ else
   fi
 fi
 
+# Configurer les tâches cron pour les backups et le nettoyage
+echo "⏰ Configuration des tâches cron..."
+sh scripts/setup-cron-backup.sh || echo "⚠️ Erreur configuration cron backup (non bloquant)"
+sh scripts/setup-cron-cleanup.sh || echo "⚠️ Erreur configuration cron cleanup (non bloquant)"
+
+# Nettoyer les fichiers temporaires et logs anciens au démarrage
+echo "🧹 Nettoyage initial..."
+node scripts/log-rotation.js || echo "⚠️ Erreur nettoyage initial (non bloquant)"
+
+# Envoyer la notification de compensation (si pas déjà envoyée)
+echo "🎁 Vérification notification de compensation..."
+node scripts/send-compensation.js || echo "⚠️ Erreur envoi compensation (non bloquant)"
+
 echo ""
 echo "🎮 Démarrage du serveur..."
 echo ""

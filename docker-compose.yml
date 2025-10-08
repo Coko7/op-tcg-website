@@ -29,6 +29,10 @@ services:
     volumes:
       # Persistance de la base de données
       - op_game_data:/app/data
+      # Backups de la base de données
+      - op_game_backups:/app/backups
+      # Logs
+      - op_game_logs:/app/logs
       # Données Vegapull (optionnel - à monter si disponibles)
       - ./public/data:/app/public/data:ro
       # Images (optionnel - à monter si disponibles)
@@ -85,6 +89,10 @@ services:
 # Volumes persistants
 volumes:
   op_game_data:
+    driver: local
+  op_game_backups:
+    driver: local
+  op_game_logs:
     driver: local
 
 # Réseau interne

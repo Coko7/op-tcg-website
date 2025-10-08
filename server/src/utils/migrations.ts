@@ -598,6 +598,74 @@ export class MigrationManager {
       }
     });
 
+    // Migration 13: Système de notifications avec récompenses
+    this.migrations.push({
+      version: 13,
+      name: 'add_notifications_system',
+      up: async () => {
+        console.log('📦 Migration 13: Ajout du système de notifications...');
+
+        // Table des notifications globales
+        await Database.run(`
+          CREATE TABLE IF NOT EXISTS notifications (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            reward_berrys INTEGER DEFAULT 0 CHECK(reward_berrys >= 0 AND reward_berrys <= 10000),
+            reward_boosters INTEGER DEFAULT 0 CHECK(reward_boosters >= 0 AND reward_boosters <= 10),
+            is_active BOOLEAN DEFAULT TRUE CHECK(is_active IN (0, 1)),
+            created_by TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            expires_at DATETIME,
+            FOREIGN KEY (created_by) REFERENCES users(id)
+          )
+        `);
+
+        console.log('  ✅ Table notifications créée');
+
+        // Table des notifications lues par utilisateur
+        await Database.run(`
+          CREATE TABLE IF NOT EXISTS user_notifications (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            notification_id TEXT NOT NULL,
+            read_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            reward_claimed BOOLEAN DEFAULT FALSE CHECK(reward_claimed IN (0, 1)),
+            claimed_at DATETIME,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE CASCADE,
+            UNIQUE(user_id, notification_id)
+          )
+        `);
+
+        console.log('  ✅ Table user_notifications créée');
+
+        // Indexes pour performance
+        await Database.run(`
+          CREATE INDEX IF NOT EXISTS idx_notifications_active
+          ON notifications(is_active, created_at DESC)
+        `);
+
+        await Database.run(`
+          CREATE INDEX IF NOT EXISTS idx_user_notifications_user_id
+          ON user_notifications(user_id)
+        `);
+
+        await Database.run(`
+          CREATE INDEX IF NOT EXISTS idx_user_notifications_notification_id
+          ON user_notifications(notification_id)
+        `);
+
+        console.log('  ✅ Indexes créés');
+
+        console.log('✅ Système de notifications ajouté');
+      },
+      down: async () => {
+        await Database.run('DROP TABLE IF EXISTS user_notifications');
+        await Database.run('DROP TABLE IF EXISTS notifications');
+      }
+    });
+
     // Trier les migrations par version
     this.migrations.sort((a, b) => a.version - b.version);
   }
