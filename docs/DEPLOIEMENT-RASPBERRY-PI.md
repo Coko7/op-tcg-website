@@ -1,10 +1,10 @@
-# =€ Guide de Déploiement sur Raspberry Pi avec Portainer
+# Guide de Déploiement sur Raspberry Pi avec Portainer
 
 Ce guide détaille toutes les étapes nécessaires pour déployer l'application **One Piece Booster Game** sur une Raspberry Pi en utilisant Docker et Portainer.
 
 ---
 
-## =Ë Table des Matières
+## Table des Matières
 
 1. [Prérequis](#-prérequis)
 2. [Préparation de la Raspberry Pi](#-préparation-de-la-raspberry-pi)
@@ -18,7 +18,7 @@ Ce guide détaille toutes les étapes nécessaires pour déployer l'application **On
 
 ---
 
-## =' Prérequis
+## Prérequis
 
 ### Matériel
 - **Raspberry Pi 3B+, 4, ou 5** (recommandé : Pi 4 avec 4GB RAM minimum)
@@ -39,7 +39,7 @@ Ce guide détaille toutes les étapes nécessaires pour déployer l'application **On
 
 ---
 
-## >g Préparation de la Raspberry Pi
+## Préparation de la Raspberry Pi
 
 ### 1. Installation du système d'exploitation
 
@@ -97,7 +97,7 @@ sudo nano /etc/dhcpcd.conf
 
 ---
 
-## =3 Installation de Docker et Portainer
+## Installation de Docker et Portainer
 
 ### 1. Installation de Docker
 
@@ -154,7 +154,7 @@ docker run -d \
 
 ---
 
-## <× Construction des Images Docker
+## Construction des Images Docker
 
 ### Méthode 1 : Construction sur votre machine de développement (Recommandé)
 
@@ -197,7 +197,7 @@ docker images | grep op-game
 
 ### Méthode 2 : Construction directement sur la Raspberry Pi
 
-  **Attention** : Cette méthode est plus lente et peut prendre 30-60 minutes.
+**Attention** : Cette méthode est plus lente et peut prendre 30-60 minutes.
 
 ```bash
 # 1. Sur la Raspberry Pi, clonez ou transférez le projet
@@ -263,7 +263,7 @@ openssl rand -base64 32
 ### 2. Création du Stack dans Portainer
 
 1. **Dans Portainer**, allez dans :
-   - **Stacks** ’ **Add stack**
+   - **Stacks** **Add stack**
 
 2. **Nom du stack** : `op-game`
 
@@ -294,12 +294,12 @@ openssl rand -base64 32
 Dans Portainer :
 - Allez dans **Containers**
 - Vérifiez que les deux conteneurs sont **running** :
-  - `op-game-backend` :  Healthy
-  - `op-game-frontend` :  Healthy
+  - `op-game-backend` : Healthy
+  - `op-game-frontend` : Healthy
 
 ---
 
-## ™ Configuration Post-Déploiement
+## Configuration Post-Déploiement
 
 ### 1. Vérification des volumes
 
@@ -348,7 +348,7 @@ sudo certbot --nginx -d votredomaine.com
 
 ---
 
-##  Vérification et Tests
+## Vérification et Tests
 
 ### 1. Test de l'API Backend
 
@@ -391,7 +391,7 @@ docker logs -f --tail=50 op-game-backend
 
 ---
 
-## =' Maintenance
+## Maintenance
 
 ### Mise à jour de l'application
 
@@ -413,12 +413,12 @@ docker load < ~/op-game-backend.tar.gz
 docker load < ~/op-game-frontend.tar.gz
 
 # 4. Dans Portainer, redéployez le stack
-# Stacks ’ op-game ’ Update the stack
+# Stacks op-game Update the stack
 ```
 
 #### Méthode 2 : Via Portainer
 
-1. Dans Portainer : **Stacks** ’ **op-game**
+1. Dans Portainer : **Stacks** **op-game**
 2. Cliquez sur **Editor**
 3. Modifiez si nécessaire
 4. Cliquez sur **Update the stack**
@@ -493,7 +493,7 @@ htop
 
 ---
 
-## = Dépannage
+## Dépannage
 
 ### Problème : Les conteneurs ne démarrent pas
 
@@ -612,7 +612,7 @@ docker inspect op-game-frontend > frontend-config.json
 
 ---
 
-## =Ê Surveillance et Monitoring (Optionnel)
+## Surveillance et Monitoring (Optionnel)
 
 ### Installation de Grafana et Prometheus
 
@@ -645,21 +645,21 @@ volumes:
 
 ---
 
-## <‰ Félicitations !
+## Félicitations !
 
 Votre application One Piece Booster Game est maintenant déployée sur votre Raspberry Pi !
 
 ### Prochaines étapes suggérées
 
-1.  Configurez des sauvegardes automatiques
-2.  Configurez un nom de domaine personnalisé
-3.  Ajoutez SSL/TLS avec Let's Encrypt
-4.  Configurez des alertes de monitoring
-5.  Documentez votre configuration spécifique
+1. Configurez des sauvegardes automatiques
+2. Configurez un nom de domaine personnalisé
+3. Ajoutez SSL/TLS avec Let's Encrypt
+4. Configurez des alertes de monitoring
+5. Documentez votre configuration spécifique
 
 ---
 
-## =Þ Support
+## Support
 
 Pour toute question ou problème :
 - Consultez les logs : `docker logs <container_name>`

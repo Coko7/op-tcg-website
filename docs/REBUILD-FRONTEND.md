@@ -1,4 +1,4 @@
-# = Reconstruction Rapide de l'Image Frontend
+# Reconstruction Rapide de l'Image Frontend
 
 ## Problème Résolu
 L'erreur `ERR_BLOCKED_BY_CLIENT` / `Failed to fetch` était causée par une mauvaise configuration de l'URL de l'API.
@@ -9,7 +9,7 @@ L'erreur `ERR_BLOCKED_BY_CLIENT` / `Failed to fetch` était causée par une mauvai
 
 ---
 
-## =€ Reconstruction de l'Image Frontend
+## Reconstruction de l'Image Frontend
 
 ### Sur votre machine Windows
 
@@ -59,7 +59,7 @@ Dans Portainer, vous pouvez simplement cliquer sur le conteneur frontend et fair
 
 ---
 
-##  Vérification
+## Vérification
 
 Après le redéploiement :
 
@@ -71,11 +71,11 @@ Après le redéploiement :
    docker logs op-game-backend -f
    ```
 
-Les requêtes API devraient maintenant fonctionner ! <‰
+Les requêtes API devraient maintenant fonctionner !
 
 ---
 
-## = Debug Supplémentaire
+## Debug Supplémentaire
 
 Si le problème persiste, vérifiez :
 
@@ -115,7 +115,7 @@ fetch('/api/health')
 
 ---
 
-## =à Alternative : Build sur la Raspberry Pi
+## Alternative : Build sur la Raspberry Pi
 
 Si vous préférez construire directement sur la Raspberry Pi (plus lent mais pas besoin de transférer) :
 
@@ -131,7 +131,7 @@ docker build -t op-game-frontend:latest -f Dockerfile.frontend --build-arg VITE_
 
 ---
 
-## =Ý Note Importante
+## Note Importante
 
 **Les variables d'environnement Vite** (`VITE_*`) sont compilées **au moment du build**, pas à l'exécution. C'est pourquoi il faut reconstruire l'image frontend après avoir modifié `VITE_API_URL`.
 

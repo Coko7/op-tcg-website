@@ -1,10 +1,10 @@
-# =3 Guide de Construction des Images Docker
+# Guide de Construction des Images Docker
 
 Ce guide vous aide à construire les images Docker pour déployer l'application sur votre Raspberry Pi.
 
 ---
 
-##  Prérequis
+## Prérequis
 
 - **Docker Desktop** installé sur votre machine Windows
 - **Git Bash** ou **PowerShell** pour exécuter les commandes
@@ -13,7 +13,7 @@ Ce guide vous aide à construire les images Docker pour déployer l'application su
 
 ---
 
-## =€ Méthode Rapide - Construction Locale
+## Méthode Rapide - Construction Locale
 
 ### 1. Ouvrez un terminal dans le dossier du projet
 
@@ -123,7 +123,7 @@ docker tag votre-username/op-game-frontend:latest op-game-frontend:latest
 
 ---
 
-## <× Construction Multi-Architecture (Pour ARM64)
+## Construction Multi-Architecture (Pour ARM64)
 
 Si vous voulez construire directement pour l'architecture ARM64 de la Raspberry Pi :
 
@@ -157,7 +157,7 @@ docker buildx build --platform linux/arm64 \
 
 ---
 
-## >ê Test Local (Optionnel)
+## Test Local (Optionnel)
 
 Vous pouvez tester les images localement avant de les déployer sur la Raspberry Pi.
 
@@ -187,7 +187,7 @@ docker-compose down
 
 ---
 
-## =à Résolution de Problèmes
+## Résolution de Problèmes
 
 ### Erreur : "npm ci" failed
 
@@ -240,7 +240,7 @@ docker system prune -a --volumes
 
 ---
 
-## =Ë Checklist avant Déploiement
+## Checklist avant Déploiement
 
 - [ ] Les deux images sont construites avec succès
 - [ ] Les images ont été transférées sur la Raspberry Pi
@@ -251,7 +251,7 @@ docker system prune -a --volumes
 
 ---
 
-## =Ú Prochaines Étapes
+## Prochaines Étapes
 
 Une fois les images construites et transférées :
 
@@ -261,7 +261,7 @@ Une fois les images construites et transférées :
 
 ---
 
-## <˜ Besoin d'Aide ?
+## Besoin d'Aide ?
 
 - Vérifiez les logs Docker : `docker logs <container_name>`
 - Consultez le guide de déploiement : `DEPLOIEMENT-RASPBERRY-PI.md`
