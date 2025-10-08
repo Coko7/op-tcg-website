@@ -318,7 +318,7 @@ export class UserController {
       let cards: any[] = [];
       const newCards: string[] = [];
       let newAvailableBoosters = 0;
-      let nextBoosterTime: Date | null = null;
+      let finalNextBoosterTime: Date | null = null;
 
       await Database.transaction(async () => {
         // 1. Déduire le booster disponible avec vérification atomique
@@ -389,10 +389,10 @@ export class UserController {
 
         // Démarrer le timer si nécessaire
         if (!nextBoosterTime && newAvailableBoosters < 3) {
-          nextBoosterTime = new Date(Date.now() + 8 * 60 * 60 * 1000);
+          finalNextBoosterTime = new Date(Date.now() + 8 * 60 * 60 * 1000);
           await Database.run(`
             UPDATE users SET next_booster_time = ? WHERE id = ?
-          `, [nextBoosterTime.toISOString(), userId]);
+          `, [finalNextBoosterTime.toISOString(), userId]);
         }
 
         // 6. Enregistrer l'ouverture
@@ -425,7 +425,7 @@ export class UserController {
           cards: cards.map(transformCardToCamelCase),
           new_cards: newCards,
           available_boosters: newAvailableBoosters,
-          next_booster_time: nextBoosterTime
+          next_booster_time: finalNextBoosterTime || nextBoosterTime
         }
       });
     } catch (error) {
@@ -655,8 +655,9 @@ export class UserController {
 
   // Acheter un booster avec des Berrys
   static async buyBoosterWithBerrys(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+
     try {
-      const userId = req.user?.id;
       if (!userId) {
         res.status(401).json({ error: 'Utilisateur non authentifié' });
         return;
@@ -821,8 +822,9 @@ export class UserController {
 
   // Réclamer la récompense quotidienne
   static async claimDailyReward(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+
     try {
-      const userId = req.user?.id;
       if (!userId) {
         res.status(401).json({ error: 'Utilisateur non authentifié' });
         return;
