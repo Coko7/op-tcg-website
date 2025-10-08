@@ -50,8 +50,10 @@ COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --chown=nodejs:nodejs server/scripts/init-achievements.js ./scripts/
 COPY --chown=nodejs:nodejs server/scripts/run-migrations.js ./scripts/
 
-# Copier le script de diagnostic
+# Copier les scripts de diagnostic
 COPY --chown=nodejs:nodejs server/diagnose-database.js ./
+COPY --chown=nodejs:nodejs server/verify-migration-state.js ./
+COPY --chown=nodejs:nodejs server/quick-check.js ./
 
 # Copier les scripts d'entrypoint
 COPY --chown=nodejs:nodejs server/scripts/docker-entrypoint.sh ./scripts/

@@ -558,9 +558,20 @@ export class MigrationManager {
             )
           `);
 
-          // Copier les données
+          // Copier les données explicitement pour éviter les problèmes de colonnes
           await Database.run(`
-            INSERT INTO users_new SELECT * FROM users
+            INSERT INTO users_new (
+              id, username, password_hash, created_at, updated_at,
+              last_login, is_admin, is_active, available_boosters,
+              next_booster_time, boosters_opened_today, last_booster_opened,
+              berrys, last_daily_reward
+            )
+            SELECT
+              id, username, password_hash, created_at, updated_at,
+              last_login, is_admin, is_active, available_boosters,
+              next_booster_time, boosters_opened_today, last_booster_opened,
+              COALESCE(berrys, 0), last_daily_reward
+            FROM users
           `);
 
           // Remplacer l'ancienne table
