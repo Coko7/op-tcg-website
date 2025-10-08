@@ -5,9 +5,14 @@
  * Restaure la base de données depuis le backup le plus récent
  */
 
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
+import fs from 'fs';
+import path from 'path';
+import readline from 'readline';
+import Database from 'better-sqlite3';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -53,9 +58,6 @@ backupFiles.forEach((file, index) => {
 });
 
 console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-
-// Analyser le backup le plus récent
-const Database = require('better-sqlite3');
 
 console.log('🔍 Analyse du backup le plus récent...\n');
 const latestBackup = backupFiles[0];
