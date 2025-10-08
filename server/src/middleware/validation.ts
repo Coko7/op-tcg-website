@@ -1,8 +1,24 @@
 import { Request, Response, NextFunction } from 'express';
 
+/**
+ * Sanitize user input to prevent XSS attacks
+ */
+function sanitizeString(input: string): string {
+  return input
+    .trim()
+    .replace(/[<>]/g, '') // Remove potential HTML tags
+    .substring(0, 1000); // Limit length
+}
+
 export const validateRegistration = (req: Request, res: Response, next: NextFunction): void => {
-  const { username, password } = req.body;
+  let { username, password } = req.body;
   const errors: string[] = [];
+
+  // Sanitize inputs
+  if (typeof username === 'string') {
+    username = sanitizeString(username);
+    req.body.username = username;
+  }
 
   // Validation du nom d'utilisateur
   if (!username || typeof username !== 'string') {
@@ -34,8 +50,14 @@ export const validateRegistration = (req: Request, res: Response, next: NextFunc
 };
 
 export const validateLogin = (req: Request, res: Response, next: NextFunction): void => {
-  const { username, password } = req.body;
+  let { username, password } = req.body;
   const errors: string[] = [];
+
+  // Sanitize inputs
+  if (typeof username === 'string') {
+    username = sanitizeString(username);
+    req.body.username = username;
+  }
 
   if (!username || typeof username !== 'string') {
     errors.push('Le nom d\'utilisateur est requis');

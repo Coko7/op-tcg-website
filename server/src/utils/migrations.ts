@@ -490,6 +490,103 @@ export class MigrationManager {
       }
     });
 
+    // Migration 11: Ajouter la table d'audit logs pour la sécurité
+    this.migrations.push({
+      version: 11,
+      name: 'create_audit_logs_table',
+      up: async () => {
+        console.log('📦 Migration 11: Création de la table d\'audit logs...');
+
+        await Database.run(`
+          CREATE TABLE IF NOT EXISTS audit_logs (
+            id TEXT PRIMARY KEY,
+            user_id TEXT,
+            action TEXT NOT NULL,
+            severity TEXT NOT NULL DEFAULT 'info',
+            details TEXT,
+            ip_address TEXT,
+            user_agent TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+          )
+        `);
+
+        // Index pour améliorer les performances des requêtes
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_audit_logs_severity ON audit_logs(severity)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_audit_logs_ip ON audit_logs(ip_address)');
+
+        console.log('✅ Table audit_logs créée avec succès');
+      },
+      down: async () => {
+        console.log('🔄 Rollback Migration 11...');
+        await Database.run('DROP TABLE IF EXISTS audit_logs');
+      }
+    });
+
+    // Migration 12: Ajouter des contraintes de sécurité sur les tables
+    this.migrations.push({
+      version: 12,
+      name: 'add_security_constraints',
+      up: async () => {
+        console.log('📦 Migration 12: Ajout de contraintes de sécurité...');
+
+        // Ajouter CHECK constraints pour valider les données
+        // Note: SQLite a des limitations sur ALTER TABLE, donc certaines contraintes
+        // sont documentées plutôt qu'appliquées via SQL
+
+        // Ajouter une colonne pour limiter les Berrys si elle n'existe pas
+        try {
+          await Database.run(`
+            CREATE TABLE users_new (
+              id TEXT PRIMARY KEY,
+              username TEXT UNIQUE NOT NULL CHECK(length(username) >= 3 AND length(username) <= 30),
+              password_hash TEXT NOT NULL,
+              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+              updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+              last_login DATETIME,
+              is_admin BOOLEAN DEFAULT FALSE CHECK(is_admin IN (0, 1)),
+              is_active BOOLEAN DEFAULT TRUE CHECK(is_active IN (0, 1)),
+              available_boosters INTEGER DEFAULT 1 CHECK(available_boosters >= 0 AND available_boosters <= 10),
+              next_booster_time DATETIME,
+              boosters_opened_today INTEGER DEFAULT 0 CHECK(boosters_opened_today >= 0),
+              last_booster_opened DATETIME,
+              berrys INTEGER DEFAULT 0 CHECK(berrys >= 0 AND berrys <= 999999999),
+              last_daily_reward TEXT
+            )
+          `);
+
+          // Copier les données
+          await Database.run(`
+            INSERT INTO users_new SELECT * FROM users
+          `);
+
+          // Remplacer l'ancienne table
+          await Database.run(`DROP TABLE users`);
+          await Database.run(`ALTER TABLE users_new RENAME TO users`);
+
+          console.log('  ✅ Contraintes ajoutées sur la table users');
+        } catch (error) {
+          console.log('  ℹ️  Contraintes déjà présentes sur users');
+        }
+
+        // Créer des vues pour la sécurité (cacher les données sensibles)
+        await Database.run(`
+          CREATE VIEW IF NOT EXISTS users_public AS
+          SELECT id, username, created_at, is_admin, berrys, available_boosters
+          FROM users
+          WHERE is_active = 1
+        `);
+
+        console.log('✅ Contraintes de sécurité ajoutées');
+      },
+      down: async () => {
+        console.log('⚠️ Rollback non supporté pour cette migration (SQLite limitation)');
+      }
+    });
+
     // Trier les migrations par version
     this.migrations.sort((a, b) => a.version - b.version);
   }

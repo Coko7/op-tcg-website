@@ -5,7 +5,11 @@ import { Database } from '../utils/database.js';
 
 const router = Router();
 
-// Route pour supprimer toutes les cartes et boosters (sans auth pour debug)
+// Toutes les routes admin nécessitent une authentification et des droits admin
+router.use(authenticateToken);
+router.use(requireAdmin);
+
+// Route pour supprimer toutes les cartes et boosters (DANGER: admin uniquement)
 router.post('/reset-all-data', async (req, res) => {
   try {
     console.log('🗑️ Suppression de toutes les données...');
@@ -46,7 +50,7 @@ router.post('/reset-all-data', async (req, res) => {
   }
 });
 
-// Route pour vérifier la distribution des cartes par booster (sans auth pour debug)
+// Route pour vérifier la distribution des cartes par booster
 router.get('/check-booster-cards-temp', async (req, res) => {
   try {
     const boosters = await Database.all(`
@@ -82,7 +86,7 @@ router.get('/check-booster-cards-temp', async (req, res) => {
   }
 });
 
-// Route temporaire pour nettoyer les boosters en double (sans auth)
+// Route pour nettoyer les boosters en double
 router.post('/clean-duplicate-boosters-temp', async (req, res) => {
   try {
     console.log('🧹 Nettoyage des boosters en double...');
@@ -255,14 +259,18 @@ router.post('/fix-cards-booster-id', async (req, res) => {
   }
 });
 
-// Toutes les routes admin nécessitent une authentification et des droits admin
-router.use(authenticateToken);
-router.use(requireAdmin);
-
 // Route pour forcer une mise à jour des cartes/boosters
 router.post('/update-cards', async (req, res) => {
   try {
     const { force = false } = req.body;
+
+    // Validation: force doit être un booléen
+    if (typeof force !== 'boolean') {
+      res.status(400).json({
+        error: 'Le paramètre force doit être un booléen'
+      });
+      return;
+    }
 
     console.log('🔄 Début de la mise à jour des cartes/boosters...');
     const updateService = new CardUpdateService();
@@ -292,7 +300,7 @@ router.post('/update-cards', async (req, res) => {
 // Route pour récupérer l'historique des mises à jour
 router.get('/update-history', async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit as string) || 10;
+    const limit = Math.max(1, Math.min(parseInt(req.query.limit as string) || 10, 100));
 
     const updateService = new CardUpdateService();
     const history = await updateService.getUpdateHistory(limit);
@@ -317,6 +325,22 @@ router.post('/restore-cards', async (req, res) => {
     if (!cardIds || !Array.isArray(cardIds)) {
       res.status(400).json({
         error: 'Liste des IDs de cartes requise'
+      });
+      return;
+    }
+
+    // Validation: limite de 1000 cartes max à restaurer
+    if (cardIds.length === 0 || cardIds.length > 1000) {
+      res.status(400).json({
+        error: 'Le nombre de cartes à restaurer doit être entre 1 et 1000'
+      });
+      return;
+    }
+
+    // Validation: tous les IDs doivent être des strings
+    if (!cardIds.every(id => typeof id === 'string')) {
+      res.status(400).json({
+        error: 'Tous les IDs doivent être des chaînes de caractères'
       });
       return;
     }

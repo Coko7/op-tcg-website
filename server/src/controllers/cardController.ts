@@ -46,13 +46,32 @@ function transformCardToCamelCase(card: any) {
 export class CardController {
   static async getCards(req: Request, res: Response): Promise<void> {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = Math.min(parseInt(req.query.limit as string) || 50, 5000);
+      // Validation stricte des inputs
+      const page = Math.max(1, parseInt(req.query.page as string) || 1);
+      const limit = Math.max(1, Math.min(parseInt(req.query.limit as string) || 50, 100));
       const offset = (page - 1) * limit;
 
       const boosterId = req.query.booster_id as string;
       const rarity = req.query.rarity as string;
       const search = req.query.search as string;
+
+      // Validation de la rareté
+      const validRarities = ['common', 'uncommon', 'rare', 'super_rare', 'secret_rare'];
+      if (rarity && !validRarities.includes(rarity)) {
+        res.status(400).json({
+          error: 'Rareté invalide',
+          validRarities
+        });
+        return;
+      }
+
+      // Validation de la recherche (longueur et caractères)
+      if (search && (search.length < 1 || search.length > 100)) {
+        res.status(400).json({
+          error: 'Recherche invalide: longueur entre 1 et 100 caractères'
+        });
+        return;
+      }
 
       let cards;
 
@@ -117,12 +136,21 @@ export class CardController {
 
   static async getBoosters(req: Request, res: Response): Promise<void> {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+      // Validation stricte des inputs
+      const page = Math.max(1, parseInt(req.query.page as string) || 1);
+      const limit = Math.max(1, Math.min(parseInt(req.query.limit as string) || 20, 50));
       const offset = (page - 1) * limit;
 
       const series = req.query.series as string;
       const search = req.query.search as string;
+
+      // Validation de la recherche
+      if (search && (search.length < 1 || search.length > 100)) {
+        res.status(400).json({
+          error: 'Recherche invalide: longueur entre 1 et 100 caractères'
+        });
+        return;
+      }
 
       let boosters;
 
@@ -189,6 +217,16 @@ export class CardController {
   static async getCardsByRarity(req: Request, res: Response): Promise<void> {
     try {
       const { boosterId, rarity } = req.params;
+
+      // Validation de la rareté
+      const validRarities = ['common', 'uncommon', 'rare', 'super_rare', 'secret_rare'];
+      if (!validRarities.includes(rarity)) {
+        res.status(400).json({
+          error: 'Rareté invalide',
+          validRarities
+        });
+        return;
+      }
 
       const booster = await BoosterModel.findById(boosterId);
       if (!booster) {

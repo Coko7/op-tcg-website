@@ -9,6 +9,17 @@ import { BoosterModel } from './models/Booster.js';
 import { AchievementService } from './services/AchievementService.js';
 import { AchievementModel } from './models/Achievement.js';
 
+// Security middlewares
+import {
+  securityHeaders,
+  requestSizeLimit,
+  sqlInjectionProtection,
+  securityLogger,
+  userAgentValidation,
+  limitQueryParams,
+  pathTraversalProtection
+} from './middleware/security.js';
+
 // Routes
 import authRoutes from './routes/auth.js';
 import cardRoutes from './routes/cards.js';
@@ -21,44 +32,105 @@ const app = express();
 // Trust proxy pour obtenir la vraie IP derrière Docker/reverse proxy
 app.set('trust proxy', 1);
 
-// Configuration CORS
+// Disable X-Powered-By header
+app.disable('x-powered-by');
+
+// Configuration CORS sécurisée
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:5173'];
+
 const corsOptions = {
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:5173'],
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`🚫 CORS: Origine non autorisée: ${origin}`);
+      callback(new Error('Non autorisé par CORS'));
+    }
+  },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  maxAge: 86400, // 24 hours
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
-// Middlewares de sécurité
+// Middlewares de sécurité - ORDRE IMPORTANT
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
 }));
 app.use(cors(corsOptions));
+app.use(securityHeaders);
+app.use(requestSizeLimit(10 * 1024 * 1024)); // 10MB max
+app.use(userAgentValidation);
+app.use(limitQueryParams(100));
+app.use(pathTraversalProtection);
+app.use(securityLogger);
 
-// Rate limiting
+// Rate limiting global
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 300 : 1000, // Augmenté à 300 pour gérer plusieurs utilisateurs
+  max: process.env.NODE_ENV === 'production' ? 200 : 1000,
   message: {
     error: 'Trop de requêtes depuis cette IP, veuillez réessayer plus tard.'
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Skip successful requests to avoid penalizing legitimate users
+  skipSuccessfulRequests: false,
+  // Custom key generator based on IP and user agent
+  keyGenerator: (req) => {
+    return `${req.ip}-${req.headers['user-agent']}`;
+  }
 });
 
-// Rate limiting plus strict pour l'authentification
+// Rate limiting strict pour l'authentification
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 100 : 50, // 100 tentatives en prod, 50 en dev
+  max: process.env.NODE_ENV === 'production' ? 10 : 50, // Réduit à 10 en prod pour éviter le brute force
   message: {
     error: 'Trop de tentatives de connexion, veuillez réessayer plus tard.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // Don't count successful logins
+});
+
+// Rate limiting pour les routes admin (très strict)
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: process.env.NODE_ENV === 'production' ? 20 : 100,
+  message: {
+    error: 'Trop de requêtes admin, veuillez réessayer plus tard.'
   },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 app.use(limiter);
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '1mb' })); // Réduit à 1MB pour plus de sécurité
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+app.use(sqlInjectionProtection); // Protection SQL injection après le parsing du body
 
 // Middleware pour les logs en développement
 if (process.env.NODE_ENV !== 'production') {
@@ -68,11 +140,11 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Routes
+// Routes avec rate limiters spécifiques
 app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/admin', adminLimiter, adminRoutes);
 app.use('/api', cardRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/admin', adminRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 
 // Route de santé

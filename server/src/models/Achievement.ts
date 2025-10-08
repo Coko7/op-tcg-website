@@ -127,6 +127,30 @@ export class AchievementModel {
 
   // Mettre à jour la progression d'un achievement
   static async updateProgress(userId: string, achievementId: string, progress: number): Promise<void> {
+    // SÉCURITÉ: Validation stricte des entrées
+    if (!userId || typeof userId !== 'string') {
+      throw new Error('User ID invalide');
+    }
+    if (!achievementId || typeof achievementId !== 'string') {
+      throw new Error('Achievement ID invalide');
+    }
+    if (typeof progress !== 'number' || progress < 0 || !Number.isFinite(progress)) {
+      throw new Error('Progress invalide');
+    }
+
+    // Vérifier que l'achievement existe et récupérer son seuil
+    const achievement = await this.findById(achievementId);
+    if (!achievement) {
+      throw new Error('Achievement introuvable');
+    }
+
+    // SÉCURITÉ: Limiter le progress au threshold maximum + petite marge
+    const maxAllowedProgress = achievement.threshold * 1.1; // 10% de marge
+    if (progress > maxAllowedProgress) {
+      console.warn(`⚠️ Progress suspect pour achievement ${achievementId}: ${progress} > ${maxAllowedProgress}`);
+      progress = achievement.threshold; // Limiter au threshold exact
+    }
+
     // Vérifier si l'achievement existe pour cet utilisateur
     const existing = await Database.get(`
       SELECT * FROM user_achievements
@@ -136,9 +160,7 @@ export class AchievementModel {
     if (existing) {
       // Mettre à jour seulement si le nouveau progress est supérieur
       if (progress > existing.progress) {
-        // Vérifier si l'achievement est complété
-        const achievement = await this.findById(achievementId);
-        const isCompleted = achievement && progress >= achievement.threshold;
+        const isCompleted = progress >= achievement.threshold;
 
         await Database.run(`
           UPDATE user_achievements
@@ -149,8 +171,7 @@ export class AchievementModel {
       }
     } else {
       // Créer une nouvelle entrée
-      const achievement = await this.findById(achievementId);
-      const isCompleted = achievement && progress >= achievement.threshold;
+      const isCompleted = progress >= achievement.threshold;
 
       await Database.run(`
         INSERT INTO user_achievements (id, user_id, achievement_id, progress, completed_at, is_claimed)
@@ -161,9 +182,17 @@ export class AchievementModel {
 
   // Récupérer un achievement non réclamé
   static async claimAchievement(userId: string, achievementId: string): Promise<number> {
-    // Vérifier si l'achievement est complété et non réclamé
+    // SÉCURITÉ: Valider les entrées
+    if (!userId || typeof userId !== 'string') {
+      throw new Error('User ID invalide');
+    }
+    if (!achievementId || typeof achievementId !== 'string') {
+      throw new Error('Achievement ID invalide');
+    }
+
+    // SÉCURITÉ: Vérifier si l'achievement est complété et non réclamé avec verrouillage
     const userAchievement = await Database.get<any>(`
-      SELECT ua.*, a.reward_berrys, a.threshold
+      SELECT ua.*, a.reward_berrys, a.threshold, a.is_active
       FROM user_achievements ua
       JOIN achievements a ON ua.achievement_id = a.id
       WHERE ua.user_id = ? AND ua.achievement_id = ? AND ua.is_claimed = 0
@@ -173,23 +202,63 @@ export class AchievementModel {
       throw new Error('Achievement non trouvé ou déjà réclamé');
     }
 
-    if (userAchievement.progress < userAchievement.threshold) {
-      throw new Error('Achievement non complété');
+    // SÉCURITÉ: Vérifier que l'achievement est actif
+    if (!userAchievement.is_active) {
+      throw new Error('Achievement désactivé');
     }
 
-    // Marquer comme réclamé
-    await Database.run(`
-      UPDATE user_achievements
-      SET is_claimed = 1, claimed_at = datetime('now')
-      WHERE user_id = ? AND achievement_id = ?
-    `, [userId, achievementId]);
+    // SÉCURITÉ: Vérifier que le threshold est atteint
+    if (userAchievement.progress < userAchievement.threshold) {
+      throw new Error(`Achievement non complété (${userAchievement.progress}/${userAchievement.threshold})`);
+    }
 
-    // Ajouter les Berrys à l'utilisateur
-    await Database.run(`
-      UPDATE users
-      SET berrys = COALESCE(berrys, 0) + ?
-      WHERE id = ?
-    `, [userAchievement.reward_berrys, userId]);
+    // SÉCURITÉ: Valider le montant de récompense pour éviter manipulation
+    if (userAchievement.reward_berrys < 0 || userAchievement.reward_berrys > 10000) {
+      throw new Error('Montant de récompense invalide');
+    }
+
+    const MAX_BERRYS = 999999999;
+
+    // SÉCURITÉ: Transaction atomique pour éviter double-claim
+    await Database.transaction(async () => {
+      // Vérifier une dernière fois que c'est non réclamé (protection race condition)
+      const finalCheck = await Database.get<any>(`
+        SELECT is_claimed FROM user_achievements
+        WHERE user_id = ? AND achievement_id = ?
+      `, [userId, achievementId]);
+
+      if (!finalCheck || finalCheck.is_claimed !== 0) {
+        throw new Error('Achievement déjà réclamé');
+      }
+
+      // Vérifier qu'on ne dépasse pas le max de Berrys
+      const currentUser = await Database.get<any>(`
+        SELECT berrys FROM users WHERE id = ?
+      `, [userId]);
+
+      const currentBerrys = currentUser?.berrys || 0;
+      if (currentBerrys + userAchievement.reward_berrys > MAX_BERRYS) {
+        throw new Error('Limite de Berrys atteinte');
+      }
+
+      // Marquer comme réclamé
+      const updateResult = await Database.run(`
+        UPDATE user_achievements
+        SET is_claimed = 1, claimed_at = datetime('now')
+        WHERE user_id = ? AND achievement_id = ? AND is_claimed = 0
+      `, [userId, achievementId]);
+
+      if (updateResult.changes === 0) {
+        throw new Error('Échec de la mise à jour de l\'achievement');
+      }
+
+      // Ajouter les Berrys à l'utilisateur
+      await Database.run(`
+        UPDATE users
+        SET berrys = COALESCE(berrys, 0) + ?
+        WHERE id = ?
+      `, [userAchievement.reward_berrys, userId]);
+    });
 
     return userAchievement.reward_berrys;
   }

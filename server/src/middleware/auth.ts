@@ -2,7 +2,12 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { UserModel } from '../models/User.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
+// SÉCURITÉ: Le JWT_SECRET doit ABSOLUMENT être défini en production
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('FATAL: JWT_SECRET must be defined in production environment');
+}
+
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-CHANGE-IN-PRODUCTION';
 
 interface JwtPayload {
   userId: string;

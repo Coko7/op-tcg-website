@@ -3,9 +3,20 @@ import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { UserModel, UserCreate } from '../models/User.js';
 import { Database } from '../utils/database.js';
+import { AuditLogger, AuditAction, AuditSeverity } from '../utils/auditLogger.js';
 
-const JWT_SECRET: string = process.env.JWT_SECRET || 'fallback-secret-key';
-const JWT_REFRESH_SECRET: string = process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret-key';
+// SÉCURITÉ: Vérification des secrets JWT en production
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('FATAL: JWT_SECRET must be defined in production environment');
+  }
+  if (!process.env.JWT_REFRESH_SECRET) {
+    throw new Error('FATAL: JWT_REFRESH_SECRET must be defined in production environment');
+  }
+}
+
+const JWT_SECRET: string = process.env.JWT_SECRET || 'fallback-secret-key-CHANGE-IN-PRODUCTION';
+const JWT_REFRESH_SECRET: string = process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret-key-CHANGE-IN-PRODUCTION';
 const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || '15m';
 const JWT_REFRESH_EXPIRES_IN: string = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
@@ -56,6 +67,11 @@ export class AuthController {
       const tokens = await AuthController.generateTokens(user);
       const userResponse = AuthController.sanitizeUser(user);
 
+      // AUDIT: Log de l'inscription
+      await AuditLogger.logSuccess(AuditAction.USER_REGISTER, user.id, {
+        username: user.username
+      }, req);
+
       res.status(201).json({
         message: 'Compte créé avec succès',
         user: userResponse,
@@ -83,6 +99,13 @@ export class AuthController {
 
       const user = await UserModel.findByUsername(username);
       if (!user) {
+        // AUDIT: Log tentative de connexion échouée
+        await AuditLogger.logFailure(
+          AuditAction.FAILED_LOGIN_ATTEMPT,
+          { username, reason: 'user_not_found' },
+          req
+        );
+
         res.status(401).json({
           error: 'Nom d\'utilisateur ou mot de passe incorrect'
         });
@@ -91,6 +114,14 @@ export class AuthController {
 
       const isValidPassword = await UserModel.verifyPassword(user, password);
       if (!isValidPassword) {
+        // AUDIT: Log tentative de connexion échouée
+        await AuditLogger.logFailure(
+          AuditAction.FAILED_LOGIN_ATTEMPT,
+          { username, reason: 'invalid_password' },
+          req,
+          user.id
+        );
+
         res.status(401).json({
           error: 'Nom d\'utilisateur ou mot de passe incorrect'
         });
@@ -101,6 +132,11 @@ export class AuthController {
 
       const tokens = await AuthController.generateTokens(user);
       const userResponse = AuthController.sanitizeUser(user);
+
+      // AUDIT: Log connexion réussie
+      await AuditLogger.logSuccess(AuditAction.USER_LOGIN, user.id, {
+        username: user.username
+      }, req);
 
       res.json({
         message: 'Connexion réussie',

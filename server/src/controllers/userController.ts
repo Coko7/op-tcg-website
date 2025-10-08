@@ -5,6 +5,7 @@ import { Database } from '../utils/database.js';
 import { BoosterService } from '../services/BoosterService.js';
 import { AchievementService } from '../services/AchievementService.js';
 import { v4 as uuidv4 } from 'uuid';
+import { AuditLogger, AuditAction } from '../utils/auditLogger.js';
 
 // Prix de vente des cartes en Berrys selon la rareté
 const CARD_SELL_PRICES: Record<string, number> = {
@@ -158,11 +159,27 @@ export class UserController {
         return;
       }
 
-      await Database.run(`
+      // SÉCURITÉ: Vérifier que l'utilisateur possède bien cette carte
+      const userCard = await Database.get(`
+        SELECT card_id FROM user_collections
+        WHERE user_id = ? AND card_id = ?
+      `, [userId, cardId]);
+
+      if (!userCard) {
+        res.status(404).json({ error: 'Carte non trouvée dans votre collection' });
+        return;
+      }
+
+      const result = await Database.run(`
         UPDATE user_collections
         SET is_favorite = CASE WHEN is_favorite = 1 THEN 0 ELSE 1 END
         WHERE user_id = ? AND card_id = ?
       `, [userId, cardId]);
+
+      if (result.changes === 0) {
+        res.status(404).json({ error: 'Carte non trouvée' });
+        return;
+      }
 
       res.json({ success: true });
     } catch (error) {
@@ -255,84 +272,152 @@ export class UserController {
         return;
       }
 
-      // Vérifier si l'utilisateur peut ouvrir un booster
-      const availableBoosters = user.available_boosters !== undefined && user.available_boosters !== null ? user.available_boosters : 3;
-      if (availableBoosters <= 0) {
-        res.status(400).json({ error: 'Aucun booster disponible' });
-        return;
-      }
+      // SÉCURITÉ: Recalculer les boosters disponibles côté serveur pour éviter la triche
+      const now = new Date();
+      let availableBoosters = user.available_boosters !== undefined && user.available_boosters !== null ? user.available_boosters : 3;
+      let nextBoosterTime = user.next_booster_time;
 
-      // Utiliser le booster sélectionné par l'utilisateur, ou un booster aléatoire si non spécifié
-      let boosterId = req.body.boosterId;
+      // Recalculer les boosters selon le timer serveur
+      if (nextBoosterTime && availableBoosters < 3) {
+        const nextTime = new Date(nextBoosterTime);
+        if (now >= nextTime) {
+          const timePassed = now.getTime() - nextTime.getTime();
+          const boostersToAdd = Math.floor(timePassed / (8 * 60 * 60 * 1000)) + 1;
+          const actualBoostersToAdd = Math.min(boostersToAdd, 3 - availableBoosters);
+          availableBoosters = Math.min(availableBoosters + actualBoostersToAdd, 3);
 
-      if (!boosterId) {
-        const randomBooster = await Database.get(`
-          SELECT id FROM boosters WHERE is_active = 1 ORDER BY RANDOM() LIMIT 1
-        `);
-        boosterId = randomBooster?.id || null;
-      }
+          if (availableBoosters < 3) {
+            const baseTime = nextTime.getTime();
+            const intervalsNeeded = Math.ceil((now.getTime() - baseTime) / (8 * 60 * 60 * 1000));
+            nextBoosterTime = new Date(baseTime + (intervalsNeeded * 8 * 60 * 60 * 1000));
+          } else {
+            nextBoosterTime = null;
+          }
 
-      // Générer les cartes du booster avec filtrage
-      const cards = await BoosterService.generateBoosterCards(boosterId || undefined);
-
-      // Déterminer quelles cartes sont nouvelles (pas encore dans la collection)
-      const newCards: string[] = [];
-
-      // Ajouter les cartes à la collection
-      for (const card of cards) {
-        const existing = await Database.get(`
-          SELECT * FROM user_collections
-          WHERE user_id = ? AND card_id = ?
-        `, [userId, card.id]);
-
-        if (existing) {
+          // Mettre à jour immédiatement en base
           await Database.run(`
-            UPDATE user_collections
-            SET quantity = quantity + 1
-            WHERE user_id = ? AND card_id = ?
-          `, [userId, card.id]);
-        } else {
-          // Nouvelle carte
-          newCards.push(card.id);
-          const nowCard = new Date().toISOString();
-          await Database.run(`
-            INSERT INTO user_collections (user_id, card_id, quantity, obtained_at, is_favorite)
-            VALUES (?, ?, 1, ?, 0)
-          `, [userId, card.id, nowCard]);
+            UPDATE users
+            SET available_boosters = ?, next_booster_time = ?
+            WHERE id = ?
+          `, [availableBoosters, nextBoosterTime?.toISOString() || null, userId]);
         }
       }
 
-      // Mettre à jour le statut des boosters
-      const now = new Date();
-      const newAvailableBoosters = availableBoosters - 1;
-      let nextBoosterTime = user.next_booster_time;
-
-      // Démarrer le timer si ce n'est pas déjà fait
-      if (!nextBoosterTime && newAvailableBoosters < 3) {
-        nextBoosterTime = new Date(now.getTime() + 8 * 60 * 60 * 1000); // 8 heures
+      // SÉCURITÉ: Vérification stricte après recalcul
+      if (availableBoosters <= 0) {
+        res.status(403).json({
+          error: 'Aucun booster disponible',
+          available_boosters: 0,
+          next_booster_time: nextBoosterTime
+        });
+        return;
       }
 
-      // Mettre à jour l'utilisateur
-      const nowBooster = new Date().toISOString();
-      await Database.run(`
-        UPDATE users
-        SET available_boosters = ?,
-            next_booster_time = ?,
-            boosters_opened_today = boosters_opened_today + 1,
-            last_booster_opened = ?
-        WHERE id = ?
-      `, [newAvailableBoosters, nextBoosterTime?.toISOString() || null, nowBooster, userId]);
+      // SÉCURITÉ: TRANSACTION ATOMIQUE pour empêcher duplication de boosters
+      let boosterId: string | null = req.body.boosterId || null;
+      let cards: any[] = [];
+      const newCards: string[] = [];
+      let newAvailableBoosters = 0;
+      let nextBoosterTime: Date | null = null;
 
-      // Enregistrer l'ouverture de booster avec un booster aléatoire
-      if (boosterId) {
+      await Database.transaction(async () => {
+        // 1. Déduire le booster disponible avec vérification atomique
+        const updateResult = await Database.run(`
+          UPDATE users
+          SET available_boosters = available_boosters - 1,
+              boosters_opened_today = boosters_opened_today + 1,
+              last_booster_opened = ?
+          WHERE id = ? AND available_boosters > 0
+        `, [new Date().toISOString(), userId]);
+
+        if (updateResult.changes === 0) {
+          throw new Error('Aucun booster disponible');
+        }
+
+        // 2. Valider/sélectionner le booster
+        if (boosterId) {
+          const boosterExists = await Database.get(`
+            SELECT id FROM boosters WHERE id = ? AND is_active = 1
+          `, [boosterId]);
+
+          if (!boosterExists) {
+            throw new Error('Booster invalide');
+          }
+        } else {
+          const randomBooster = await Database.get(`
+            SELECT id FROM boosters WHERE is_active = 1 ORDER BY RANDOM() LIMIT 1
+          `);
+          boosterId = randomBooster?.id || null;
+
+          if (!boosterId) {
+            throw new Error('Aucun booster disponible dans le système');
+          }
+        }
+
+        // 3. Générer les cartes
+        cards = await BoosterService.generateBoosterCards(boosterId);
+
+        // 4. Ajouter les cartes à la collection
+        for (const card of cards) {
+          const existing = await Database.get(`
+            SELECT * FROM user_collections
+            WHERE user_id = ? AND card_id = ?
+          `, [userId, card.id]);
+
+          if (existing) {
+            await Database.run(`
+              UPDATE user_collections
+              SET quantity = quantity + 1
+              WHERE user_id = ? AND card_id = ?
+            `, [userId, card.id]);
+          } else {
+            newCards.push(card.id);
+            await Database.run(`
+              INSERT INTO user_collections (user_id, card_id, quantity, obtained_at, is_favorite)
+              VALUES (?, ?, 1, ?, 0)
+            `, [userId, card.id, new Date().toISOString()]);
+          }
+        }
+
+        // 5. Calculer le nouveau statut de boosters
+        const updatedUser = await Database.get(`
+          SELECT available_boosters, next_booster_time FROM users WHERE id = ?
+        `, [userId]);
+
+        newAvailableBoosters = updatedUser?.available_boosters || 0;
+        nextBoosterTime = updatedUser?.next_booster_time ? new Date(updatedUser.next_booster_time) : null;
+
+        // Démarrer le timer si nécessaire
+        if (!nextBoosterTime && newAvailableBoosters < 3) {
+          nextBoosterTime = new Date(Date.now() + 8 * 60 * 60 * 1000);
+          await Database.run(`
+            UPDATE users SET next_booster_time = ? WHERE id = ?
+          `, [nextBoosterTime.toISOString(), userId]);
+        }
+
+        // 6. Enregistrer l'ouverture
         await Database.run(`
           INSERT INTO booster_openings (user_id, booster_id, session_id, seed, opened_at, cards_obtained)
           VALUES (?, ?, ?, 0, ?, ?)
-        `, [userId, boosterId, uuidv4(), nowBooster, JSON.stringify(cards.map(c => c.id))]);
+        `, [userId, boosterId, uuidv4(), new Date().toISOString(), JSON.stringify(cards.map(c => c.id))]);
+      });
 
-        // Mettre à jour les achievements
-        await AchievementService.updateAfterBoosterOpen(userId, boosterId, cards.map(c => c.id));
+      // 7. Mettre à jour les achievements (hors transaction)
+      if (boosterId) {
+        try {
+          await AchievementService.updateAfterBoosterOpen(userId, boosterId, cards.map(c => c.id));
+        } catch (error) {
+          console.error('Erreur mise à jour achievements (non bloquant):', error);
+        }
       }
+
+      // AUDIT: Log ouverture de booster
+      await AuditLogger.logSuccess(AuditAction.BOOSTER_OPENED, userId, {
+        boosterId,
+        cardsObtained: cards.length,
+        newCards: newCards.length,
+        boostersRemaining: newAvailableBoosters
+      }, req);
 
       res.json({
         success: true,
@@ -457,14 +542,22 @@ export class UserController {
         return;
       }
 
-      if (!cardId || quantity < 1) {
-        res.status(400).json({ error: 'Données invalides' });
+      // SÉCURITÉ: Valider les entrées
+      if (!cardId || typeof cardId !== 'string') {
+        res.status(400).json({ error: 'Card ID invalide' });
         return;
       }
 
-      // Vérifier que l'utilisateur possède cette carte
+      // SÉCURITÉ: Valider quantity (nombre entier positif, max raisonnable)
+      const parsedQuantity = parseInt(quantity as any, 10);
+      if (isNaN(parsedQuantity) || parsedQuantity < 1 || parsedQuantity > 1000) {
+        res.status(400).json({ error: 'Quantité invalide (1-1000)' });
+        return;
+      }
+
+      // SÉCURITÉ: Vérifier que l'utilisateur possède cette carte
       const userCard = await Database.get(`
-        SELECT uc.*, c.rarity
+        SELECT uc.*, c.rarity, c.is_active
         FROM user_collections uc
         JOIN cards c ON uc.card_id = c.id
         WHERE uc.user_id = ? AND uc.card_id = ?
@@ -475,32 +568,77 @@ export class UserController {
         return;
       }
 
-      // Vérifier que l'utilisateur a assez de cartes (garder au moins 1)
-      if (userCard.quantity <= quantity) {
-        res.status(400).json({ error: 'Vous devez garder au moins une carte de chaque type' });
+      // SÉCURITÉ: Vérifier que la carte est active
+      if (!userCard.is_active) {
+        res.status(400).json({ error: 'Cette carte ne peut plus être vendue' });
         return;
       }
 
-      // Calculer les Berrys gagnés
+      // SÉCURITÉ: Vérifier que l'utilisateur a assez de cartes (garder au moins 1)
+      if (userCard.quantity <= parsedQuantity) {
+        res.status(403).json({
+          error: 'Vous devez garder au moins une carte de chaque type',
+          current_quantity: userCard.quantity,
+          requested_quantity: parsedQuantity
+        });
+        return;
+      }
+
+      // SÉCURITÉ: Calculer les Berrys gagnés côté serveur (jamais faire confiance au client)
       const sellPrice = CARD_SELL_PRICES[userCard.rarity] || 0;
-      const berrysEarned = sellPrice * quantity;
+      if (sellPrice === 0) {
+        res.status(400).json({ error: 'Cette carte ne peut pas être vendue' });
+        return;
+      }
 
-      // Mettre à jour la quantité de cartes et les Berrys
-      await Database.run(`
-        UPDATE user_collections
-        SET quantity = quantity - ?
-        WHERE user_id = ? AND card_id = ?
-      `, [quantity, userId, cardId]);
+      const berrysEarned = sellPrice * parsedQuantity;
 
-      await Database.run(`
-        UPDATE users
-        SET berrys = COALESCE(berrys, 0) + ?
-        WHERE id = ?
-      `, [berrysEarned, userId]);
+      // SÉCURITÉ: Protection contre overflow (max berrys raisonnable)
+      const MAX_BERRYS = 999999999;
+      const currentUser = await UserModel.findById(userId);
+      const currentBerrys = currentUser?.berrys || 0;
+
+      if (currentBerrys + berrysEarned > MAX_BERRYS) {
+        res.status(400).json({
+          error: 'Limite de Berrys atteinte',
+          max_berrys: MAX_BERRYS
+        });
+        return;
+      }
+
+      // SÉCURITÉ: Transaction atomique pour éviter race conditions
+      await Database.transaction(async () => {
+        // Mettre à jour la quantité de cartes
+        const updateCards = await Database.run(`
+          UPDATE user_collections
+          SET quantity = quantity - ?
+          WHERE user_id = ? AND card_id = ? AND quantity > ?
+        `, [parsedQuantity, userId, cardId, parsedQuantity]);
+
+        if (updateCards.changes === 0) {
+          throw new Error('Échec de la transaction: quantité insuffisante');
+        }
+
+        // Ajouter les Berrys
+        await Database.run(`
+          UPDATE users
+          SET berrys = COALESCE(berrys, 0) + ?
+          WHERE id = ?
+        `, [berrysEarned, userId]);
+      });
 
       // Récupérer le nouveau solde
       const user = await UserModel.findById(userId);
       const newBalance = user?.berrys || 0;
+
+      // AUDIT: Log transaction vente de carte
+      await AuditLogger.logSuccess(AuditAction.CARD_SOLD, userId, {
+        cardId,
+        quantity: parsedQuantity,
+        rarity: userCard.rarity,
+        berrysEarned,
+        newBalance
+      }, req);
 
       res.json({
         success: true,
@@ -530,71 +668,102 @@ export class UserController {
         return;
       }
 
-      // Vérifier que l'utilisateur a assez de Berrys
+      // SÉCURITÉ: Vérifier que l'utilisateur a assez de Berrys (relire depuis la DB)
       const currentBerrys = user.berrys || 0;
       if (currentBerrys < BOOSTER_BERRY_PRICE) {
-        res.status(400).json({ error: `Pas assez de Berrys (besoin de ${BOOSTER_BERRY_PRICE}, vous avez ${currentBerrys})` });
+        res.status(403).json({
+          error: `Pas assez de Berrys`,
+          required: BOOSTER_BERRY_PRICE,
+          current: currentBerrys,
+          missing: BOOSTER_BERRY_PRICE - currentBerrys
+        });
         return;
       }
 
-      // Déduire les Berrys
-      await Database.run(`
-        UPDATE users
-        SET berrys = berrys - ?
-        WHERE id = ?
-      `, [BOOSTER_BERRY_PRICE, userId]);
-
-      // Sélectionner un booster aléatoire
-      const randomBooster = await Database.get(`
-        SELECT id FROM boosters WHERE is_active = 1 ORDER BY RANDOM() LIMIT 1
-      `);
-      const boosterId = randomBooster?.id || null;
-
-      // Générer les cartes du booster
-      const cards = await BoosterService.generateBoosterCards(boosterId || undefined);
-
-      // Déterminer quelles cartes sont nouvelles
+      // SÉCURITÉ: TRANSACTION ATOMIQUE COMPLÈTE pour éviter perte de Berrys
+      let boosterId: string | null = null;
+      let cards: any[] = [];
       const newCards: string[] = [];
 
-      // Ajouter les cartes à la collection
-      for (const card of cards) {
-        const existing = await Database.get(`
-          SELECT * FROM user_collections
-          WHERE user_id = ? AND card_id = ?
-        `, [userId, card.id]);
+      await Database.transaction(async () => {
+        // 1. Déduire les Berrys avec vérification atomique
+        const updateResult = await Database.run(`
+          UPDATE users
+          SET berrys = berrys - ?
+          WHERE id = ? AND berrys >= ?
+        `, [BOOSTER_BERRY_PRICE, userId, BOOSTER_BERRY_PRICE]);
 
-        if (existing) {
-          await Database.run(`
-            UPDATE user_collections
-            SET quantity = quantity + 1
+        // Si aucune ligne affectée, rollback automatique
+        if (updateResult.changes === 0) {
+          throw new Error('Transaction refusée: Berrys insuffisants');
+        }
+
+        // 2. Sélectionner un booster aléatoire
+        const randomBooster = await Database.get(`
+          SELECT id FROM boosters WHERE is_active = 1 ORDER BY RANDOM() LIMIT 1
+        `);
+        boosterId = randomBooster?.id || null;
+
+        if (!boosterId) {
+          throw new Error('Aucun booster disponible');
+        }
+
+        // 3. Générer les cartes du booster
+        cards = await BoosterService.generateBoosterCards(boosterId);
+
+        // 4. Ajouter les cartes à la collection
+        for (const card of cards) {
+          const existing = await Database.get(`
+            SELECT * FROM user_collections
             WHERE user_id = ? AND card_id = ?
           `, [userId, card.id]);
-        } else {
-          newCards.push(card.id);
-          const nowCollection = new Date().toISOString();
-          await Database.run(`
-            INSERT INTO user_collections (user_id, card_id, quantity, obtained_at, is_favorite)
-            VALUES (?, ?, 1, ?, 0)
-          `, [userId, card.id, nowCollection]);
-        }
-      }
 
-      // Enregistrer l'ouverture
-      if (boosterId) {
+          if (existing) {
+            await Database.run(`
+              UPDATE user_collections
+              SET quantity = quantity + 1
+              WHERE user_id = ? AND card_id = ?
+            `, [userId, card.id]);
+          } else {
+            newCards.push(card.id);
+            const nowCollection = new Date().toISOString();
+            await Database.run(`
+              INSERT INTO user_collections (user_id, card_id, quantity, obtained_at, is_favorite)
+              VALUES (?, ?, 1, ?, 0)
+            `, [userId, card.id, nowCollection]);
+          }
+        }
+
+        // 5. Enregistrer l'ouverture
         const nowOpening = new Date().toISOString();
         await Database.run(`
           INSERT INTO booster_openings (user_id, booster_id, session_id, seed, opened_at, cards_obtained)
           VALUES (?, ?, ?, 0, ?, ?)
         `, [userId, boosterId, uuidv4(), nowOpening, JSON.stringify(cards.map(c => c.id))]);
+      });
 
-        // Mettre à jour les achievements
-        await AchievementService.updateAfterBoosterOpen(userId, boosterId, cards.map(c => c.id));
+      // 6. Mettre à jour les achievements (hors transaction car non critique)
+      if (boosterId) {
+        try {
+          await AchievementService.updateAfterBoosterOpen(userId, boosterId, cards.map(c => c.id));
+        } catch (error) {
+          console.error('Erreur mise à jour achievements (non bloquant):', error);
+        }
       }
 
       // Récupérer le statut des boosters actualisé
       const updatedUser = await UserModel.findById(userId);
       const availableBoosters = updatedUser?.available_boosters || 0;
       const nextBoosterTime = updatedUser?.next_booster_time;
+      const newBalance = updatedUser?.berrys || 0;
+
+      // AUDIT: Log achat de booster
+      await AuditLogger.logSuccess(AuditAction.BOOSTER_PURCHASED, userId, {
+        boosterId,
+        berrysSpent: BOOSTER_BERRY_PRICE,
+        newBalance,
+        cardsObtained: cards.length
+      }, req);
 
       res.json({
         success: true,
@@ -602,12 +771,24 @@ export class UserController {
           cards: cards.map(transformCardToCamelCase),
           new_cards: newCards,
           available_boosters: availableBoosters,
-          next_booster_time: nextBoosterTime
+          next_booster_time: nextBoosterTime,
+          new_balance: newBalance
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur lors de l\'achat du booster:', error);
-      res.status(500).json({ error: 'Erreur serveur' });
+
+      // AUDIT: Log échec
+      if (error.message?.includes('insuffisants')) {
+        await AuditLogger.logFailure(AuditAction.BOOSTER_PURCHASED, {
+          reason: 'insufficient_berrys',
+          userId
+        }, req, userId);
+      }
+
+      res.status(500).json({
+        error: error.message || 'Erreur serveur'
+      });
     }
   }
 
@@ -647,50 +828,75 @@ export class UserController {
         return;
       }
 
-      const user = await UserModel.findById(userId);
-      if (!user) {
-        res.status(404).json({ error: 'Utilisateur non trouvé' });
-        return;
-      }
-
-      // Vérifier si l'utilisateur a déjà réclamé sa récompense aujourd'hui
-      const now = new Date();
-      const today = now.toISOString().split('T')[0]; // Format YYYY-MM-DD
-
-      const lastDailyReward = (user as any).last_daily_reward;
-      const lastRewardDate = lastDailyReward ? lastDailyReward.split('T')[0] : null;
-
-      console.log(`[DAILY REWARD] User ${userId} - Last reward: ${lastDailyReward}, Today: ${today}, Last date: ${lastRewardDate}`);
-
-      if (lastRewardDate === today) {
-        console.log(`[DAILY REWARD] User ${userId} already claimed today - REJECTED`);
-        res.status(400).json({
-          error: 'Récompense quotidienne déjà réclamée aujourd\'hui',
-          next_reward_available: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
-        });
-        return;
-      }
-
-      // Donner 10 Berrys à l'utilisateur
       const DAILY_REWARD_BERRYS = 10;
-      const nowISO = new Date().toISOString();
+      const MAX_BERRYS = 999999999;
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const nowISO = now.toISOString();
 
-      console.log(`[DAILY REWARD] User ${userId} claiming reward - Setting last_daily_reward to: ${nowISO}`);
+      console.log(`[DAILY REWARD] User ${userId} attempting to claim - Today: ${today}`);
 
-      const result = await Database.run(`
-        UPDATE users
-        SET berrys = COALESCE(berrys, 0) + ?,
-            last_daily_reward = ?
-        WHERE id = ?
-      `, [DAILY_REWARD_BERRYS, nowISO, userId]);
+      let newBalance = 0;
 
-      console.log(`[DAILY REWARD] Update result:`, result);
+      // Transaction atomique pour éviter double-claim
+      await Database.transaction(async () => {
+        // 1. Vérifier l'utilisateur et sa dernière récompense
+        const user = await Database.get<any>(`
+          SELECT id, berrys, last_daily_reward
+          FROM users
+          WHERE id = ?
+        `, [userId]);
 
-      // Récupérer le nouveau solde
-      const updatedUser = await UserModel.findById(userId);
-      const newBalance = updatedUser?.berrys || 0;
+        if (!user) {
+          throw new Error('Utilisateur non trouvé');
+        }
 
-      console.log(`[DAILY REWARD] User ${userId} successfully claimed - New balance: ${newBalance}, last_daily_reward: ${(updatedUser as any)?.last_daily_reward}`);
+        const lastDailyReward = user.last_daily_reward;
+        const lastRewardDate = lastDailyReward ? lastDailyReward.split('T')[0] : null;
+
+        console.log(`[DAILY REWARD] User ${userId} - Last reward: ${lastDailyReward}, Last date: ${lastRewardDate}`);
+
+        if (lastRewardDate === today) {
+          console.log(`[DAILY REWARD] User ${userId} already claimed today - REJECTED`);
+          throw new Error('Récompense quotidienne déjà réclamée aujourd\'hui');
+        }
+
+        // 2. Vérifier la limite de Berrys
+        const currentBerrys = user.berrys || 0;
+        if (currentBerrys + DAILY_REWARD_BERRYS > MAX_BERRYS) {
+          throw new Error('Limite de Berrys atteinte');
+        }
+
+        // 3. Atomic update avec WHERE clause pour éviter race condition
+        const result = await Database.run(`
+          UPDATE users
+          SET berrys = berrys + ?,
+              last_daily_reward = ?
+          WHERE id = ?
+            AND (last_daily_reward IS NULL OR date(last_daily_reward) < date(?))
+        `, [DAILY_REWARD_BERRYS, nowISO, userId, nowISO]);
+
+        if (result.changes === 0) {
+          throw new Error('Récompense quotidienne déjà réclamée');
+        }
+
+        console.log(`[DAILY REWARD] Update successful - Changes: ${result.changes}`);
+
+        // 4. Récupérer le nouveau solde
+        const updatedUser = await Database.get<any>(`
+          SELECT berrys FROM users WHERE id = ?
+        `, [userId]);
+
+        newBalance = updatedUser?.berrys || 0;
+      });
+
+      // AUDIT: Log récompense réclamée (en dehors de la transaction)
+      await AuditLogger.logSuccess(AuditAction.BERRYS_DAILY_REWARD, userId, {
+        berrys_earned: DAILY_REWARD_BERRYS,
+        new_balance: newBalance
+      }, req);
+
+      console.log(`[DAILY REWARD] User ${userId} successfully claimed - New balance: ${newBalance}`);
 
       res.json({
         success: true,
@@ -700,9 +906,27 @@ export class UserController {
           next_reward_available: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
         }
       });
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Erreur lors de la réclamation de la récompense quotidienne:', error);
-      res.status(500).json({ error: 'Erreur serveur' });
+
+      // AUDIT: Log échec
+      if (error.message?.includes('déjà réclamée')) {
+        await AuditLogger.logFailure(AuditAction.BERRYS_DAILY_REWARD, {
+          reason: 'already_claimed',
+          userId
+        }, req, userId);
+
+        res.status(400).json({
+          error: 'Récompense quotidienne déjà réclamée aujourd\'hui',
+          next_reward_available: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 1).toISOString()
+        });
+        return;
+      }
+
+      res.status(500).json({
+        error: error.message || 'Erreur serveur'
+      });
     }
   }
 
