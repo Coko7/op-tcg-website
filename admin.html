@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - One Piece TCG</title>
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Écran de connexion -->
+    <div id="loginScreen" class="screen active">
+      <div class="login-container">
+        <div class="login-card">
+          <h1>🏴‍☠️ Admin Panel</h1>
+          <p class="subtitle">One Piece TCG - Administration</p>
+
+          <form id="loginForm">
+            <div class="form-group">
+              <label for="username">Nom d'utilisateur</label>
+              <input type="text" id="username" name="username" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+              <label for="password">Mot de passe</label>
+              <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+
+            <div id="loginError" class="error-message"></div>
+
+            <button type="submit" class="btn btn-primary" id="loginBtn">
+              Connexion
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard principal -->
+    <div id="dashboardScreen" class="screen">
+      <div class="navbar">
+        <div class="navbar-content">
+          <h1>🏴‍☠️ Admin Dashboard</h1>
+          <div class="navbar-actions">
+            <span id="adminUsername" class="admin-name"></span>
+            <button id="logoutBtn" class="btn btn-secondary">Déconnexion</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <!-- Navigation par onglets -->
+        <div class="tabs">
+          <button class="tab active" data-tab="stats">📊 Statistiques</button>
+          <button class="tab" data-tab="notifications">📢 Notifications</button>
+          <button class="tab" data-tab="players">👥 Joueurs</button>
+          <button class="tab" data-tab="activity">📋 Activité</button>
+        </div>
+
+        <!-- Contenu des onglets -->
+        <div class="tab-content">
+          <!-- ONGLET STATISTIQUES -->
+          <div id="statsTab" class="tab-panel active">
+            <div class="stats-grid">
+              <!-- Statistiques Utilisateurs -->
+              <div class="stat-card">
+                <div class="stat-header">
+                  <h3>👥 Utilisateurs</h3>
+                  <button class="btn-refresh" onclick="loadDashboardStats()">🔄</button>
+                </div>
+                <div class="stat-body">
+                  <div class="stat-item">
+                    <span class="stat-label">Total</span>
+                    <span class="stat-value" id="totalUsers">-</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Actifs aujourd'hui</span>
+                    <span class="stat-value" id="activeToday">-</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Actifs cette semaine</span>
+                    <span class="stat-value" id="activeWeek">-</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Nouveaux (7j)</span>
+                    <span class="stat-value" id="newWeek">-</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Statistiques Berrys -->
+              <div class="stat-card">
+                <div class="stat-header">
+                  <h3>💰 Économie</h3>
+                </div>
+                <div class="stat-body">
+                  <div class="stat-item">
+                    <span class="stat-label">Total Berrys</span>
+                    <span class="stat-value" id="totalBerrys">-</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Moyenne par joueur</span>
+                    <span class="stat-value" id="avgBerrys">-</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Statistiques Boosters -->
+              <div class="stat-card">
+                <div class="stat-header">
+                  <h3>📦 Boosters</h3>
+                </div>
+                <div class="stat-body">
+                  <div class="stat-item">
+                    <span class="stat-label">Total ouvertures</span>
+                    <span class="stat-value" id="totalOpenings">-</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Aujourd'hui</span>
+                    <span class="stat-value" id="openedToday">-</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Cette semaine</span>
+                    <span class="stat-value" id="openedWeek">-</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Statistiques Cartes -->
+              <div class="stat-card">
+                <div class="stat-header">
+                  <h3>🃏 Cartes</h3>
+                </div>
+                <div class="stat-body">
+                  <div class="stat-item">
+                    <span class="stat-label">Total cartes</span>
+                    <span class="stat-value" id="totalCards">-</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Cartes actives</span>
+                    <span class="stat-value" id="activeCards">-</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Possédées total</span>
+                    <span class="stat-value" id="totalCardsOwned">-</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Statistiques Sécurité -->
+              <div class="stat-card">
+                <div class="stat-header">
+                  <h3>🔒 Sécurité (24h)</h3>
+                </div>
+                <div class="stat-body">
+                  <div class="stat-item">
+                    <span class="stat-label">Connexions échouées</span>
+                    <span class="stat-value warning" id="failedLogins">-</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Activités suspectes</span>
+                    <span class="stat-value warning" id="suspicious">-</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">Événements critiques</span>
+                    <span class="stat-value danger" id="criticalEvents">-</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Top Joueurs -->
+              <div class="stat-card wide">
+                <div class="stat-header">
+                  <h3>🏆 Top Joueurs</h3>
+                </div>
+                <div class="stat-body">
+                  <table class="top-players-table" id="topPlayersTable">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Joueur</th>
+                        <th>Berrys</th>
+                        <th>Cartes uniques</th>
+                        <th>Total cartes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr><td colspan="5" class="loading">Chargement...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ONGLET NOTIFICATIONS -->
+          <div id="notificationsTab" class="tab-panel">
+            <div class="section">
+              <h2>📢 Créer une notification</h2>
+              <form id="notificationForm" class="notification-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="notifTitle">Titre *</label>
+                    <input type="text" id="notifTitle" required minlength="3" maxlength="100" placeholder="Ex: Maintenance planifiée">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group full-width">
+                    <label for="notifMessage">Message *</label>
+                    <textarea id="notifMessage" required minlength="10" maxlength="1000" rows="4" placeholder="Message à envoyer à tous les joueurs..."></textarea>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="rewardBerrys">Récompense Berrys</label>
+                    <input type="number" id="rewardBerrys" min="0" max="10000" value="0">
+                    <small>0 à 10,000 Berrys</small>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="rewardBoosters">Récompense Boosters</label>
+                    <input type="number" id="rewardBoosters" min="0" max="10" value="0">
+                    <small>0 à 10 boosters</small>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="expiresAt">Date d'expiration (optionnel)</label>
+                    <input type="datetime-local" id="expiresAt">
+                  </div>
+                </div>
+
+                <div id="notifError" class="error-message"></div>
+                <div id="notifSuccess" class="success-message"></div>
+
+                <button type="submit" class="btn btn-primary" id="sendNotifBtn">
+                  📤 Envoyer la notification
+                </button>
+              </form>
+            </div>
+
+            <div class="section">
+              <div class="section-header">
+                <h2>📜 Historique des notifications</h2>
+                <button class="btn-refresh" onclick="loadNotifications()">🔄</button>
+              </div>
+              <div id="notificationsList" class="notifications-list">
+                <p class="loading">Chargement...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ONGLET JOUEURS -->
+          <div id="playersTab" class="tab-panel">
+            <div class="section">
+              <div class="section-header">
+                <h2>👥 Joueurs en ligne</h2>
+                <button class="btn-refresh" onclick="loadOnlineUsers()">🔄</button>
+              </div>
+              <div id="onlineUsersList" class="online-users-list">
+                <p class="loading">Chargement...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ONGLET ACTIVITÉ -->
+          <div id="activityTab" class="tab-panel">
+            <div class="section">
+              <div class="section-header">
+                <h2>📋 Activité récente</h2>
+                <button class="btn-refresh" onclick="loadRecentActivity()">🔄</button>
+              </div>
+              <div id="activityList" class="activity-list">
+                <p class="loading">Chargement...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/admin.js"></script>
+</body>
+</html>

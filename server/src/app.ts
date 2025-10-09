@@ -2,12 +2,17 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { Database } from './utils/database.js';
 import { MigrationManager } from './utils/migrations.js';
 import { VegapullImporter } from './scripts/import-vegapull-data.js';
 import { BoosterModel } from './models/Booster.js';
 import { AchievementService } from './services/AchievementService.js';
 import { AchievementModel } from './models/Achievement.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Security middlewares
 import {
@@ -162,6 +167,12 @@ app.get('/health', (req, res) => {
 // Route pour servir les fichiers statiques (images, etc.)
 app.use('/images', express.static('public/images'));
 app.use('/boosters', express.static('public/images/boosters'));
+
+// Route pour servir l'interface d'administration
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../admin.html'));
+});
+app.use(express.static(path.join(__dirname, '../../public')));
 
 // Gestion des erreurs 404
 app.use((req, res, next) => {
