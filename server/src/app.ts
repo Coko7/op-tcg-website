@@ -102,12 +102,7 @@ const limiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip successful requests to avoid penalizing legitimate users
-  skipSuccessfulRequests: false,
-  // Custom key generator based on IP and user agent
-  keyGenerator: (req) => {
-    return `${req.ip}-${req.headers['user-agent']}`;
-  }
+  skipSuccessfulRequests: false
 });
 
 // Rate limiting strict pour l'authentification
@@ -176,12 +171,18 @@ app.get('/admin', (req, res) => {
 // Servir les fichiers statiques (CSS, JS)
 app.use(express.static(path.join(__dirname, '../../public')));
 
-// Gestion des erreurs 404 - UNIQUEMENT pour les routes /api/*
-app.use('/api/*', (req, res, next) => {
-  res.status(404).json({
-    error: 'Route API non trouvée',
-    path: req.originalUrl
-  });
+// Gestion des erreurs 404 - UNIQUEMENT pour les routes API
+app.use((req, res, next) => {
+  // Si la route commence par /api et n'a pas été gérée, retourner une erreur JSON
+  if (req.path.startsWith('/api')) {
+    res.status(404).json({
+      error: 'Route API non trouvée',
+      path: req.originalUrl
+    });
+  } else {
+    // Pour les autres routes non trouvées, ne rien faire (ou servir une page 404 si besoin)
+    next();
+  }
 });
 
 // Gestionnaire d'erreurs global
