@@ -331,7 +331,16 @@ export class UserController {
       let finalNextBoosterTime: Date | null = null;
 
       await Database.transaction(async () => {
-        // 1. Déduire le booster disponible avec vérification atomique
+        // 1. Vérifier à nouveau les boosters disponibles dans la transaction
+        const currentUser = await Database.get(`
+          SELECT available_boosters FROM users WHERE id = ?
+        `, [userId]);
+
+        if (!currentUser || currentUser.available_boosters <= 0) {
+          throw new Error('Aucun booster disponible');
+        }
+
+        // 2. Déduire le booster disponible avec vérification atomique
         const updateResult = await Database.run(`
           UPDATE users
           SET available_boosters = available_boosters - 1,
@@ -344,7 +353,7 @@ export class UserController {
           throw new Error('Aucun booster disponible');
         }
 
-        // 2. Valider/sélectionner le booster
+        // 3. Valider/sélectionner le booster
         if (boosterId) {
           const boosterExists = await Database.get(`
             SELECT id FROM boosters WHERE id = ? AND is_active = 1
@@ -364,10 +373,10 @@ export class UserController {
           }
         }
 
-        // 3. Générer les cartes
+        // 4. Générer les cartes
         cards = await BoosterService.generateBoosterCards(boosterId);
 
-        // 4. Ajouter les cartes à la collection
+        // 5. Ajouter les cartes à la collection
         for (const card of cards) {
           const existing = await Database.get(`
             SELECT * FROM user_collections
@@ -389,7 +398,7 @@ export class UserController {
           }
         }
 
-        // 5. Calculer le nouveau statut de boosters
+        // 6. Calculer le nouveau statut de boosters
         const updatedUser = await Database.get(`
           SELECT available_boosters, next_booster_time FROM users WHERE id = ?
         `, [userId]);
@@ -405,14 +414,14 @@ export class UserController {
           `, [finalNextBoosterTime.toISOString(), userId]);
         }
 
-        // 6. Enregistrer l'ouverture
+        // 7. Enregistrer l'ouverture
         await Database.run(`
           INSERT INTO booster_openings (user_id, booster_id, session_id, seed, opened_at, cards_obtained)
           VALUES (?, ?, ?, 0, ?, ?)
         `, [userId, boosterId, uuidv4(), new Date().toISOString(), JSON.stringify(cards.map(c => c.id))]);
       });
 
-      // 7. Mettre à jour les achievements (hors transaction)
+      // 8. Mettre à jour les achievements (hors transaction)
       if (boosterId) {
         try {
           await AchievementService.updateAfterBoosterOpen(userId, boosterId, cards.map(c => c.id));
@@ -852,7 +861,7 @@ export class UserController {
 
       // Transaction atomique pour éviter double-claim
       await Database.transaction(async () => {
-        // 1. Vérifier l'utilisateur et sa dernière récompense
+        // 1. Vérifier l'utilisateur et sa dernière récompense avec LOCK
         const user = await Database.get<any>(`
           SELECT id, berrys, last_daily_reward
           FROM users
@@ -868,33 +877,35 @@ export class UserController {
 
         console.log(`[DAILY REWARD] User ${userId} - Last reward: ${lastDailyReward}, Last date: ${lastRewardDate}`);
 
+        // 2. Vérification stricte - si déjà réclamée aujourd'hui, rejeter immédiatement
         if (lastRewardDate === today) {
           console.log(`[DAILY REWARD] User ${userId} already claimed today - REJECTED`);
           throw new Error('Récompense quotidienne déjà réclamée aujourd\'hui');
         }
 
-        // 2. Vérifier la limite de Berrys
+        // 3. Vérifier la limite de Berrys
         const currentBerrys = user.berrys || 0;
         if (currentBerrys + DAILY_REWARD_BERRYS > MAX_BERRYS) {
           throw new Error('Limite de Berrys atteinte');
         }
 
-        // 3. Atomic update avec WHERE clause pour éviter race condition
+        // 4. Atomic update avec WHERE clause stricte pour éviter race condition
         const result = await Database.run(`
           UPDATE users
-          SET berrys = berrys + ?,
+          SET berrys = COALESCE(berrys, 0) + ?,
               last_daily_reward = ?
           WHERE id = ?
             AND (last_daily_reward IS NULL OR date(last_daily_reward) < date(?))
         `, [DAILY_REWARD_BERRYS, nowISO, userId, nowISO]);
 
         if (result.changes === 0) {
+          console.log(`[DAILY REWARD] Update failed - No changes (already claimed or race condition)`);
           throw new Error('Récompense quotidienne déjà réclamée');
         }
 
         console.log(`[DAILY REWARD] Update successful - Changes: ${result.changes}`);
 
-        // 4. Récupérer le nouveau solde
+        // 5. Récupérer le nouveau solde
         const updatedUser = await Database.get<any>(`
           SELECT berrys FROM users WHERE id = ?
         `, [userId]);
