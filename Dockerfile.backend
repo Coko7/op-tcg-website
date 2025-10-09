@@ -81,11 +81,6 @@ RUN mkdir -p data backups logs public/data/vegapull public/images && \
 # Copier les données Vegapull (packs et cartes)
 COPY --chown=nodejs:nodejs public/data/vegapull ./public/data/vegapull
 
-# Copier l'interface d'administration
-COPY --chown=nodejs:nodejs admin.html ./
-COPY --chown=nodejs:nodejs public/admin.css ./public/
-COPY --chown=nodejs:nodejs public/admin.js ./public/
-
 # Passer à l'utilisateur non-root
 USER nodejs
 

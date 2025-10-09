@@ -165,14 +165,6 @@ app.get('/health', (req, res) => {
 app.use('/images', express.static('public/images'));
 app.use('/boosters', express.static('public/images/boosters'));
 
-// Route pour servir l'interface d'administration (AVANT le static pour avoir priorité)
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../admin.html'));
-});
-
-// Servir les fichiers statiques (CSS, JS)
-app.use(express.static(path.join(__dirname, '../../public')));
-
 // Gestion des erreurs 404 - UNIQUEMENT pour les routes API
 app.use((req, res, next) => {
   // Si la route commence par /api et n'a pas été gérée, retourner une erreur JSON
