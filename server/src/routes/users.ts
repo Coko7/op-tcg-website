@@ -13,6 +13,9 @@ const router = Router();
 // Toutes les routes nécessitent une authentification
 router.use(authenticateToken);
 
+// Route pour récupérer les infos de l'utilisateur connecté
+router.get('/me', UserController.getCurrentUser);
+
 // Vérifications de cohérence sur toutes les routes
 router.use(resourceConsistencyCheck);
 router.use(temporalConsistencyCheck);

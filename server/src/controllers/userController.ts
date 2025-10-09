@@ -991,4 +991,42 @@ export class UserController {
       res.status(500).json({ error: 'Erreur serveur' });
     }
   }
+
+  /**
+   * Récupérer les informations de l'utilisateur connecté
+   */
+  static async getCurrentUser(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        res.status(401).json({ error: 'Non authentifié' });
+        return;
+      }
+
+      const user = await UserModel.findById(userId);
+
+      if (!user) {
+        res.status(404).json({ error: 'Utilisateur introuvable' });
+        return;
+      }
+
+      // Retourner les infos utilisateur (sans le password_hash)
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          is_admin: user.is_admin,
+          berrys: user.berrys,
+          available_boosters: user.available_boosters,
+          created_at: user.created_at,
+          last_login: user.last_login
+        }
+      });
+    } catch (error) {
+      console.error('Erreur récupération utilisateur:', error);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  }
 }

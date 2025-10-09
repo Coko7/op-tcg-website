@@ -1,9 +1,12 @@
 // Configuration
-const API_URL = 'http://localhost:3001/api';
+const API_URL = window.location.port === '5000'
+  ? 'http://localhost:5000/api'
+  : 'http://localhost:3001/api';
 
 // État de l'application
 const state = {
-  token: localStorage.getItem('adminToken') || null,
+  // Utiliser le token du frontend (accessToken) en priorité, puis adminToken
+  token: localStorage.getItem('accessToken') || localStorage.getItem('adminToken') || null,
   user: null,
 };
 
@@ -462,13 +465,29 @@ elements.notificationForm.addEventListener('submit', (e) => {
 async function init() {
   if (state.token) {
     try {
-      // Vérifier si le token est valide en récupérant les stats
-      const data = await apiRequest('/admin/dashboard/stats');
-      state.user = { username: 'Admin' }; // Temporaire, on récupère juste le username
+      // Vérifier si le token est valide et récupérer les infos utilisateur
+      const userResponse = await apiRequest('/users/me');
+
+      // Vérifier si l'utilisateur est admin
+      if (!userResponse.user || !userResponse.user.is_admin) {
+        throw new Error('Accès refusé: droits administrateur requis');
+      }
+
+      state.user = userResponse.user;
+
+      // Charger le dashboard si admin
       showDashboard();
     } catch (error) {
-      // Token invalide, retour à la connexion
-      logout();
+      console.error('Erreur d\'authentification:', error);
+      // Token invalide ou pas admin, afficher message et retour à la connexion
+      if (error.message.includes('admin')) {
+        alert('⛔ Accès refusé\n\nCette interface est réservée aux administrateurs.\nVotre compte ne dispose pas des droits nécessaires.');
+      }
+      // Nettoyer le token invalide
+      state.token = null;
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('adminToken');
+      showLogin();
     }
   } else {
     showLogin();
