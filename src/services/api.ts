@@ -316,6 +316,17 @@ class ApiService {
     return await this.request('/leaderboard');
   }
 
+  // Méthodes pour les notifications
+  async getNotifications(): Promise<any> {
+    return await this.request('/notifications');
+  }
+
+  async claimNotification(notificationId: string): Promise<any> {
+    return await this.request(`/notifications/${notificationId}/claim`, {
+      method: 'POST',
+    });
+  }
+
   // Vérifier si l'utilisateur est connecté
   isAuthenticated(): boolean {
     return !!this.accessToken;

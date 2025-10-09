@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Home, Package, BookOpen, Trophy, User, LogIn, UserPlus, Medal, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import UserProfile from './UserProfile';
+import NotificationBell from './NotificationBell';
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -110,21 +111,24 @@ const Header: React.FC = () => {
 
           <div className="flex items-center space-x-1 sm:space-x-4">
             {isAuthenticated ? (
-              <div className="relative user-menu-container">
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm px-2 sm:px-3 py-2 rounded-lg bg-emerald-sea/70 hover:bg-emerald-sea border-2 border-gold-treasure/40 transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-emerald-sea/30"
-                >
-                  <User size={16} className="text-gold-treasure" />
-                  <span className="text-cloud-white font-semibold hidden xs:inline">{user?.username}</span>
-                </button>
+              <>
+                <NotificationBell />
+                <div className="relative user-menu-container">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm px-2 sm:px-3 py-2 rounded-lg bg-emerald-sea/70 hover:bg-emerald-sea border-2 border-gold-treasure/40 transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-emerald-sea/30"
+                  >
+                    <User size={16} className="text-gold-treasure" />
+                    <span className="text-cloud-white font-semibold hidden xs:inline">{user?.username}</span>
+                  </button>
 
-                {showUserMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 z-50">
-                    <UserProfile />
-                  </div>
-                )}
-              </div>
+                  {showUserMenu && (
+                    <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 z-50">
+                      <UserProfile />
+                    </div>
+                  )}
+                </div>
+              </>
             ) : (
               <div className="flex items-center space-x-1 sm:space-x-2">
                 <Link
