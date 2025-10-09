@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import { apiService } from '../services/api';
 import { Users, Activity, Bell, TrendingUp, Coins, Package, Shield, Calendar } from 'lucide-react';
 
 interface DashboardStats {
@@ -79,14 +79,26 @@ const Admin: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [statsRes, activityRes, notifsRes] = await Promise.all([
-        api.get('/admin/dashboard/stats'),
-        api.get('/admin/dashboard/activity'),
-        api.get('/admin/notifications')
-      ]);
-      setStats(statsRes.data.stats);
-      setActivities(activityRes.data.activities || []);
-      setNotifications(notifsRes.data.notifications || []);
+      const statsRes = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/admin/dashboard/stats`, {
+        credentials: 'include',
+        headers: { 'Authorization': `Bearer ${apiService.getAccessToken()}` }
+      });
+      const activityRes = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/admin/dashboard/activity`, {
+        credentials: 'include',
+        headers: { 'Authorization': `Bearer ${apiService.getAccessToken()}` }
+      });
+      const notifsRes = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/admin/notifications`, {
+        credentials: 'include',
+        headers: { 'Authorization': `Bearer ${apiService.getAccessToken()}` }
+      });
+
+      const statsData = await statsRes.json();
+      const activityData = await activityRes.json();
+      const notifsData = await notifsRes.json();
+
+      setStats(statsData.stats);
+      setActivities(activityData.activities || []);
+      setNotifications(notifsData.notifications || []);
     } catch (error) {
       console.error('Erreur chargement admin:', error);
     } finally {
@@ -97,10 +109,18 @@ const Admin: React.FC = () => {
   const handleSendNotification = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/admin/notifications', {
-        message: notifForm.message,
-        berry_reward: notifForm.berry_reward ? parseInt(notifForm.berry_reward) : null,
-        booster_reward: notifForm.booster_reward ? parseInt(notifForm.booster_reward) : null
+      await fetch(`${import.meta.env.VITE_API_URL || '/api'}/admin/notifications`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiService.getAccessToken()}`
+        },
+        body: JSON.stringify({
+          message: notifForm.message,
+          berry_reward: notifForm.berry_reward ? parseInt(notifForm.berry_reward) : null,
+          booster_reward: notifForm.booster_reward ? parseInt(notifForm.booster_reward) : null
+        })
       });
       setNotifForm({ message: '', berry_reward: '', booster_reward: '' });
       await loadData();
@@ -114,7 +134,13 @@ const Admin: React.FC = () => {
   const handleDeleteNotification = async (id: number) => {
     if (!confirm('Désactiver cette notification ?')) return;
     try {
-      await api.delete(`/admin/notifications/${id}`);
+      await fetch(`${import.meta.env.VITE_API_URL || '/api'}/admin/notifications/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${apiService.getAccessToken()}`
+        }
+      });
       await loadData();
     } catch (error) {
       console.error('Erreur suppression notification:', error);
