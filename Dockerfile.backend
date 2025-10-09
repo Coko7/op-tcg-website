@@ -29,7 +29,8 @@ LABEL version="1.0.0"
 
 # Installer uniquement les dépendances système nécessaires à l'exécution
 RUN apk add --no-cache \
-    curl
+    curl \
+    sqlite
 
 # Créer un utilisateur non-root pour la sécurité
 RUN addgroup -g 1001 -S nodejs && \
@@ -64,6 +65,7 @@ COPY --chown=nodejs:nodejs server/restore-from-backup.js ./
 COPY --chown=nodejs:nodejs server/scripts/backup-database.js ./scripts/
 COPY --chown=nodejs:nodejs server/scripts/log-rotation.js ./scripts/
 COPY --chown=nodejs:nodejs server/scripts/send-compensation.js ./scripts/
+COPY --chown=nodejs:nodejs server/scripts/make-admin.js ./scripts/
 COPY --chown=nodejs:nodejs server/scripts/setup-cron-backup.sh ./scripts/
 COPY --chown=nodejs:nodejs server/scripts/setup-cron-cleanup.sh ./scripts/
 
@@ -78,6 +80,11 @@ RUN mkdir -p data backups logs public/data/vegapull public/images && \
 
 # Copier les données Vegapull (packs et cartes)
 COPY --chown=nodejs:nodejs public/data/vegapull ./public/data/vegapull
+
+# Copier l'interface d'administration
+COPY --chown=nodejs:nodejs admin.html ./
+COPY --chown=nodejs:nodejs public/admin.css ./public/
+COPY --chown=nodejs:nodejs public/admin.js ./public/
 
 # Passer à l'utilisateur non-root
 USER nodejs

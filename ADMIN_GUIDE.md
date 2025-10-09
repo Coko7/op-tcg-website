@@ -36,18 +36,67 @@ http://localhost:5000/admin
 2. Entrez vos identifiants
 3. L'interface vérifie automatiquement les droits admin
 
-### Créer un compte admin (SQL)
+### Créer un compte admin
 
+#### Méthode 1: Script automatique (Recommandé) ✅
+
+**En local:**
+```bash
+cd server
+node scripts/make-admin.js <username>
+```
+
+**Avec Docker:**
+```bash
+# Lister les utilisateurs existants
+docker exec -it op-game-backend node scripts/make-admin.js
+
+# Promouvoir un utilisateur
+docker exec -it op-game-backend node scripts/make-admin.js votre_username
+```
+
+#### Méthode 2: Directement avec sqlite3
+
+**En local:**
+```bash
+cd server
+sqlite3 data/database.sqlite
+```
+
+**Avec Docker:**
+```bash
+# Accéder au conteneur
+docker exec -it op-game-backend sh
+
+# Utiliser sqlite3
+sqlite3 /app/data/database.sqlite
+```
+
+Puis exécuter:
 ```sql
--- Se connecter à la base de données
-sqlite3 server/database.sqlite
+-- Voir tous les utilisateurs
+SELECT username, is_admin FROM users WHERE is_active = 1;
 
--- Mettre à jour un utilisateur existant
+-- Promouvoir un utilisateur
 UPDATE users SET is_admin = 1 WHERE username = 'votre_username';
 
--- Ou créer un nouveau compte admin directement
--- Note: utilisez le endpoint /api/auth/register puis faites l'update ci-dessus
+-- Vérifier
+SELECT username, is_admin FROM users WHERE username = 'votre_username';
+
+-- Quitter
+.exit
 ```
+
+#### Méthode 3: Créer un nouveau compte puis le promouvoir
+
+1. S'inscrire via l'interface web: `http://localhost/` ou appel API:
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "VotreMotDePasseSecurisé123!"}'
+```
+
+2. Puis promouvoir avec une des méthodes ci-dessus
 
 ## 📊 Fonctionnalités
 
