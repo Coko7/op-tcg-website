@@ -146,10 +146,31 @@ export class Database {
     }
   }
 
-  // Transaction
+  // Transaction - Better-sqlite3 ne supporte pas les fonctions async dans les transactions
+  // On doit gérer manuellement BEGIN/COMMIT/ROLLBACK
   static async transaction<T>(callback: () => Promise<T>): Promise<T> {
-    const txn = this.getInstance().transaction(callback);
-    return txn();
+    const db = this.getInstance();
+
+    try {
+      // Démarrer la transaction
+      db.prepare('BEGIN IMMEDIATE').run();
+
+      // Exécuter le callback
+      const result = await callback();
+
+      // Valider la transaction
+      db.prepare('COMMIT').run();
+
+      return result;
+    } catch (error) {
+      // Annuler la transaction en cas d'erreur
+      try {
+        db.prepare('ROLLBACK').run();
+      } catch (rollbackError) {
+        console.error('Erreur lors du rollback:', rollbackError);
+      }
+      throw error;
+    }
   }
 
   // Fermer la base de données
