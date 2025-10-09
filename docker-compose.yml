@@ -26,6 +26,7 @@ services:
       - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost,http://localhost:80}
+      - COOKIE_DOMAIN=${COOKIE_DOMAIN:-.polo2409.work}
     volumes:
       # Persistance de la base de données
       - op_game_data:/app/data

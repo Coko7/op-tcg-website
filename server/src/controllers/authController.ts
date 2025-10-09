@@ -67,6 +67,9 @@ export class AuthController {
       const tokens = await AuthController.generateTokens(user);
       const userResponse = AuthController.sanitizeUser(user);
 
+      // Définir les cookies sécurisés (partagés entre sous-domaines)
+      AuthController.setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
+
       // AUDIT: Log de l'inscription
       await AuditLogger.logSuccess(AuditAction.USER_REGISTER, user.id, {
         username: user.username
@@ -132,6 +135,9 @@ export class AuthController {
 
       const tokens = await AuthController.generateTokens(user);
       const userResponse = AuthController.sanitizeUser(user);
+
+      // Définir les cookies sécurisés (partagés entre sous-domaines)
+      AuthController.setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
 
       // AUDIT: Log connexion réussie
       await AuditLogger.logSuccess(AuditAction.USER_LOGIN, user.id, {
@@ -296,6 +302,35 @@ export class AuthController {
       is_admin: user.is_admin,
       berrys: user.berrys || 0
     };
+  }
+
+  /**
+   * Définir les cookies d'authentification sécurisés
+   * Partagés entre sous-domaines (ex: optcg.polo2409.work et backend-optcg.polo2409.work)
+   */
+  private static setAuthCookies(res: Response, accessToken: string, refreshToken: string): void {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieDomain = process.env.COOKIE_DOMAIN || (isProduction ? '.polo2409.work' : undefined);
+
+    const cookieOptions = {
+      httpOnly: true, // Pas accessible via JavaScript (protection XSS)
+      secure: isProduction, // HTTPS uniquement en production
+      sameSite: 'lax' as const, // Protection CSRF
+      domain: cookieDomain, // Partagé entre sous-domaines
+      path: '/',
+    };
+
+    // Access token (courte durée: 15min)
+    res.cookie('accessToken', accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    // Refresh token (longue durée: 7 jours)
+    res.cookie('refreshToken', refreshToken, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
+    });
   }
 
   private static getExpirationTime(timeString: string): number {

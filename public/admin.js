@@ -1,14 +1,36 @@
-// Configuration
-const API_URL = window.location.port === '5000'
-  ? 'http://localhost:5000/api'
-  : 'http://localhost:3001/api';
+// Configuration - Détecter automatiquement l'URL de l'API
+const API_URL = (() => {
+  // Si on est sur le même domaine que l'API, utiliser l'URL relative
+  const currentHost = window.location.host;
+  const currentProtocol = window.location.protocol;
+
+  // Si on est sur le backend directement (port 5000 ou domaine backend)
+  if (currentHost.includes('backend') || window.location.port === '5000') {
+    return `${currentProtocol}//${currentHost}/api`;
+  }
+
+  // Sinon, essayer de deviner l'URL du backend
+  // Si le frontend est sur un sous-domaine, remplacer par backend
+  if (currentHost.includes('optcg.polo2409.work')) {
+    return `${currentProtocol}//backend-optcg.polo2409.work/api`;
+  }
+
+  // Par défaut, localhost
+  return 'http://localhost:5000/api';
+})();
 
 // État de l'application
+// Note: Le token est maintenant dans un cookie httpOnly, pas besoin de le gérer en JS
 const state = {
-  // Utiliser le token du frontend (accessToken) en priorité, puis adminToken
-  token: localStorage.getItem('accessToken') || localStorage.getItem('adminToken') || null,
+  token: null, // Non utilisé, le cookie est envoyé automatiquement
   user: null,
 };
+
+// Debug: afficher la configuration
+console.log('🔧 Admin Panel Configuration:');
+console.log('  API URL:', API_URL);
+console.log('  Auth method: httpOnly cookies');
+console.log('  Current host:', window.location.host);
 
 // Éléments DOM
 const elements = {
@@ -115,7 +137,6 @@ async function apiRequest(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
   const headers = {
     'Content-Type': 'application/json',
-    ...(state.token && { 'Authorization': `Bearer ${state.token}` }),
     ...options.headers,
   };
 
@@ -123,6 +144,7 @@ async function apiRequest(endpoint, options = {}) {
     const response = await fetch(url, {
       ...options,
       headers,
+      credentials: 'include', // Important: envoyer les cookies httpOnly
     });
 
     const data = await response.json();

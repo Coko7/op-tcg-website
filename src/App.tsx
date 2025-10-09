@@ -14,8 +14,13 @@ import Register from './pages/Register';
 // Composant de redirection vers l'admin backend
 function AdminRedirect() {
   useEffect(() => {
-    // Rediriger vers le backend admin
-    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin`;
+    // Construire l'URL du backend
+    const backendUrl = import.meta.env.VITE_API_URL
+      ? import.meta.env.VITE_API_URL.replace('/api', '')
+      : 'http://localhost:5000';
+
+    // Rediriger vers le backend admin (le cookie sera automatiquement envoyé)
+    window.location.href = `${backendUrl}/admin`;
   }, []);
 
   return (
@@ -30,7 +35,7 @@ function AdminRedirect() {
     }}>
       <div style={{ textAlign: 'center' }}>
         <h1>🏴‍☠️ Redirection vers l'admin...</h1>
-        <p>Si la redirection ne fonctionne pas, <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/admin`} style={{ color: '#60a5fa' }}>cliquez ici</a></p>
+        <p style={{ marginTop: '1rem', color: '#94a3b8' }}>Vérification des droits d'accès...</p>
       </div>
     </div>
   );

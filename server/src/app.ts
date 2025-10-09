@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Database } from './utils/database.js';
@@ -129,6 +130,7 @@ const adminLimiter = rateLimit({
 });
 
 app.use(limiter);
+app.use(cookieParser()); // Parser les cookies
 app.use(express.json({ limit: '1mb' })); // Réduit à 1MB pour plus de sécurité
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(sqlInjectionProtection); // Protection SQL injection après le parsing du body

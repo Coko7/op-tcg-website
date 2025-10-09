@@ -24,8 +24,12 @@ declare module 'express' {
 
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    // Priorité: 1. Cookie httpOnly, 2. Authorization header
+    const tokenFromCookie = req.cookies?.accessToken;
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    const tokenFromHeader = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    const token = tokenFromCookie || tokenFromHeader;
 
     if (!token) {
       res.status(401).json({
