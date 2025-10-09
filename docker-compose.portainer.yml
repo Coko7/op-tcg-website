@@ -30,9 +30,13 @@ services:
       - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost,http://localhost:80}
+      - COOKIE_DOMAIN=${COOKIE_DOMAIN:-.polo2409.work}
     volumes:
-      # Volume persistant pour la base de donn�es
+      # Volume persistant pour la base de données
       - op_game_data:/app/data
+      # Volumes pour backups et logs
+      - op_game_backups:/app/backups
+      - op_game_logs:/app/logs
     networks:
       - op-game-network
     healthcheck:
@@ -80,8 +84,12 @@ services:
 volumes:
   op_game_data:
     driver: local
+  op_game_backups:
+    driver: local
+  op_game_logs:
+    driver: local
 
-# R�seau interne
+# Réseau interne
 networks:
   op-game-network:
     driver: bridge
