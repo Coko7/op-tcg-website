@@ -26,9 +26,19 @@ L'interface d'administration est **entièrement sécurisée** :
 
 ## 📍 Accès à l'interface
 
+### Via le frontend (après rebuild) ✅
+```
+http://localhost/admin
+```
+→ Redirige automatiquement vers le backend
+
+### Directement via le backend 🎯
 ```
 http://localhost:5000/admin
 ```
+
+**Important:** L'interface admin est servie par le **backend** (port 5000), pas le frontend React.
+Si vous accédez via `http://localhost/admin`, React Router redirigera automatiquement vers `http://localhost:5000/admin`.
 
 ## 🔑 Connexion
 
