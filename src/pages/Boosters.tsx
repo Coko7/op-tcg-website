@@ -8,6 +8,7 @@ import Card from '../components/Card';
 import CardDeck from '../components/CardDeck';
 import CardModal from '../components/CardModal';
 import Timer from '../components/Timer';
+import ChestAnimation3D from '../components/ChestAnimation3D';
 
 type AnimationPhase = 'idle' | 'opening' | 'deck' | 'revealing' | 'complete';
 
@@ -206,86 +207,6 @@ const Boosters: React.FC = () => {
     }, 2000);
   };
 
-  const BoosterPack: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-    <div
-      onClick={onClick}
-      className={`relative mx-auto cursor-pointer transition-all duration-700 w-72 h-72 ${
-        animationPhase === 'opening' ? 'scale-110' : 'hover:scale-105'
-      } ${animationPhase === 'revealing' ? 'opacity-0 scale-0' : ''}`}
-    >
-      {/* Particules ambiantes */}
-      {animationPhase === 'idle' && (
-        <div className="absolute inset-0 pointer-events-none">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-2 h-2 bg-amber-400 rounded-full animate-pulse"
-              style={{
-                top: `${20 + i * 10}%`,
-                left: `${10 + (i % 2) * 70}%`,
-                animationDelay: `${i * 0.3}s`,
-                opacity: 0.6
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Coffre au trésor moderne */}
-      <div className="relative w-full h-full group">
-        {/* Ombre du coffre avec glow */}
-        <div className="absolute inset-0 bg-gradient-to-b from-amber-500/30 to-orange-600/30 blur-2xl transform translate-y-6 opacity-60 group-hover:opacity-80 transition-opacity"></div>
-
-        {/* Corps du coffre */}
-        <div className="relative w-full h-full bg-gradient-to-br from-amber-500/90 via-orange-600/90 to-amber-700/90 rounded-3xl border-4 border-amber-400/50 backdrop-blur-sm shadow-2xl overflow-hidden">
-          {/* Texture subtile */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_40%,_black_100%)]"></div>
-          </div>
-
-          {/* Bandes métalliques modernes */}
-          <div className="absolute top-1/3 left-0 right-0 h-2 bg-gradient-to-r from-transparent via-amber-300/60 to-transparent"></div>
-          <div className="absolute bottom-1/3 left-0 right-0 h-2 bg-gradient-to-r from-transparent via-amber-300/60 to-transparent"></div>
-
-          {/* Serrure centrale moderne */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-            <div className="relative">
-              <div className="w-20 h-24 bg-gradient-to-br from-amber-300/90 to-orange-500/90 rounded-2xl border-2 border-amber-200/50 flex items-center justify-center shadow-xl backdrop-blur-sm">
-                <Gem size={44} className={`text-amber-100 ${animationPhase === 'opening' ? 'animate-spin' : 'group-hover:animate-pulse'}`} />
-              </div>
-              {/* Glow de la serrure */}
-              <div className="absolute inset-0 bg-amber-400 rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity"></div>
-            </div>
-          </div>
-
-          {/* Effet de brillance */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-40"></div>
-
-          {/* Animation d'ouverture améliorée */}
-          {animationPhase === 'opening' && (
-            <>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200/50 to-transparent animate-pulse"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="relative">
-                  <Sparkles size={64} className="text-amber-200 animate-spin" />
-                  <div className="absolute inset-0 bg-amber-300 blur-xl animate-pulse"></div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Effet de hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-transparent to-amber-300/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        </div>
-
-        {/* Texte en dessous moderne */}
-        <div className="absolute -bottom-16 left-0 right-0 text-center">
-          <div className="text-amber-400 font-bold text-xl drop-shadow-2xl mb-1">Coffre Mystérieux</div>
-          <div className="text-slate-300 text-sm font-medium">Cliquez pour découvrir vos cartes</div>
-        </div>
-      </div>
-    </div>
-  );
 
   if (loading) {
     return (
@@ -393,8 +314,12 @@ const Boosters: React.FC = () => {
 
       {animationPhase === 'idle' && (
         <div className="text-center space-y-6 sm:space-y-8">
-          <div className="mb-20">
-            <BoosterPack onClick={handleOpenBooster} />
+          <div className="mb-8">
+            <ChestAnimation3D
+              isOpening={false}
+              animationPhase={animationPhase}
+              onClick={handleOpenBooster}
+            />
           </div>
 
           <div className="space-y-3 sm:space-y-4 px-4">
@@ -453,7 +378,11 @@ const Boosters: React.FC = () => {
 
       {animationPhase === 'opening' && (
         <div className="text-center space-y-8">
-          <BoosterPack onClick={() => {}} />
+          <ChestAnimation3D
+            isOpening={true}
+            animationPhase={animationPhase}
+            onClick={() => {}}
+          />
 
           <div className="space-y-4">
             <div className="text-2xl font-bold text-white animate-pulse">
@@ -470,7 +399,7 @@ const Boosters: React.FC = () => {
         <div className="w-full max-w-6xl mx-auto px-2">
           <div className="text-center mb-6 sm:mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
-              🃏 Révélez vos cartes !
+              🃏 Vos cartes sortent du coffre !
             </h2>
             <div className="text-blue-300 text-sm sm:text-base">
               {boosterResult.new_cards.length > 0 && (
@@ -481,11 +410,22 @@ const Boosters: React.FC = () => {
             </div>
           </div>
 
-          <CardDeck
+          <ChestAnimation3D
+            isOpening={true}
+            animationPhase={animationPhase}
             cards={boosterResult.cards}
-            onCardRevealed={handleCardRevealed}
-            onComplete={handleDeckComplete}
+            onAnimationComplete={handleDeckComplete}
+            onClick={() => {}}
           />
+
+          <div className="text-center mt-6">
+            <button
+              onClick={handleDeckComplete}
+              className="btn-primary text-sm sm:text-base px-6 py-3"
+            >
+              Voir le résumé →
+            </button>
+          </div>
         </div>
       )}
 

@@ -2,10 +2,17 @@
 FROM node:20-alpine AS builder
 
 # Installer les dépendances système nécessaires
-RUN apk add --no-cache git
+RUN apk add --no-cache git curl
 
 # Définir le répertoire de travail
 WORKDIR /app
+
+# Configuration npm pour améliorer la fiabilité
+RUN npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-timeout 300000 && \
+    npm config set registry https://registry.npmjs.org/
 
 # Copier les fichiers de dépendances
 COPY package.json package-lock.json ./
@@ -16,8 +23,12 @@ COPY eslint.config.js ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
 
-# Installer toutes les dépendances (y compris dev pour le build)
-RUN npm ci --prefer-offline --no-audit --loglevel=verbose
+# Installer toutes les dépendances avec retry
+# Essayer npm ci d'abord, sinon fallback sur npm install
+RUN npm ci --prefer-offline --no-audit || \
+    (echo "npm ci failed, trying npm install..." && \
+     rm -rf node_modules package-lock.json && \
+     npm install --no-audit)
 
 # Copier le code source
 COPY src ./src
