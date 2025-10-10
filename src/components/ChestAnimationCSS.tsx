@@ -1,0 +1,462 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Card as CardType } from '../types';
+
+interface ChestAnimationCSSProps {
+  isOpening: boolean;
+  animationPhase: 'idle' | 'opening' | 'deck' | 'revealing' | 'complete';
+  cards?: CardType[];
+  onAnimationComplete?: () => void;
+  onClick?: () => void;
+}
+
+const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
+  isOpening,
+  animationPhase,
+  cards,
+  onAnimationComplete,
+  onClick,
+}) => {
+  const [revealedCount, setRevealedCount] = useState(0);
+  const [animating, setAnimating] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const particlesRef = useRef<Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    alpha: number;
+    size: number;
+    color: string;
+  }>>([]);
+
+  // Animation des particules avec Canvas
+  useEffect(() => {
+    if (!isOpening && animationPhase !== 'deck') return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Initialiser les particules
+    if (particlesRef.current.length === 0) {
+      for (let i = 0; i < 100; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 3 + 1;
+        particlesRef.current.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - Math.random() * 2,
+          alpha: 1,
+          size: Math.random() * 4 + 2,
+          color: ['#FFD700', '#FFA500', '#FF6B35', '#FBBF24'][Math.floor(Math.random() * 4)]
+        });
+      }
+    }
+
+    let animationId: number;
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Dessiner et mettre à jour les particules
+      particlesRef.current.forEach((particle, index) => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vy += 0.1; // Gravité
+        particle.alpha -= 0.01;
+
+        if (particle.alpha > 0) {
+          ctx.globalAlpha = particle.alpha;
+          ctx.fillStyle = particle.color;
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // Réinitialiser la particule
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 3 + 1;
+          particle.x = canvas.width / 2;
+          particle.y = canvas.height / 2;
+          particle.vx = Math.cos(angle) * speed;
+          particle.vy = Math.sin(angle) * speed - Math.random() * 2;
+          particle.alpha = 1;
+        }
+      });
+
+      ctx.globalAlpha = 1;
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      particlesRef.current = [];
+    };
+  }, [isOpening, animationPhase]);
+
+  const handleStackClick = () => {
+    if (animating || !cards || revealedCount >= cards.length) return;
+
+    setAnimating(true);
+    setTimeout(() => {
+      setRevealedCount(prev => {
+        const newCount = prev + 1;
+        if (newCount >= cards.length) {
+          setTimeout(() => onAnimationComplete?.(), 800);
+        }
+        return newCount;
+      });
+      setAnimating(false);
+    }, 600);
+  };
+
+  const getRarityColor = (rarity: string) => {
+    const colors: Record<string, string> = {
+      common: '#9CA3AF',
+      uncommon: '#10B981',
+      rare: '#3B82F6',
+      super_rare: '#A855F7',
+      secret_rare: '#FBBF24',
+    };
+    return colors[rarity] || colors.common;
+  };
+
+  const getRarityGradient = (rarity: string) => {
+    const gradients: Record<string, string> = {
+      common: 'from-gray-600 to-gray-800',
+      uncommon: 'from-green-600 to-green-800',
+      rare: 'from-blue-600 to-blue-800',
+      super_rare: 'from-purple-600 to-purple-800',
+      secret_rare: 'from-yellow-500 to-yellow-700',
+    };
+    return gradients[rarity] || gradients.common;
+  };
+
+  return (
+    <div className="relative w-full h-[600px] bg-gradient-to-b from-sky-400 via-sky-500 to-blue-400 rounded-2xl overflow-hidden shadow-2xl">
+      {/* Canvas pour les particules */}
+      <canvas
+        ref={canvasRef}
+        width={800}
+        height={600}
+        className="absolute inset-0 w-full h-full pointer-events-none z-10"
+      />
+
+      {/* Phase IDLE - Coffre fermé */}
+      {(animationPhase === 'idle' || animationPhase === 'opening') && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div
+            className={`chest-container cursor-pointer transition-transform duration-300 hover:scale-105 ${
+              isOpening ? 'opening' : ''
+            }`}
+            onClick={onClick}
+            style={{ perspective: '1000px' }}
+          >
+            {/* Coffre */}
+            <div className="chest relative w-64 h-48">
+              {/* Corps du coffre */}
+              <div className="chest-body absolute bottom-0 w-full h-32 bg-gradient-to-b from-amber-800 to-amber-900 rounded-lg border-4 border-yellow-600 shadow-2xl">
+                {/* Détails du coffre - planches */}
+                <div className="absolute inset-0 flex justify-around p-2">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="w-1 h-full bg-amber-950/50 rounded" />
+                  ))}
+                </div>
+
+                {/* Bandes métalliques */}
+                <div className="absolute top-2 left-0 right-0 h-2 bg-gradient-to-r from-yellow-700 via-yellow-500 to-yellow-700 shadow-inner" />
+                <div className="absolute bottom-2 left-0 right-0 h-2 bg-gradient-to-r from-yellow-700 via-yellow-500 to-yellow-700 shadow-inner" />
+
+                {/* Pieds du coffre */}
+                {[-1, 1].map((dir) => (
+                  <React.Fragment key={dir}>
+                    <div
+                      className="absolute bottom-[-8px] w-6 h-4 bg-gradient-to-b from-yellow-600 to-yellow-800 rounded"
+                      style={{ left: dir === -1 ? '10px' : 'auto', right: dir === 1 ? '10px' : 'auto' }}
+                    />
+                  </React.Fragment>
+                ))}
+
+                {/* Serrure ornée */}
+                <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-16 h-20 flex items-center justify-center">
+                  <div className="relative w-12 h-16 bg-gradient-to-b from-yellow-500 to-yellow-700 rounded-lg shadow-lg border-2 border-yellow-600">
+                    {/* Gemme centrale */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-red-500 rounded-full shadow-lg animate-pulse">
+                      <div className="absolute inset-1 bg-red-400 rounded-full" />
+                      <div className="absolute inset-2 bg-red-300 rounded-full" />
+                    </div>
+                    {/* Ornements autour */}
+                    {[0, 90, 180, 270].map((angle) => (
+                      <div
+                        key={angle}
+                        className="absolute w-2 h-2 bg-yellow-400 rounded-full"
+                        style={{
+                          top: '50%',
+                          left: '50%',
+                          transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-16px)`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Couvercle du coffre */}
+              <div
+                className={`chest-lid absolute top-0 w-full h-24 bg-gradient-to-b from-amber-700 to-amber-900 rounded-t-lg border-4 border-yellow-600 shadow-2xl transition-all duration-1000 origin-bottom ${
+                  isOpening ? 'rotate-x-120' : ''
+                }`}
+                style={{
+                  transformStyle: 'preserve-3d',
+                  transform: isOpening ? 'rotateX(-120deg)' : 'rotateX(0deg)',
+                }}
+              >
+                {/* Planches du couvercle */}
+                <div className="absolute inset-0 flex justify-around p-2">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="w-1 h-full bg-amber-950/50 rounded" />
+                  ))}
+                </div>
+
+                {/* Bandes métalliques du couvercle */}
+                <div className="absolute top-4 left-0 right-0 h-1.5 bg-gradient-to-r from-yellow-700 via-yellow-500 to-yellow-700 shadow-inner" />
+                <div className="absolute bottom-4 left-0 right-0 h-1.5 bg-gradient-to-r from-yellow-700 via-yellow-500 to-yellow-700 shadow-inner" />
+
+                {/* Charnières */}
+                {[-1, 1].map((dir) => (
+                  <div
+                    key={dir}
+                    className="absolute bottom-0 w-4 h-3 bg-gray-700 rounded"
+                    style={{ left: dir === -1 ? '20px' : 'auto', right: dir === 1 ? '20px' : 'auto' }}
+                  />
+                ))}
+              </div>
+
+              {/* Lueur magique quand le coffre s'ouvre */}
+              {isOpening && (
+                <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-32 h-32">
+                  <div className="absolute inset-0 bg-yellow-400 rounded-full opacity-60 animate-ping" />
+                  <div className="absolute inset-4 bg-yellow-300 rounded-full opacity-80 animate-pulse" />
+                  <div className="absolute inset-8 bg-yellow-200 rounded-full opacity-100" />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Phase DECK - Pile de cartes */}
+      {animationPhase === 'deck' && cards && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          {/* Instructions */}
+          <div className="absolute top-8 left-0 right-0 text-center z-20 px-4">
+            <div className="inline-block backdrop-blur-sm bg-black/40 py-3 px-6 rounded-lg">
+              <p className="text-white font-semibold text-lg mb-1">
+                🎴 Cliquez sur la pile pour découvrir vos cartes !
+              </p>
+              <p className="text-blue-300 text-sm">
+                {revealedCount} / {cards.length} cartes révélées
+              </p>
+            </div>
+          </div>
+
+          {/* Pile de cartes au centre */}
+          <div
+            className={`relative cursor-pointer transition-transform hover:scale-105 ${
+              animating ? 'animate-bounce' : ''
+            }`}
+            onClick={handleStackClick}
+            style={{ width: '200px', height: '280px' }}
+          >
+            {cards
+              .slice(revealedCount, Math.min(revealedCount + 5, cards.length))
+              .map((card, i) => {
+                const cardIndex = revealedCount + i;
+                const isTop = i === 0;
+                const offset = i * 4;
+
+                return (
+                  <div
+                    key={`stack-${cardIndex}`}
+                    className={`absolute card-back transition-all duration-300 ${
+                      isTop ? 'hover:translate-y-[-8px]' : ''
+                    }`}
+                    style={{
+                      width: '200px',
+                      height: '280px',
+                      transform: `translateY(${offset}px) translateZ(${-i * 10}px)`,
+                      zIndex: 10 - i,
+                    }}
+                  >
+                    {/* Bordure de rareté */}
+                    <div
+                      className="absolute inset-0 rounded-xl p-1"
+                      style={{
+                        background: `linear-gradient(135deg, ${getRarityColor(card.rarity)}, ${getRarityColor(card.rarity)}dd)`,
+                        boxShadow: isTop ? `0 0 30px ${getRarityColor(card.rarity)}` : 'none',
+                      }}
+                    >
+                      {/* Dos de carte */}
+                      <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg flex items-center justify-center relative overflow-hidden">
+                        {/* Pattern de fond */}
+                        <div className="absolute inset-0 opacity-20">
+                          <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black" />
+                          {[...Array(8)].map((_, i) => (
+                            <div
+                              key={i}
+                              className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-gray-600 to-transparent"
+                              style={{ top: `${(i + 1) * 12.5}%` }}
+                            />
+                          ))}
+                        </div>
+
+                        {/* Logo central animé pour la carte du dessus */}
+                        {isTop && (
+                          <div className="relative z-10">
+                            <div
+                              className="w-24 h-24 rounded-full animate-pulse"
+                              style={{
+                                background: `radial-gradient(circle, ${getRarityColor(card.rarity)}, transparent)`,
+                              }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div
+                                className="w-16 h-16 rounded-full border-4 animate-spin-slow"
+                                style={{ borderColor: `${getRarityColor(card.rarity)} transparent ${getRarityColor(card.rarity)} transparent` }}
+                              />
+                            </div>
+                            <div className="absolute inset-0 flex items-center justify-center text-4xl">
+                              🃏
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Effet de brillance */}
+                    {isTop && (
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent rounded-xl pointer-events-none" />
+                    )}
+                  </div>
+                );
+              })}
+
+            {/* Message quand toutes les cartes sont révélées */}
+            {revealedCount >= cards.length && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center backdrop-blur-sm bg-green-500/80 p-6 rounded-xl">
+                  <div className="text-4xl mb-2">✨</div>
+                  <p className="text-white font-bold text-xl">Toutes révélées !</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Cartes révélées sur le côté droit */}
+          <div className="absolute right-4 top-24 bottom-4 w-48 overflow-y-auto space-y-3 z-10">
+            {cards.slice(0, revealedCount).map((card, i) => (
+              <div
+                key={`revealed-${card.id}-${i}`}
+                className={`bg-gradient-to-br ${getRarityGradient(card.rarity)} rounded-lg p-2 shadow-2xl transform transition-all duration-500 hover:scale-105`}
+                style={{
+                  animation: `slideInRight 0.5s ease-out ${i * 0.1}s both`,
+                }}
+              >
+                <div className="bg-gray-900 rounded-md overflow-hidden">
+                  {card.image_url ? (
+                    <img
+                      src={card.image_url}
+                      alt={card.name}
+                      className="w-full h-auto object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src =
+                          'https://via.placeholder.com/300x420?text=No+Image';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-40 flex items-center justify-center bg-gray-800">
+                      <span className="text-gray-500 text-xs">No Image</span>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-2 text-center">
+                  <p className="text-white text-xs font-semibold truncate">{card.name}</p>
+                  <p className="text-white/70 text-xs">{card.cost} 💎</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Instructions en bas pour la phase idle */}
+      {animationPhase === 'idle' && (
+        <div className="absolute bottom-4 left-0 right-0 text-center px-4">
+          <p className="text-white/90 text-sm backdrop-blur-sm bg-black/30 py-2 px-4 rounded-lg inline-block shadow-lg">
+            🖱️ Cliquez sur le coffre pour l'ouvrir
+          </p>
+        </div>
+      )}
+
+      {/* Message d'ouverture */}
+      {animationPhase === 'opening' && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+          <div className="backdrop-blur-sm bg-black/40 py-4 px-8 rounded-xl">
+            <p className="text-white font-bold text-2xl animate-pulse">
+              ✨ Ouverture du coffre... ✨
+            </p>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(100px) scale(0.8);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+          }
+        }
+
+        .chest-container {
+          animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+
+        .card-back {
+          transform-style: preserve-3d;
+        }
+
+        @keyframes spin-slow {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        .animate-spin-slow {
+          animation: spin-slow 3s linear infinite;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default ChestAnimationCSS;

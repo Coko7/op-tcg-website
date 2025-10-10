@@ -1,16 +1,13 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, ArrowLeft, Sparkles, ChevronLeft, ChevronRight, Coins, Gem } from 'lucide-react';
+import { ArrowLeft, Sparkles, ChevronLeft, ChevronRight, Coins } from 'lucide-react';
 import { GameService } from '../services/gameService';
 import { BoosterResult, Card as CardType, BOOSTER_BERRY_PRICE } from '../types';
 import { BoosterPack } from '../data/onePieceCards';
 import Card from '../components/Card';
-import CardDeck from '../components/CardDeck';
 import CardModal from '../components/CardModal';
 import Timer from '../components/Timer';
-
-// Lazy load du composant 3D pour éviter de charger Three.js sur toutes les pages
-const ChestAnimation3D = lazy(() => import('../components/ChestAnimation3D'));
+import ChestAnimationCSS from '../components/ChestAnimationCSS';
 
 type AnimationPhase = 'idle' | 'opening' | 'deck' | 'revealing' | 'complete';
 
@@ -317,13 +314,11 @@ const Boosters: React.FC = () => {
       {animationPhase === 'idle' && (
         <div className="text-center space-y-6 sm:space-y-8">
           <div className="mb-8">
-            <Suspense fallback={<div className="text-white text-center py-20">Chargement du coffre 3D...</div>}>
-              <ChestAnimation3D
-                isOpening={false}
-                animationPhase={animationPhase}
-                onClick={handleOpenBooster}
-              />
-            </Suspense>
+            <ChestAnimationCSS
+              isOpening={false}
+              animationPhase={animationPhase}
+              onClick={handleOpenBooster}
+            />
           </div>
 
           <div className="space-y-3 sm:space-y-4 px-4">
@@ -382,49 +377,23 @@ const Boosters: React.FC = () => {
 
       {animationPhase === 'opening' && (
         <div className="text-center space-y-8">
-          <Suspense fallback={<div className="text-white text-center py-20">Chargement...</div>}>
-            <ChestAnimation3D
-              isOpening={true}
-              animationPhase={animationPhase}
-              onClick={() => {}}
-            />
-          </Suspense>
-
-          <div className="space-y-4">
-            <div className="text-2xl font-bold text-white animate-pulse">
-              Ouverture en cours...
-            </div>
-            <div className="text-blue-300">
-              La magie de Grand Line opère... ✨
-            </div>
-          </div>
+          <ChestAnimationCSS
+            isOpening={true}
+            animationPhase={animationPhase}
+            onClick={() => {}}
+          />
         </div>
       )}
 
       {animationPhase === 'deck' && boosterResult && (
         <div className="w-full max-w-6xl mx-auto px-2">
-          <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
-              🃏 Vos cartes sortent du coffre !
-            </h2>
-            <div className="text-blue-300 text-sm sm:text-base">
-              {boosterResult.new_cards.length > 0 && (
-                <p>
-                  {boosterResult.new_cards.length} nouvelle(s) carte(s) ajoutée(s) !
-                </p>
-              )}
-            </div>
-          </div>
-
-          <Suspense fallback={<div className="text-white text-center py-20">Chargement...</div>}>
-            <ChestAnimation3D
-              isOpening={true}
-              animationPhase={animationPhase}
-              cards={boosterResult.cards}
-              onAnimationComplete={handleDeckComplete}
-              onClick={() => {}}
-            />
-          </Suspense>
+          <ChestAnimationCSS
+            isOpening={true}
+            animationPhase={animationPhase}
+            cards={boosterResult.cards}
+            onAnimationComplete={handleDeckComplete}
+            onClick={() => {}}
+          />
 
           <div className="text-center mt-6">
             <button

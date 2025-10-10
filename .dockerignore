@@ -89,3 +89,8 @@ token.json
 *.backup
 .pnp.*
 .yarn/
+
+# Composants Three.js désactivés
+src/components/ChestAnimation3D.tsx.backup
+dist/assets/three-*.js
+dist/assets/ChestAnimation3D-*.js
