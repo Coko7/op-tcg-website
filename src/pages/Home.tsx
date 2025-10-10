@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, BookOpen, TrendingUp, RotateCcw, Gift, Coins } from 'lucide-react';
+import { Package, BookOpen, TrendingUp, Gift, Coins } from 'lucide-react';
 import { GameService } from '../services/gameService';
 import { BoosterStatus, User } from '../types';
 import Timer from '../components/Timer';
 import DailyRewardModal from '../components/DailyRewardModal';
 import { apiService } from '../services/api';
+import { Button, GameCard, ProgressBar, StatDisplay } from '../components/ui';
 
 const Home: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -154,26 +155,25 @@ const Home: React.FC = () => {
         }}
       />
 
-      <section className="text-center px-2">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
+      <section className="text-center px-2 py-8">
+        <div className="text-6xl mb-4 animate-float">🏴‍☠️</div>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-ocean-400 via-treasure-400 to-ocean-400 bg-clip-text text-transparent">
           Bienvenue sur One Piece TCG!
         </h1>
-        <p className="text-blue-200 text-sm sm:text-base md:text-lg">
+        <p className="text-slate-300 text-base sm:text-lg md:text-xl max-w-2xl mx-auto">
           Explorez les mers de Grand Line et collectionnez les cartes légendaires !
         </p>
       </section>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {/* Carte Récompense Quotidienne */}
-        <div className="group relative bg-gradient-to-br from-amber-500/20 to-orange-600/20 backdrop-blur-md rounded-2xl p-4 sm:p-6 border border-amber-400/30 hover:border-amber-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-amber-500/20">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-400/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div className="relative">
-            <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
-              <div className="p-2 bg-amber-500/20 rounded-lg">
-                <Gift className="text-amber-300" size={20} />
-              </div>
-              <h2 className="text-lg sm:text-xl font-bold text-white">Récompense Quotidienne</h2>
+        <GameCard variant="treasure" className="p-4 sm:p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="p-2 bg-treasure-500/20 rounded-xl">
+              <Gift className="text-treasure-300" size={24} />
             </div>
+            <h2 className="text-lg sm:text-xl font-bold text-white">Récompense</h2>
+          </div>
 
             <div className="space-y-2 sm:space-y-3">
               {dailyRewardAvailable ? (
@@ -188,12 +188,13 @@ const Home: React.FC = () => {
                       <p className="text-white font-bold text-2xl">10</p>
                     </div>
                   </div>
-                  <button
+                  <Button
                     onClick={handleOpenDailyReward}
-                    className="block w-full text-center py-3 px-4 text-sm sm:text-base rounded-xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all transform hover:scale-105 hover:shadow-lg shadow-amber-500/50"
+                    variant="treasure"
+                    className="w-full"
                   >
                     Réclamer maintenant
-                  </button>
+                  </Button>
                 </>
               ) : (
                 <>
@@ -204,28 +205,26 @@ const Home: React.FC = () => {
                     <p className="text-slate-300 text-sm mb-2">Déjà réclamée aujourd'hui</p>
                     <p className="text-slate-400 text-xs mb-3">Revenez demain !</p>
                   </div>
-                  <button
+                  <Button
                     disabled
-                    className="block w-full text-center py-3 px-4 text-sm sm:text-base rounded-xl font-medium bg-slate-700/50 text-slate-400 cursor-not-allowed"
+                    variant="secondary"
+                    className="w-full"
                   >
                     Indisponible
-                  </button>
+                  </Button>
                 </>
               )}
             </div>
-          </div>
-        </div>
+        </GameCard>
 
         {/* Carte Boosters */}
-        <div className="group relative bg-gradient-to-br from-blue-500/20 to-indigo-600/20 backdrop-blur-md rounded-2xl p-4 sm:p-6 border border-blue-400/30 hover:border-blue-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div className="relative">
-            <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
-              <div className="p-2 bg-blue-500/20 rounded-lg">
-                <Package className="text-blue-300" size={20} />
-              </div>
-              <h2 className="text-lg sm:text-xl font-bold text-white">Boosters</h2>
+        <GameCard variant="ocean" className="p-4 sm:p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="p-2 bg-ocean-500/20 rounded-xl">
+              <Package className="text-ocean-300" size={24} />
             </div>
+            <h2 className="text-lg sm:text-xl font-bold text-white">Boosters</h2>
+          </div>
 
             <div className="space-y-3">
               <div className="flex justify-between items-center">
@@ -254,76 +253,62 @@ const Home: React.FC = () => {
                 </div>
               )}
 
-              <Link
-                to="/boosters"
-                className={`block w-full text-center py-3 px-4 text-sm sm:text-base rounded-xl font-bold transition-all ${
-                  canOpenBooster
-                    ? 'btn-primary hover:scale-105'
-                    : 'btn-disabled'
-                }`}
-              >
-                {canOpenBooster ? '🎲 Ouvrir Booster' : 'Indisponible'}
+              <Link to="/boosters" className="block w-full">
+                <Button
+                  variant={canOpenBooster ? 'primary' : 'secondary'}
+                  disabled={!canOpenBooster}
+                  className="w-full"
+                >
+                  {canOpenBooster ? '🎲 Ouvrir Booster' : 'Indisponible'}
+                </Button>
               </Link>
             </div>
-          </div>
-        </div>
+        </GameCard>
 
         {/* Carte Collection */}
-        <div className="group relative bg-gradient-to-br from-emerald-500/20 to-green-600/20 backdrop-blur-md rounded-2xl p-4 sm:p-6 border border-emerald-400/30 hover:border-emerald-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/20">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div className="relative">
-            <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
-              <div className="p-2 bg-emerald-500/20 rounded-lg">
-                <BookOpen className="text-emerald-300" size={20} />
-              </div>
-              <h2 className="text-lg sm:text-xl font-bold text-white">Collection</h2>
+        <GameCard variant="success" className="p-4 sm:p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="p-2 bg-emerald-500/20 rounded-xl">
+              <BookOpen className="text-emerald-300" size={24} />
             </div>
-
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-300">Progression</span>
-                  <span className="text-white font-bold text-lg">{stats.collection_completion}%</span>
-                </div>
-                <div className="w-full bg-slate-700 rounded-full h-2.5 overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-emerald-500 to-green-400 transition-all duration-1000 ease-out"
-                    style={{ width: `${stats.collection_completion}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-center">
-                <div className="bg-slate-800/50 rounded-lg p-2">
-                  <p className="text-2xl font-bold text-white">{stats.unique_cards}</p>
-                  <p className="text-xs text-slate-400">Uniques</p>
-                </div>
-                <div className="bg-slate-800/50 rounded-lg p-2">
-                  <p className="text-2xl font-bold text-white">{stats.total_cards}</p>
-                  <p className="text-xs text-slate-400">Total</p>
-                </div>
-              </div>
-
-              <Link
-                to="/collection"
-                className="block w-full text-center py-3 px-4 text-sm sm:text-base rounded-xl font-bold btn-primary"
-              >
-                📚 Voir Collection
-              </Link>
-            </div>
+            <h2 className="text-lg sm:text-xl font-bold text-white">Collection</h2>
           </div>
-        </div>
+
+          <div className="space-y-3">
+            <ProgressBar
+              value={stats.collection_completion}
+              variant="success"
+              showLabel
+              label="Progression"
+            />
+
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-slate-800/50 rounded-lg p-2 text-center">
+                <p className="text-2xl font-bold text-white">{stats.unique_cards}</p>
+                <p className="text-xs text-slate-400">Uniques</p>
+              </div>
+              <div className="bg-slate-800/50 rounded-lg p-2 text-center">
+                <p className="text-2xl font-bold text-white">{stats.total_cards}</p>
+                <p className="text-xs text-slate-400">Total</p>
+              </div>
+            </div>
+
+            <Link to="/collection" className="block w-full">
+              <Button variant="primary" className="w-full">
+                📚 Voir Collection
+              </Button>
+            </Link>
+          </div>
+        </GameCard>
 
         {/* Carte Statistiques */}
-        <div className="group relative bg-gradient-to-br from-purple-500/20 to-fuchsia-600/20 backdrop-blur-md rounded-2xl p-4 sm:p-6 border border-purple-400/30 hover:border-purple-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div className="relative">
-            <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
-              <div className="p-2 bg-purple-500/20 rounded-lg">
-                <TrendingUp className="text-purple-300" size={20} />
-              </div>
-              <h2 className="text-lg sm:text-xl font-bold text-white">Statistiques</h2>
+        <GameCard variant="default" className="p-4 sm:p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="p-2 bg-purple-500/20 rounded-xl">
+              <TrendingUp className="text-purple-300" size={24} />
             </div>
+            <h2 className="text-lg sm:text-xl font-bold text-white">Statistiques</h2>
+          </div>
 
             <div className="space-y-3">
               <p className="text-slate-300 text-xs font-medium">Répartition par rareté</p>
@@ -375,32 +360,35 @@ const Home: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+        </GameCard>
       </div>
 
-      <section className="text-center py-8 sm:py-12 px-2">
-        <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🏴‍☠️</div>
-        <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
-          Prêt pour l'aventure ?
-        </h2>
-        <p className="text-blue-200 text-sm sm:text-base mb-4 sm:mb-6">
-          Ouvrez des boosters pour agrandir votre collection de cartes légendaires !
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
-          <Link
-            to="/boosters"
-            className={`inline-block py-3 px-6 text-sm sm:text-base rounded-lg font-bold transition-all ${canOpenBooster ? 'btn-primary' : 'btn-disabled'}`}
-          >
-            {canOpenBooster ? 'Ouvrir un Booster!' : 'Patience, moussaillon...'}
-          </Link>
-          <Link
-            to="/collection"
-            className="inline-block py-3 px-6 text-sm sm:text-base rounded-lg font-bold bg-green-600 hover:bg-green-700 text-white transition-all"
-          >
-            Voir ma Collection
-          </Link>
-        </div>
+      <section className="text-center py-12 px-4">
+        <GameCard variant="ocean" className="p-8 max-w-3xl mx-auto" glow>
+          <div className="text-5xl sm:text-6xl mb-4 animate-float">⚓</div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+            Prêt pour l'aventure ?
+          </h2>
+          <p className="text-slate-300 text-base sm:text-lg mb-6 max-w-xl mx-auto">
+            Ouvrez des boosters pour agrandir votre collection de cartes légendaires !
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/boosters">
+              <Button
+                variant={canOpenBooster ? 'treasure' : 'secondary'}
+                disabled={!canOpenBooster}
+                size="lg"
+              >
+                {canOpenBooster ? '🎲 Ouvrir un Booster!' : 'Patience, moussaillon...'}
+              </Button>
+            </Link>
+            <Link to="/collection">
+              <Button variant="primary" size="lg">
+                📚 Voir ma Collection
+              </Button>
+            </Link>
+          </div>
+        </GameCard>
       </section>
     </div>
   );
