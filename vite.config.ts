@@ -14,8 +14,20 @@ export default defineConfig({
   },
   build: {
     target: 'es2020',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'three-vendor': ['three'],
+          'three-react': ['@react-three/fiber', '@react-three/drei']
+        }
+      }
+    },
     commonjsOptions: {
-      include: [/three/, /node_modules/]
+      include: [/three/, /node_modules/],
+      transformMixedEsModules: true
     }
+  },
+  resolve: {
+    dedupe: ['three']
   }
 })
