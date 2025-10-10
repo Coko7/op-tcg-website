@@ -15,7 +15,7 @@ RUN npm config set fetch-retries 5 && \
     npm config set registry https://registry.npmjs.org/
 
 # Copier les fichiers de dépendances
-COPY package.json package-lock.json ./
+COPY package.json ./
 COPY tsconfig.json ./
 COPY tsconfig.node.json ./
 COPY vite.config.ts ./
@@ -23,12 +23,8 @@ COPY eslint.config.js ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
 
-# Installer toutes les dépendances avec retry
-# Essayer npm ci d'abord, sinon fallback sur npm install
-RUN npm ci --prefer-offline --no-audit || \
-    (echo "npm ci failed, trying npm install..." && \
-     rm -rf node_modules package-lock.json && \
-     npm install --no-audit)
+# Installer toutes les dépendances
+RUN npm install --no-audit
 
 # Copier le code source
 COPY src ./src
