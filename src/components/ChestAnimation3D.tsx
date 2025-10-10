@@ -229,19 +229,19 @@ function Card3D({
         meshRef.current.rotation.y = elapsedTime * 0.5;
         meshRef.current.rotation.x = Math.sin(elapsedTime * 0.3) * 0.1;
       }
+
+      // Scale animation
+      if (timeSinceStart < 1.5) {
+        const scaleProgress = Math.min(timeSinceStart / 0.5, 1);
+        const scale = THREE.MathUtils.lerp(0, 1, scaleProgress);
+        meshRef.current.scale.set(scale, scale, scale);
+      } else {
+        meshRef.current.scale.set(1, 1, 1);
+      }
     } else {
       // Avant le démarrage, reste au centre du coffre
       meshRef.current.position.set(0, 0, 0);
       meshRef.current.scale.set(0, 0, 0);
-    }
-
-    // Scale animation
-    if (hasStarted && timeSinceStart < 1.5) {
-      const scaleProgress = Math.min(timeSinceStart / 0.5, 1);
-      const scale = THREE.MathUtils.lerp(0, 1, scaleProgress);
-      meshRef.current.scale.set(scale, scale, scale);
-    } else if (hasStarted) {
-      meshRef.current.scale.set(1, 1, 1);
     }
   });
 
