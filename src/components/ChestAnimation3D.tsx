@@ -51,6 +51,7 @@ function MagicParticles({ isActive }: { isActive: boolean }) {
           count={particleCount}
           array={positions}
           itemSize={3}
+          args={[positions, 3]}
         />
       </bufferGeometry>
       <pointsMaterial
@@ -271,28 +272,43 @@ function Chest({ isOpening, onClick, animationPhase }: {
             </React.Fragment>
           ))}
 
-          {/* Serrure ornée avec gemme centrale */}
+              {/* Serrure ornée avec gemme centrale - style pirate */}
           <mesh position={[0, 0.05, 0.82]} material={metalMaterial}>
-            <boxGeometry args={[0.35, 0.5, 0.12]} />
+            <boxGeometry args={[0.4, 0.55, 0.12]} />
           </mesh>
-          {/* Cadre autour de la serrure */}
+          {/* Cadre décoratif autour de la serrure */}
           <mesh position={[0, 0.05, 0.84]} material={metalMaterial}>
-            <torusGeometry args={[0.25, 0.03, 8, 16]} />
+            <torusGeometry args={[0.28, 0.04, 8, 16]} />
           </mesh>
-          {/* Gemme centrale brillante */}
-          <mesh position={[0, 0.05, 0.88]} material={gemMaterial}>
-            <dodecahedronGeometry args={[0.18, 0]} />
+          {/* Deuxième cadre pour plus de détail */}
+          <mesh position={[0, 0.05, 0.845]} material={metalMaterial}>
+            <torusGeometry args={[0.22, 0.02, 8, 16]} />
           </mesh>
-          {/* Petites gemmes décoratives */}
-          {[[-0.2, 0.3], [0.2, 0.3], [-0.2, -0.2], [0.2, -0.2]].map((pos, i) => (
-            <mesh
-              key={`small-gem-${i}`}
-              position={[pos[0], pos[1], 0.85]}
-              material={gemMaterial}
-            >
-              <octahedronGeometry args={[0.06, 0]} />
-            </mesh>
-          ))}
+          {/* Gemme centrale brillante (plus grosse) */}
+          <mesh position={[0, 0.05, 0.9]} material={gemMaterial}>
+            <dodecahedronGeometry args={[0.2, 0]} />
+          </mesh>
+          {/* Petites gemmes décoratives en cercle */}
+          {Array.from({ length: 8 }).map((_, i) => {
+            const angle = (i / 8) * Math.PI * 2;
+            const radius = 0.35;
+            return (
+              <mesh
+                key={`small-gem-${i}`}
+                position={[Math.cos(angle) * radius, Math.sin(angle) * radius, 0.86]}
+                material={gemMaterial}
+              >
+                <octahedronGeometry args={[0.04, 0]} />
+              </mesh>
+            );
+          })}
+          {/* Symbole de trésor - croix dorée */}
+          <mesh position={[0, -0.3, 0.83]} material={metalMaterial}>
+            <boxGeometry args={[0.15, 0.05, 0.05]} />
+          </mesh>
+          <mesh position={[0, -0.3, 0.83]} material={metalMaterial}>
+            <boxGeometry args={[0.05, 0.15, 0.05]} />
+          </mesh>
         </mesh>
       </group>
 
@@ -316,14 +332,211 @@ function Chest({ isOpening, onClick, animationPhase }: {
       {/* Charnières détaillées */}
       {[-0.8, 0, 0.8].map((x, i) => (
         <group key={`hinge-${i}`} position={[x, 0.65, -0.81]}>
-          <mesh material={ironMaterial}>
-            <cylinderGeometry args={[0.05, 0.05, 0.15, 8]} rotation={[Math.PI / 2, 0, 0]} />
+          <mesh material={ironMaterial} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.05, 0.05, 0.15, 8]} />
           </mesh>
           <mesh position={[0, 0.1, 0]} material={ironMaterial}>
             <boxGeometry args={[0.12, 0.2, 0.08]} />
           </mesh>
         </group>
       ))}
+
+      {/* Rivets décoratifs dorés sur la base */}
+      {[
+        [-0.9, 0.5, 0.78], [0, 0.5, 0.78], [0.9, 0.5, 0.78],
+        [-0.9, 0, 0.78], [0.9, 0, 0.78],
+        [-0.9, -0.5, 0.78], [0, -0.5, 0.78], [0.9, -0.5, 0.78],
+      ].map((pos, i) => (
+        <mesh key={`rivet-front-${i}`} position={pos as [number, number, number]} material={metalMaterial}>
+          <sphereGeometry args={[0.04, 8, 8]} />
+        </mesh>
+      ))}
+
+      {/* Rivets sur l'arrière */}
+      {[
+        [-0.9, 0.5, -0.78], [0, 0.5, -0.78], [0.9, 0.5, -0.78],
+        [-0.9, 0, -0.78], [0.9, 0, -0.78],
+        [-0.9, -0.5, -0.78], [0, -0.5, -0.78], [0.9, -0.5, -0.78],
+      ].map((pos, i) => (
+        <mesh key={`rivet-back-${i}`} position={pos as [number, number, number]} material={metalMaterial}>
+          <sphereGeometry args={[0.04, 8, 8]} />
+        </mesh>
+      ))}
+
+      {/* Anneaux de transport sur les côtés */}
+      {[[-1.15, 0.2, 0], [1.15, 0.2, 0]].map((pos, i) => (
+        <group key={`ring-${i}`} position={pos as [number, number, number]}>
+          <mesh material={metalMaterial} rotation={[0, 0, Math.PI / 2]}>
+            <torusGeometry args={[0.15, 0.04, 8, 16]} />
+          </mesh>
+          {/* Support de l'anneau */}
+          <mesh position={[0, 0.15, 0]} material={metalMaterial}>
+            <boxGeometry args={[0.08, 0.15, 0.08]} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Coins renforcés avec détails */}
+      {[
+        [-1.05, 0.6, 0.76], [1.05, 0.6, 0.76], [-1.05, 0.6, -0.76], [1.05, 0.6, -0.76],
+        [-1.05, -0.6, 0.76], [1.05, -0.6, 0.76], [-1.05, -0.6, -0.76], [1.05, -0.6, -0.76],
+      ].map((pos, i) => (
+        <mesh key={`corner-detail-${i}`} position={pos as [number, number, number]} material={metalMaterial}>
+          <boxGeometry args={[0.12, 0.12, 0.12]} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// Composant pour l'environnement de plage
+function BeachEnvironment({ animationPhase }: { animationPhase: string }) {
+  const wavesRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (wavesRef.current) {
+      // Animation des vagues
+      wavesRef.current.position.z = Math.sin(state.clock.elapsedTime * 0.3) * 0.2;
+    }
+  });
+
+  return (
+    <group>
+      {/* Sable de plage */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.01, 0]} receiveShadow>
+        <planeGeometry args={[40, 40, 32, 32]} />
+        <meshStandardMaterial
+          color="#F4E4C1"
+          roughness={0.95}
+          metalness={0.05}
+        />
+      </mesh>
+
+      {/* Eau de mer avec vagues */}
+      <mesh
+        ref={wavesRef}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, -0.98, 15]}
+        receiveShadow
+      >
+        <planeGeometry args={[40, 20, 32, 16]} />
+        <meshStandardMaterial
+          color="#1E88E5"
+          roughness={0.1}
+          metalness={0.8}
+          transparent
+          opacity={0.7}
+        />
+      </mesh>
+
+      {/* Vagues écume */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.95, 5]}>
+        <planeGeometry args={[40, 3]} />
+        <meshStandardMaterial
+          color="#E3F2FD"
+          roughness={0.3}
+          metalness={0.2}
+          transparent
+          opacity={0.6}
+        />
+      </mesh>
+
+      {/* Palmiers */}
+      {[[-8, -1, -3], [8, -1, -2], [-6, -1, 2]].map((pos, i) => (
+        <group key={`palm-${i}`} position={pos as [number, number, number]}>
+          {/* Tronc */}
+          <mesh position={[0, 2, 0]}>
+            <cylinderGeometry args={[0.2, 0.25, 4, 8]} />
+            <meshStandardMaterial color="#8B6F47" roughness={0.9} />
+          </mesh>
+          {/* Feuilles */}
+          {Array.from({ length: 8 }).map((_, j) => {
+            const angle = (j / 8) * Math.PI * 2;
+            return (
+              <mesh
+                key={`leaf-${j}`}
+                position={[Math.cos(angle) * 0.3, 4, Math.sin(angle) * 0.3]}
+                rotation={[Math.PI / 6, angle, 0]}
+              >
+                <boxGeometry args={[0.1, 2, 0.6]} />
+                <meshStandardMaterial color="#2E7D32" roughness={0.7} />
+              </mesh>
+            );
+          })}
+          {/* Noix de coco */}
+          {[0, 1, 2].map((j) => {
+            const angle = (j / 3) * Math.PI * 2;
+            return (
+              <mesh
+                key={`coconut-${j}`}
+                position={[Math.cos(angle) * 0.3, 3.8, Math.sin(angle) * 0.3]}
+              >
+                <sphereGeometry args={[0.15, 8, 8]} />
+                <meshStandardMaterial color="#6D4C41" roughness={0.8} />
+              </mesh>
+            );
+          })}
+        </group>
+      ))}
+
+      {/* Rochers sur la plage */}
+      {[
+        [-4, -0.7, 1], [5, -0.8, -1], [-3, -0.75, -2], [6, -0.85, 3]
+      ].map((pos, i) => (
+        <mesh key={`rock-${i}`} position={pos as [number, number, number]} castShadow>
+          <dodecahedronGeometry args={[0.5 + Math.random() * 0.3, 0]} />
+          <meshStandardMaterial color="#78909C" roughness={0.9} metalness={0.1} />
+        </mesh>
+      ))}
+
+      {/* Coquillages éparpillés */}
+      {Array.from({ length: 15 }).map((_, i) => {
+        const x = (Math.random() - 0.5) * 20;
+        const z = (Math.random() - 0.5) * 10;
+        return (
+          <mesh
+            key={`shell-${i}`}
+            position={[x, -0.95, z]}
+            rotation={[0, Math.random() * Math.PI * 2, 0]}
+          >
+            <coneGeometry args={[0.1, 0.15, 6]} />
+            <meshStandardMaterial
+              color={i % 3 === 0 ? "#FFF3E0" : i % 3 === 1 ? "#FFE0B2" : "#FFCCBC"}
+              roughness={0.6}
+            />
+          </mesh>
+        );
+      })}
+
+      {/* Étoiles de mer */}
+      {[[-2, -0.95, 0.5], [3, -0.95, -0.8], [-1, -0.95, 2]].map((pos, i) => (
+        <mesh
+          key={`starfish-${i}`}
+          position={pos as [number, number, number]}
+          rotation={[-Math.PI / 2, 0, (i * Math.PI) / 3]}
+        >
+          <cylinderGeometry args={[0.25, 0.25, 0.05, 5]} />
+          <meshStandardMaterial color="#FF6F61" roughness={0.8} />
+        </mesh>
+      ))}
+
+      {/* Planches de bois échouées */}
+      {[[-5, -0.9, 0], [4, -0.9, 1]].map((pos, i) => (
+        <mesh
+          key={`plank-${i}`}
+          position={pos as [number, number, number]}
+          rotation={[0, i * 0.5, 0]}
+        >
+          <boxGeometry args={[2, 0.1, 0.3]} />
+          <meshStandardMaterial color="#8D6E63" roughness={0.9} />
+        </mesh>
+      ))}
+
+      {/* Soleil (lumière) */}
+      <mesh position={[-10, 10, -10]}>
+        <sphereGeometry args={[1.5, 16, 16]} />
+        <meshBasicMaterial color="#FFF9C4" />
+      </mesh>
     </group>
   );
 }
@@ -563,46 +776,50 @@ function Scene({
       {/* Caméra */}
       <PerspectiveCamera
         makeDefault
-        position={animationPhase === 'deck' ? [0, 4, 5] : [0, 3, 6]}
-        fov={50}
+        position={animationPhase === 'deck' ? [0, 5, 6] : [0, 4, 7]}
+        fov={55}
       />
 
       {/* Contrôles */}
       <OrbitControls
         enabled={animationPhase === 'idle'}
         enablePan={false}
-        minDistance={4}
-        maxDistance={10}
-        maxPolarAngle={Math.PI / 2}
+        minDistance={5}
+        maxDistance={15}
+        maxPolarAngle={Math.PI / 2.2}
       />
 
-      {/* Lumières de la scène */}
-      <ambientLight intensity={0.5} />
+      {/* Lumières de la scène - ambiance plage ensoleillée */}
+      <ambientLight intensity={0.7} color="#FFF9E6" />
+
+      {/* Soleil (lumière directionnelle) */}
       <directionalLight
-        position={[5, 8, 5]}
-        intensity={1}
+        position={[-10, 15, -5]}
+        intensity={1.5}
+        color="#FFFACD"
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
+        shadow-camera-left={-20}
+        shadow-camera-right={20}
+        shadow-camera-top={20}
+        shadow-camera-bottom={-20}
       />
-      <pointLight position={[-5, 5, -5]} intensity={0.6} color="#3B82F6" />
-      <pointLight position={[5, 5, 5]} intensity={0.6} color="#A855F7" />
 
-      {/* Étoiles en arrière-plan */}
-      <Stars
-        radius={50}
-        depth={50}
-        count={3000}
-        factor={4}
-        saturation={0}
-        fade
-        speed={0.5}
-      />
+      {/* Lumière de remplissage douce */}
+      <pointLight position={[8, 5, 8]} intensity={0.4} color="#B3E5FC" />
+      <pointLight position={[-8, 5, -8]} intensity={0.3} color="#FFE082" />
+
+      {/* Lumière réfléchie de l'eau */}
+      <pointLight position={[0, 2, 10]} intensity={0.5} color="#4FC3F7" />
+
+      {/* Environnement de plage */}
+      <BeachEnvironment animationPhase={animationPhase} />
 
       {/* Particules magiques */}
       <MagicParticles isActive={isOpening || animationPhase === 'deck'} />
 
-      {/* Coffre */}
+      {/* Coffre au trésor */}
       {(animationPhase === 'idle' || animationPhase === 'opening' || animationPhase === 'deck') && (
         <Chest isOpening={isOpening} onClick={onClick} animationPhase={animationPhase} />
       )}
@@ -617,25 +834,18 @@ function Scene({
         <RevealingCard
           key={`revealed-${card.id}-${i}`}
           card={card}
-          position={[3 + (i % 3) * 0.3, 2 + i * 0.2, -i * 0.1]}
+          position={[4 + (i % 2) * 0.5, 2 + i * 0.3, -i * 0.2]}
         />
       ))}
 
-      {/* Sol */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} receiveShadow>
-        <planeGeometry args={[30, 30]} />
-        <meshStandardMaterial
-          color="#0F172A"
-          roughness={0.9}
-          metalness={0.1}
-        />
+      {/* Ciel avec dégradé */}
+      <mesh position={[0, 20, -30]} scale={[60, 40, 1]}>
+        <planeGeometry />
+        <meshBasicMaterial color="#87CEEB" />
       </mesh>
 
-      {/* Grille au sol pour l'effet */}
-      <gridHelper args={[20, 20, '#1E293B', '#1E293B']} position={[0, -0.99, 0]} />
-
-      {/* Brouillard pour l'ambiance */}
-      <fog attach="fog" args={['#0A0E1A', 8, 20]} />
+      {/* Brouillard léger pour la profondeur */}
+      <fog attach="fog" args={['#B3E5FC', 15, 35]} />
     </>
   );
 }
@@ -682,7 +892,7 @@ const ChestAnimation3D: React.FC<ChestAnimation3DProps> = ({
       <Canvas
         shadows
         gl={{ antialias: true, alpha: true }}
-        className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800 rounded-2xl"
+        className="bg-gradient-to-b from-sky-300 via-sky-400 to-blue-300 rounded-2xl"
       >
         <Scene
           isOpening={isOpening}
