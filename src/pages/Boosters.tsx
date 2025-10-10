@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, ArrowLeft, Sparkles, ChevronLeft, ChevronRight, Coins, Gem } from 'lucide-react';
 import { GameService } from '../services/gameService';
@@ -8,7 +8,9 @@ import Card from '../components/Card';
 import CardDeck from '../components/CardDeck';
 import CardModal from '../components/CardModal';
 import Timer from '../components/Timer';
-import ChestAnimation3D from '../components/ChestAnimation3D';
+
+// Lazy load du composant 3D pour éviter de charger Three.js sur toutes les pages
+const ChestAnimation3D = lazy(() => import('../components/ChestAnimation3D'));
 
 type AnimationPhase = 'idle' | 'opening' | 'deck' | 'revealing' | 'complete';
 
@@ -315,11 +317,13 @@ const Boosters: React.FC = () => {
       {animationPhase === 'idle' && (
         <div className="text-center space-y-6 sm:space-y-8">
           <div className="mb-8">
-            <ChestAnimation3D
-              isOpening={false}
-              animationPhase={animationPhase}
-              onClick={handleOpenBooster}
-            />
+            <Suspense fallback={<div className="text-white text-center py-20">Chargement du coffre 3D...</div>}>
+              <ChestAnimation3D
+                isOpening={false}
+                animationPhase={animationPhase}
+                onClick={handleOpenBooster}
+              />
+            </Suspense>
           </div>
 
           <div className="space-y-3 sm:space-y-4 px-4">
@@ -378,11 +382,13 @@ const Boosters: React.FC = () => {
 
       {animationPhase === 'opening' && (
         <div className="text-center space-y-8">
-          <ChestAnimation3D
-            isOpening={true}
-            animationPhase={animationPhase}
-            onClick={() => {}}
-          />
+          <Suspense fallback={<div className="text-white text-center py-20">Chargement...</div>}>
+            <ChestAnimation3D
+              isOpening={true}
+              animationPhase={animationPhase}
+              onClick={() => {}}
+            />
+          </Suspense>
 
           <div className="space-y-4">
             <div className="text-2xl font-bold text-white animate-pulse">
@@ -410,13 +416,15 @@ const Boosters: React.FC = () => {
             </div>
           </div>
 
-          <ChestAnimation3D
-            isOpening={true}
-            animationPhase={animationPhase}
-            cards={boosterResult.cards}
-            onAnimationComplete={handleDeckComplete}
-            onClick={() => {}}
-          />
+          <Suspense fallback={<div className="text-white text-center py-20">Chargement...</div>}>
+            <ChestAnimation3D
+              isOpening={true}
+              animationPhase={animationPhase}
+              cards={boosterResult.cards}
+              onAnimationComplete={handleDeckComplete}
+              onClick={() => {}}
+            />
+          </Suspense>
 
           <div className="text-center mt-6">
             <button
