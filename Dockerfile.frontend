@@ -24,11 +24,11 @@ COPY tailwind.config.js ./
 COPY postcss.config.js ./
 
 # Installer toutes les dépendances avec retry
-# Essayer npm ci d'abord, sinon fallback sur npm install
-RUN npm ci --prefer-offline --no-audit || \
+# Essayer npm ci d'abord, sinon fallback sur npm install avec --legacy-peer-deps
+RUN npm ci --prefer-offline --no-audit --legacy-peer-deps || \
     (echo "npm ci failed, trying npm install..." && \
      rm -rf node_modules package-lock.json && \
-     npm install --no-audit)
+     npm install --no-audit --legacy-peer-deps)
 
 # Copier le code source
 COPY src ./src
