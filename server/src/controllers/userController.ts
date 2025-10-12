@@ -675,6 +675,7 @@ export class UserController {
   // Acheter un booster avec des Berrys
   static async buyBoosterWithBerrys(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;
+    const { boosterId: requestedBoosterId } = req.body;
 
     try {
       if (!userId) {
@@ -718,11 +719,23 @@ export class UserController {
           throw new Error('Transaction refusée: Berrys insuffisants');
         }
 
-        // 2. Sélectionner un booster aléatoire
-        const randomBooster = await Database.get(`
-          SELECT id FROM boosters WHERE is_active = 1 ORDER BY RANDOM() LIMIT 1
-        `);
-        boosterId = randomBooster?.id || null;
+        // 2. Valider/sélectionner le booster
+        if (requestedBoosterId) {
+          const boosterExists = await Database.get(`
+            SELECT id FROM boosters WHERE id = ? AND is_active = 1
+          `, [requestedBoosterId]);
+
+          if (!boosterExists) {
+            throw new Error('Booster invalide ou inactif');
+          }
+          boosterId = requestedBoosterId;
+        } else {
+          // Si aucun booster spécifié, en sélectionner un aléatoire
+          const randomBooster = await Database.get(`
+            SELECT id FROM boosters WHERE is_active = 1 ORDER BY RANDOM() LIMIT 1
+          `);
+          boosterId = randomBooster?.id || null;
+        }
 
         if (!boosterId) {
           throw new Error('Aucun booster disponible');

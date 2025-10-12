@@ -182,7 +182,7 @@ const Boosters: React.FC = () => {
     setAnimationPhase('opening');
 
     try {
-      const result = await GameService.buyBoosterWithBerrys();
+      const result = await GameService.buyBoosterWithBerrys(selectedBooster.id);
       if (result) {
         setBoosterResult(result);
 

@@ -91,11 +91,14 @@ export class BoosterService {
       }
 
       // Filtrer selon si on veut des alternates ou non
-      // Les cartes alternate ont un vegapull_id qui contient '_p'
+      // Les cartes normales n'ont pas de suffixe après le numéro (ex: OP01-016)
+      // Les cartes alternates ont un suffixe _pX, _rX, etc. (ex: OP01-016_p1, OP01-041_r1)
       if (shouldBeAlternate) {
-        query += ` AND vegapull_id LIKE '%_p%'`;
+        // Chercher les cartes avec un underscore suivi de n'importe quelle lettre et chiffre
+        query += ` AND vegapull_id LIKE '%\\_%'`;
       } else {
-        query += ` AND (vegapull_id NOT LIKE '%_p%' OR vegapull_id IS NULL)`;
+        // Chercher les cartes sans underscore dans le vegapull_id
+        query += ` AND (vegapull_id NOT LIKE '%\\_%' OR vegapull_id IS NULL)`;
       }
 
       query += ` ORDER BY RANDOM() LIMIT 1`;
@@ -117,18 +120,61 @@ export class BoosterService {
           return this.getRandomCardByRarity(rarity, boosterId, true); // Retry avec forceNonAlternate
         }
 
-        // Diagnostic détaillé
+        // Si on cherchait une carte normale mais qu'on n'en a pas trouvé,
+        // vérifier si ce booster ne contient QUE des alternates pour cette rareté
+        console.warn(`Aucune carte ${rarity} normale trouvée, vérification des alternates...`);
+
+        // Compter le total de cartes de cette rareté dans ce booster
+        const totalQuery = `SELECT COUNT(*) as count FROM cards WHERE rarity = ? AND is_active = 1 AND booster_id = ?`;
+        const totalResult = await Database.get(totalQuery, [rarity, boosterId]);
+        const totalCards = totalResult?.count || 0;
+
+        // Compter les cartes alternates
+        const alternatesQuery = `SELECT COUNT(*) as count FROM cards WHERE rarity = ? AND is_active = 1 AND booster_id = ? AND vegapull_id LIKE '%\\_%'`;
+        const alternatesResult = await Database.get(alternatesQuery, [rarity, boosterId]);
+        const alternateCards = alternatesResult?.count || 0;
+
+        console.log(`🔍 Total ${rarity}: ${totalCards}, Alternates: ${alternateCards}`);
+
+        // Si TOUTES les cartes de cette rareté sont des alternates, accepter n'importe laquelle
+        if (totalCards > 0 && totalCards === alternateCards) {
+          console.warn(`⚠️ Ce booster ne contient QUE des alternates pour ${rarity}, sélection d'une carte alternate`);
+
+          const anyCardQuery = `
+            SELECT * FROM cards
+            WHERE rarity = ? AND is_active = 1 AND booster_id = ?
+            ORDER BY RANDOM() LIMIT 1
+          `;
+          const anyCards = await Database.all(anyCardQuery, [rarity, boosterId]);
+
+          if (anyCards.length > 0) {
+            const cardData = anyCards[0];
+            return {
+              id: cardData.id,
+              name: cardData.name,
+              character: cardData.character,
+              rarity: cardData.rarity,
+              type: cardData.type || undefined,
+              color: cardData.color ? JSON.parse(cardData.color) : undefined,
+              cost: cardData.cost || undefined,
+              power: cardData.power || undefined,
+              counter: cardData.counter || undefined,
+              attack: cardData.attack || undefined,
+              defense: cardData.defense || undefined,
+              description: cardData.description || undefined,
+              special_ability: cardData.special_ability || undefined,
+              image_url: cardData.image_url || undefined,
+              fallback_image_url: cardData.fallback_image_url || undefined,
+              vegapull_id: cardData.vegapull_id || undefined,
+              is_active: cardData.is_active === 1
+            };
+          }
+        }
+
+        // Diagnostic détaillé si vraiment aucune carte trouvée
         console.error(`ERREUR: Aucune carte ${rarity} trouvée dans le booster ${boosterId || 'non spécifié'}`);
-
-        // Vérifier combien de cartes existent sans le filtre vegapull_id
-        const debugQuery1 = `SELECT COUNT(*) as count FROM cards WHERE rarity = ? AND is_active = 1 AND booster_id = ?`;
-        const debugResult1 = await Database.get(debugQuery1, [rarity, boosterId]);
-        console.error(`🔍 DEBUG - Cartes ${rarity} dans booster ${boosterId} (total):`, debugResult1?.count || 0);
-
-        // Vérifier avec le filtre vegapull_id
-        const debugQuery2 = `SELECT COUNT(*) as count FROM cards WHERE rarity = ? AND is_active = 1 AND booster_id = ? AND (vegapull_id NOT LIKE '%_p%' OR vegapull_id IS NULL)`;
-        const debugResult2 = await Database.get(debugQuery2, [rarity, boosterId]);
-        console.error(`🔍 DEBUG - Cartes ${rarity} non-alternate dans booster ${boosterId}:`, debugResult2?.count || 0);
+        console.error(`🔍 DEBUG - Cartes ${rarity} dans booster ${boosterId} (total):`, totalCards);
+        console.error(`🔍 DEBUG - Cartes ${rarity} alternates:`, alternateCards);
 
         // Montrer quelques exemples de vegapull_id
         const debugQuery3 = `SELECT vegapull_id FROM cards WHERE rarity = ? AND booster_id = ? LIMIT 5`;

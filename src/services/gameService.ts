@@ -176,9 +176,9 @@ export class GameService {
     }
   }
 
-  static async buyBoosterWithBerrys(): Promise<BoosterResult | null> {
+  static async buyBoosterWithBerrys(boosterId?: string): Promise<BoosterResult | null> {
     try {
-      const response = await apiService.buyBoosterWithBerrys();
+      const response = await apiService.buyBoosterWithBerrys(boosterId);
       if (response.success) {
         return {
           cards: response.data.cards || [],

@@ -266,9 +266,10 @@ class ApiService {
   }
 
   // Acheter un booster avec des Berrys
-  async buyBoosterWithBerrys(): Promise<any> {
+  async buyBoosterWithBerrys(boosterId?: string): Promise<any> {
     return await this.request('/users/buy-booster', {
       method: 'POST',
+      body: JSON.stringify({ boosterId }),
     });
   }
 
