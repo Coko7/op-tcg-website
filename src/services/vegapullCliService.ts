@@ -120,8 +120,8 @@ export class VegapullCliService {
       attack: vc.power || 0,
       defense: vc.counter || 0,
       description: vc.effect || '',
-      image_url: `/images/cards/${vc.id}.png`, // Essaie d'abord local, puis fallback vers officiel
-      fallback_image_url: vc.img_full_url, // URL officielle en fallback
+      image_url: vc.img_full_url, // URL officielle depuis Vegapull
+      fallback_image_url: undefined,
       special_ability: vc.trigger || undefined,
       // Propriétés One Piece TCG
       cost: vc.cost || undefined,

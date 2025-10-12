@@ -33,7 +33,7 @@ interface VegapullCard {
 
 // Mapping des raretés Vegapull vers nos raretés
 const RARITY_MAPPING: Record<string, string> = {
-  'Leader': 'super_rare',
+  'Leader': 'leader',
   'SuperRare': 'super_rare',
   'Rare': 'rare',
   'Uncommon': 'uncommon',
@@ -176,9 +176,9 @@ class VegapullImporter {
     // Mapper le type de carte
     const cardType = CATEGORY_MAPPING[vegapullCard.category] || 'Character';
 
-    // Construire l'URL de l'image
-    const imageUrl = vegapullCard.img_full_url || `/images/cards/${vegapullCard.id}.png`;
-    const fallbackImageUrl = `/images/cards/placeholder.png`;
+    // Utiliser l'URL complète depuis Vegapull
+    const imageUrl = vegapullCard.img_full_url;
+    const fallbackImageUrl = null;
 
     // Générer un ID unique pour notre base
     const cardId = uuidv4();

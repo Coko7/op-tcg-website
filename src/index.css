@@ -119,6 +119,31 @@
     opacity: 0.4;
   }
 
+  .card-leader {
+    @apply bg-gradient-to-br from-red-500/90 via-rose-500/90 to-red-600/90 border-red-400/60;
+    border-width: 2px;
+    backdrop-filter: blur(10px);
+    box-shadow:
+      0 6px 18px rgba(239, 68, 68, 0.5),
+      0 0 28px rgba(239, 68, 68, 0.25),
+      inset 0 2px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+  }
+
+  .card-leader::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.6), rgba(248, 113, 113, 0.4));
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0.5;
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
   .card-super-rare {
     @apply bg-gradient-to-br from-purple-500/90 via-fuchsia-500/90 to-purple-600/90 border-purple-400/60;
     border-width: 2px;
@@ -569,5 +594,125 @@
     right: 10px;
     font-size: 24px;
     animation: sparkle-animation 1.5s ease-in-out infinite;
+  }
+
+  /* Effet holographique subtil pour SuperRare et SecretRare */
+  @keyframes holographic {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .holographic-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .holographic-effect::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.1) 35%,
+      rgba(255, 255, 255, 0.3) 40%,
+      transparent 45%,
+      transparent 55%,
+      rgba(255, 255, 255, 0.1) 60%,
+      rgba(255, 255, 255, 0.3) 65%,
+      transparent 70%
+    );
+    background-size: 200% 200%;
+    animation: holographic 3s linear infinite;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    opacity: 0.6;
+  }
+
+  /* Effet de reflets colorés pour holographique */
+  .holographic-shimmer {
+    position: relative;
+  }
+
+  .holographic-shimmer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 0, 255, 0.15) 0%,
+      rgba(0, 255, 255, 0.15) 25%,
+      rgba(255, 255, 0, 0.15) 50%,
+      rgba(255, 0, 255, 0.15) 75%,
+      rgba(0, 255, 255, 0.15) 100%
+    );
+    background-size: 400% 400%;
+    animation: holographic-shimmer 4s ease-in-out infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    border-radius: inherit;
+  }
+
+  .holographic-shimmer:hover::before {
+    opacity: 1;
+  }
+
+  @keyframes holographic-shimmer {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* Effet Rainbow pour les cartes super rares */
+  .rainbow-foil {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .rainbow-foil::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 0, 0, 0.1) 2px,
+        rgba(255, 127, 0, 0.1) 4px,
+        rgba(255, 255, 0, 0.1) 6px,
+        rgba(0, 255, 0, 0.1) 8px,
+        rgba(0, 0, 255, 0.1) 10px,
+        rgba(75, 0, 130, 0.1) 12px,
+        rgba(148, 0, 211, 0.1) 14px,
+        transparent 16px
+      );
+    animation: rainbow-scroll 8s linear infinite;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    opacity: 0.4;
+  }
+
+  @keyframes rainbow-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(16px);
+    }
   }
 }

@@ -4,14 +4,18 @@ import { Database } from '../utils/database.js';
 export class BoosterService {
   // Probabilités par rareté (en pourcentage)
   private static readonly RARITY_WEIGHTS = {
-    'common': 65,
-    'uncommon': 25,
-    'rare': 8,
-    'super_rare': 1.8,
-    'secret_rare': 0.2
+    'common': 58,
+    'uncommon': 26,
+    'rare': 10,
+    'leader': 3,
+    'super_rare': 2.5,
+    'secret_rare': 0.5
   };
 
   private static readonly CARDS_PER_BOOSTER = 5;
+
+  // Probabilité qu'une carte soit alternate (10% pour les raretés qui ont des alternates)
+  private static readonly ALTERNATE_CHANCE = 0.10; // 10%
 
   /**
    * Génère les cartes pour un booster spécifique
@@ -57,10 +61,29 @@ export class BoosterService {
   }
 
   /**
+   * Détermine si on devrait obtenir une carte alternate pour une rareté donnée
+   * Les Common et Uncommon n'ont pas d'alternates
+   * Les autres raretés (Rare, Leader, SuperRare, SecretRare) ont 10% de chance
+   */
+  private static shouldGetAlternate(rarity: string): boolean {
+    // Common et Uncommon n'ont pas d'alternates
+    if (rarity === 'common' || rarity === 'uncommon') {
+      return false;
+    }
+
+    // Pour les autres raretés, 10% de chance d'être alternate
+    return Math.random() < this.ALTERNATE_CHANCE;
+  }
+
+  /**
    * Récupère une carte aléatoire d'une rareté donnée, optionnellement d'un booster spécifique
+   * Gère la logique des cartes alternate (avec suffixe _p1, _p2, etc.)
    */
   private static async getRandomCardByRarity(rarity: string, boosterId?: string): Promise<Card | null> {
     try {
+      // Déterminer si cette carte devrait être alternate
+      const shouldBeAlternate = this.shouldGetAlternate(rarity);
+
       let query = `
         SELECT * FROM cards
         WHERE rarity = ? AND is_active = 1
@@ -72,11 +95,24 @@ export class BoosterService {
         params.push(boosterId);
       }
 
+      // Filtrer selon si on veut des alternates ou non
+      // Les cartes alternate ont un vegapull_id qui contient '_p'
+      if (shouldBeAlternate) {
+        query += ` AND vegapull_id LIKE '%_p%'`;
+      } else {
+        query += ` AND (vegapull_id NOT LIKE '%_p%' OR vegapull_id IS NULL)`;
+      }
+
       query += ` ORDER BY RANDOM() LIMIT 1`;
 
       const cards = await Database.all(query, params);
 
       if (cards.length === 0) {
+        // Si aucune carte alternate trouvée, fallback sur une carte normale
+        if (shouldBeAlternate) {
+          console.warn(`Aucune carte alternate trouvée pour ${rarity}, fallback sur carte normale`);
+          return this.getRandomCardByRarity(rarity, boosterId); // Retry sans alternate
+        }
         console.warn(`Aucune carte trouvée pour la rareté: ${rarity}${boosterId ? ` dans le booster ${boosterId}` : ''}`);
         return null;
       }

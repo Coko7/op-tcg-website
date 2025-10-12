@@ -66,14 +66,18 @@ const Card: React.FC<CardProps> = ({
       )}
 
       {/* Full-size card image */}
-      <div className="w-full aspect-[2.5/3.5] relative overflow-hidden bg-gray-800">
+      <div className={`w-full aspect-[2.5/3.5] relative overflow-hidden bg-gray-800 ${
+        card.rarity === 'super_rare' ? 'holographic-shimmer' : ''
+      } ${card.rarity === 'secret_rare' ? 'rainbow-foil' : ''}`}>
         {card.image_url ? (
           <img
             src={card.image_url}
             alt={card.name}
             loading="lazy"
             decoding="async"
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover ${
+              card.rarity === 'super_rare' || card.rarity === 'secret_rare' ? 'holographic-effect' : ''
+            }`}
             style={{
               contentVisibility: 'auto',
               willChange: 'transform'
@@ -112,6 +116,7 @@ const Card: React.FC<CardProps> = ({
             <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded font-medium text-xs ${
               card.rarity === 'secret_rare' ? 'bg-purple-600 text-white' :
               card.rarity === 'super_rare' ? 'bg-yellow-600 text-white' :
+              card.rarity === 'leader' ? 'bg-red-600 text-white' :
               card.rarity === 'rare' ? 'bg-blue-600 text-white' :
               card.rarity === 'uncommon' ? 'bg-green-600 text-white' :
               'bg-gray-600 text-white'

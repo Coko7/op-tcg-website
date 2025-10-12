@@ -1,5 +1,4 @@
 import { Card, Rarity } from '../types';
-import { ImageService } from './imageService';
 
 // Structure des données Vegapull
 interface VegapullCard {
@@ -8,6 +7,7 @@ interface VegapullCard {
   rarity: string;
   category: string;
   img_url: string;
+  img_full_url: string; // Ajout de l'URL complète
   colors: string[];
   cost?: number;
   attributes?: string[];
@@ -120,7 +120,7 @@ export class VegapullService {
       attack: vc.power || 0,
       defense: vc.counter || 0,
       description: vc.effect || '',
-      image_url: this.buildImageUrl(vc.id),
+      image_url: vc.img_full_url, // Utiliser directement l'URL complète depuis Vegapull
       special_ability: vc.trigger || undefined,
       // Propriétés One Piece TCG
       cost: vc.cost,
@@ -141,12 +141,6 @@ export class VegapullService {
       .trim();
 
     return name || cardName;
-  }
-
-  // Construire l'URL de l'image
-  private static buildImageUrl(cardId: string): string {
-    // Utiliser le service d'images dédié
-    return ImageService.getCardImageUrl(cardId);
   }
 
   // Charger TOUTES les cartes disponibles

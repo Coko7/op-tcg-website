@@ -193,17 +193,19 @@ export const testCards: Card[] = [
 ];
 
 export const RARITY_DISTRIBUTION = {
-  common: 0.60,      // 60%
-  uncommon: 0.25,    // 25%
+  common: 0.58,      // 58%
+  uncommon: 0.26,    // 26%
   rare: 0.10,        // 10%
-  super_rare: 0.04,  // 4%
-  secret_rare: 0.01  // 1%
+  leader: 0.03,      // 3%
+  super_rare: 0.025, // 2.5%
+  secret_rare: 0.005 // 0.5%
 };
 
 export const RARITY_COLORS = {
   common: 'from-gray-400 to-gray-600',
   uncommon: 'from-green-400 to-green-600',
   rare: 'from-blue-400 to-blue-600',
+  leader: 'from-red-400 to-red-600',
   super_rare: 'from-purple-400 to-purple-600',
   secret_rare: 'from-yellow-400 to-orange-500'
 };
@@ -212,6 +214,7 @@ export const RARITY_LABELS = {
   common: 'Commune',
   uncommon: 'Peu Commune',
   rare: 'Rare',
+  leader: 'Leader',
   super_rare: 'Super Rare',
   secret_rare: 'Secrète Rare'
 };

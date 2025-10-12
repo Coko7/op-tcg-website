@@ -1,4 +1,4 @@
-export type Rarity = 'common' | 'uncommon' | 'rare' | 'super_rare' | 'secret_rare';
+export type Rarity = 'common' | 'uncommon' | 'rare' | 'leader' | 'super_rare' | 'secret_rare';
 
 export interface Card {
   id: string;
@@ -64,6 +64,7 @@ export interface RarityDistribution {
   common: number;
   uncommon: number;
   rare: number;
+  leader: number;
   super_rare: number;
   secret_rare: number;
 }
@@ -80,6 +81,7 @@ export const CARD_SELL_PRICES: Record<Rarity, number> = {
   common: 10,
   uncommon: 25,
   rare: 50,
+  leader: 100,
   super_rare: 150,
   secret_rare: 500,
 };
