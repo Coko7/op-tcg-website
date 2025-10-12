@@ -215,4 +215,14 @@ export class GameService {
     }
   }
 
+  static async setProfileFavoriteCard(cardId: string | null): Promise<{ favorite_card_id: string | null; favorite_card: Card | null }> {
+    try {
+      const response = await apiService.setProfileFavoriteCard(cardId);
+      return response.data;
+    } catch (error) {
+      console.error('Erreur lors de la définition de la carte favorite de profil:', error);
+      throw error;
+    }
+  }
+
 }

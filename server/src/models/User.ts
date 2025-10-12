@@ -16,6 +16,7 @@ export interface User {
   boosters_opened_today?: number;
   last_booster_opened?: Date | null;
   berrys?: number;
+  favorite_card_id?: string | null;
 }
 
 export interface UserCreate {

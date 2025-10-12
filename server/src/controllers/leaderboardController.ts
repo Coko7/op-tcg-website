@@ -18,6 +18,10 @@ interface LeaderboardEntry {
   uncommon: number;
   common: number;
   rank: number;
+  favorite_card_id?: string | null;
+  favorite_card_name?: string | null;
+  favorite_card_image?: string | null;
+  favorite_card_rarity?: string | null;
 }
 
 // Ordre des raretés de la plus rare à la moins rare pour le tri
@@ -31,6 +35,7 @@ export class LeaderboardController {
         SELECT
           u.id as user_id,
           u.username,
+          u.favorite_card_id,
           COUNT(CASE WHEN c.rarity = 'secret_rare' THEN 1 END) as secret_rare,
           COUNT(CASE WHEN c.rarity = 'super_rare' THEN 1 END) as super_rare,
           COUNT(CASE WHEN c.rarity = 'rare' THEN 1 END) as rare,
@@ -40,7 +45,7 @@ export class LeaderboardController {
         LEFT JOIN user_collections uc ON u.id = uc.user_id
         LEFT JOIN cards c ON uc.card_id = c.id
         WHERE u.is_active = 1
-        GROUP BY u.id, u.username
+        GROUP BY u.id, u.username, u.favorite_card_id
       `);
 
       // Trier les joueurs selon les règles :
@@ -54,17 +59,39 @@ export class LeaderboardController {
         return 0; // Égalité parfaite
       });
 
-      // Prendre uniquement les 3 premiers
-      const top3 = sortedUsers.slice(0, 3).map((user, index) => ({
-        rank: index + 1,
-        username: user.username,
-        user_id: user.user_id,
-        secret_rare: user.secret_rare,
-        super_rare: user.super_rare,
-        rare: user.rare,
-        uncommon: user.uncommon,
-        common: user.common
-      }));
+      // Prendre uniquement les 3 premiers et enrichir avec les infos de carte favorite
+      const top3 = await Promise.all(
+        sortedUsers.slice(0, 3).map(async (user, index) => {
+          const entry: LeaderboardEntry = {
+            rank: index + 1,
+            username: user.username,
+            user_id: user.user_id,
+            secret_rare: user.secret_rare,
+            super_rare: user.super_rare,
+            rare: user.rare,
+            uncommon: user.uncommon,
+            common: user.common,
+            favorite_card_id: user.favorite_card_id || null
+          };
+
+          // Récupérer les détails de la carte favorite si elle existe
+          if (user.favorite_card_id) {
+            const favoriteCard = await Database.get<any>(`
+              SELECT id, name, image_url, fallback_image_url, rarity
+              FROM cards
+              WHERE id = ? AND is_active = 1
+            `, [user.favorite_card_id]);
+
+            if (favoriteCard) {
+              entry.favorite_card_name = favoriteCard.name;
+              entry.favorite_card_image = favoriteCard.image_url || favoriteCard.fallback_image_url;
+              entry.favorite_card_rarity = favoriteCard.rarity;
+            }
+          }
+
+          return entry;
+        })
+      );
 
       res.json({
         success: true,

@@ -10,6 +10,10 @@ interface LeaderboardEntry {
   rare: number;
   uncommon: number;
   common: number;
+  favorite_card_id?: string | null;
+  favorite_card_name?: string | null;
+  favorite_card_image?: string | null;
+  favorite_card_rarity?: string | null;
 }
 
 const RARITY_LABELS = {
@@ -98,7 +102,7 @@ const Leaderboard: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-purple-600">
+        <h1 className="text-4xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-purple-600 sticky top-0 bg-slate-900 z-10 py-4">
           🏆 Leaderboard - Top 3
         </h1>
 
@@ -106,15 +110,33 @@ const Leaderboard: React.FC = () => {
           {leaderboard.map((entry) => (
             <div
               key={entry.user_id}
-              className={`rounded-xl p-6 shadow-2xl transform transition-all duration-300 hover:scale-105 ${getRankStyle(entry.rank)}`}
+              className={`rounded-xl p-6 shadow-2xl transform transition-all duration-300 hover:scale-105 ${getRankStyle(entry.rank)} ${entry.rank <= 3 ? 'sticky top-20 z-' + (10 - entry.rank) : ''}`}
+              style={{ top: entry.rank <= 3 ? `${64 + (entry.rank - 1) * 20}px` : undefined }}
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-4">
                   <span className="text-5xl">{getRankIcon(entry.rank)}</span>
-                  <div>
+                  <div className="flex-1">
                     <h2 className="text-2xl font-bold">{entry.username}</h2>
                     <p className="text-sm opacity-80">Rang #{entry.rank}</p>
                   </div>
+
+                  {/* Afficher la carte favorite si elle existe */}
+                  {entry.favorite_card_image && (
+                    <div className="flex items-center gap-3 bg-black/30 rounded-lg p-2">
+                      <img
+                        src={entry.favorite_card_image}
+                        alt={entry.favorite_card_name || 'Carte favorite'}
+                        className="w-16 h-24 object-cover rounded shadow-lg"
+                        title={entry.favorite_card_name || undefined}
+                      />
+                      <div className="text-left">
+                        <p className="text-xs opacity-80">Carte favorite</p>
+                        <p className="font-semibold text-sm">{entry.favorite_card_name}</p>
+                        <p className="text-xs opacity-70">{entry.favorite_card_rarity}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

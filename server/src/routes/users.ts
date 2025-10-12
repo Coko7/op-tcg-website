@@ -16,6 +16,13 @@ router.use(authenticateToken);
 // Route pour récupérer les infos de l'utilisateur connecté
 router.get('/me', UserController.getCurrentUser);
 
+// Route pour définir la carte favorite de profil
+router.put(
+  '/profile-favorite-card',
+  antiCheatMiddleware('set_favorite_card', { maxPerMinute: 10, maxPerHour: 50, minDelay: 1000 }),
+  UserController.setProfileFavoriteCard
+);
+
 // Vérifications de cohérence sur toutes les routes
 router.use(resourceConsistencyCheck);
 router.use(temporalConsistencyCheck);

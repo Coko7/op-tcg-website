@@ -1034,11 +1034,84 @@ export class UserController {
           berrys: user.berrys,
           available_boosters: user.available_boosters,
           created_at: user.created_at,
-          last_login: user.last_login
+          last_login: user.last_login,
+          favorite_card_id: user.favorite_card_id
         }
       });
     } catch (error) {
       console.error('Erreur récupération utilisateur:', error);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  }
+
+  /**
+   * Définir la carte favorite de profil
+   */
+  static async setProfileFavoriteCard(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      const { cardId } = req.body;
+
+      if (!userId) {
+        res.status(401).json({ error: 'Utilisateur non authentifié' });
+        return;
+      }
+
+      // SÉCURITÉ: Valider l'entrée
+      if (cardId && typeof cardId !== 'string') {
+        res.status(400).json({ error: 'Card ID invalide' });
+        return;
+      }
+
+      // Si cardId est fourni, vérifier que l'utilisateur possède cette carte
+      if (cardId) {
+        const userCard = await Database.get(`
+          SELECT card_id FROM user_collections
+          WHERE user_id = ? AND card_id = ?
+        `, [userId, cardId]);
+
+        if (!userCard) {
+          res.status(404).json({ error: 'Carte non trouvée dans votre collection' });
+          return;
+        }
+
+        // Vérifier que la carte existe et est active
+        const card = await CardModel.findById(cardId);
+        if (!card || !card.is_active) {
+          res.status(400).json({ error: 'Cette carte n\'est pas disponible' });
+          return;
+        }
+      }
+
+      // Mettre à jour la carte favorite (null pour retirer)
+      await Database.run(`
+        UPDATE users
+        SET favorite_card_id = ?
+        WHERE id = ?
+      `, [cardId || null, userId]);
+
+      // Récupérer les informations de la carte si définie
+      let favoriteCard = null;
+      if (cardId) {
+        favoriteCard = await CardModel.findById(cardId);
+      }
+
+      // AUDIT: Log changement de carte favorite
+      await AuditLogger.logSuccess(AuditAction.USER_PROFILE_UPDATED, userId, {
+        action: 'set_favorite_card',
+        cardId: cardId || null,
+        cardName: favoriteCard?.name || null
+      }, req);
+
+      res.json({
+        success: true,
+        data: {
+          favorite_card_id: cardId || null,
+          favorite_card: favoriteCard ? transformCardToCamelCase(favoriteCard) : null
+        }
+      });
+    } catch (error) {
+      console.error('Erreur lors de la définition de la carte favorite:', error);
       res.status(500).json({ error: 'Erreur serveur' });
     }
   }

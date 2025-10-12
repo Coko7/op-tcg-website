@@ -706,6 +706,37 @@ export class MigrationManager {
       }
     });
 
+    // Migration 15: Ajouter favorite_card_id pour la carte de profil
+    this.migrations.push({
+      version: 15,
+      name: 'add_favorite_card_id_to_users',
+      up: async () => {
+        console.log('📦 Migration 15: Ajout de la carte favorite de profil...');
+
+        try {
+          await Database.run(`
+            ALTER TABLE users ADD COLUMN favorite_card_id TEXT
+          `);
+          console.log('  ✅ Colonne favorite_card_id ajoutée à la table users');
+
+          // Ajouter une foreign key constraint si SQLite le supporte
+          // Note: SQLite ne permet pas d'ajouter des contraintes FK après coup via ALTER
+          // Mais on peut créer un index pour améliorer les performances
+          await Database.run(`
+            CREATE INDEX IF NOT EXISTS idx_users_favorite_card_id ON users(favorite_card_id)
+          `);
+          console.log('  ✅ Index créé sur favorite_card_id');
+        } catch (error) {
+          console.log('  ℹ️ Colonne favorite_card_id déjà présente');
+        }
+
+        console.log('✅ Système de carte favorite de profil ajouté');
+      },
+      down: async () => {
+        console.log('⚠️ Rollback non supporté pour cette migration (SQLite limitation)');
+      }
+    });
+
     // Trier les migrations par version
     this.migrations.sort((a, b) => a.version - b.version);
   }

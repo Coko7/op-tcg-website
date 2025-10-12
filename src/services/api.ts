@@ -286,6 +286,14 @@ class ApiService {
     return await this.request('/users/berrys');
   }
 
+  // Définir la carte favorite de profil
+  async setProfileFavoriteCard(cardId: string | null): Promise<any> {
+    return await this.request('/users/profile-favorite-card', {
+      method: 'PUT',
+      body: JSON.stringify({ cardId }),
+    });
+  }
+
   // Méthodes pour les récompenses quotidiennes
   async checkDailyReward(): Promise<any> {
     return await this.request('/users/daily-reward/check');
