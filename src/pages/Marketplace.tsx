@@ -18,11 +18,16 @@ interface MarketplaceListing {
 
 interface UserCard {
   card_id: string;
+  id: string;
   name: string;
   character: string;
   rarity: string;
   quantity: number;
   image_url?: string;
+  fallback_image_url?: string;
+  type?: string;
+  cost?: number;
+  power?: number;
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -106,12 +111,19 @@ const Marketplace: React.FC = () => {
           .filter((card: any) => card.quantity >= 2)
           .map((card: any) => ({
             card_id: card.card_id || card.id,
+            id: card.id || card.card_id,
             name: card.name,
             character: card.character,
             rarity: card.rarity,
             quantity: card.quantity,
-            image_url: card.image_url || card.fallback_image_url
+            image_url: card.image_url,
+            fallback_image_url: card.fallback_image_url,
+            type: card.type,
+            cost: card.cost,
+            power: card.power
           }));
+
+        console.log('Cartes vendables chargées:', sellableCards.length);
         setMyCards(sellableCards);
       }
     } catch (error: any) {
@@ -464,84 +476,157 @@ const Marketplace: React.FC = () => {
         {/* Onglet Vendre */}
         {!loading && activeTab === 'sell' && (
           <div>
-            <div className="bg-gray-800 rounded-lg p-6 mb-6 max-w-2xl mx-auto">
-              <h2 className="text-2xl font-bold mb-4">Créer une annonce</h2>
-              <form onSubmit={handleCreateListing} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Sélectionner une carte</label>
-                  <select
-                    value={selectedCard}
-                    onChange={(e) => setSelectedCard(e.target.value)}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                    required
-                  >
-                    <option value="">-- Choisir une carte --</option>
-                    {myCards.map((card) => (
-                      <option key={card.card_id} value={card.card_id}>
-                        {card.name} ({card.character}) - Quantité: {card.quantity} - {card.rarity}
-                      </option>
-                    ))}
-                  </select>
-                  {myCards.length === 0 && (
-                    <p className="text-sm text-gray-400 mt-2">
-                      Vous n'avez aucune carte vendable (minimum 2 exemplaires requis)
-                    </p>
-                  )}
+            {/* Formulaire de prix si une carte est sélectionnée */}
+            {selectedCard && (
+              <div className="bg-gray-800 rounded-lg p-6 mb-6 max-w-2xl mx-auto border-2 border-blue-500">
+                <h2 className="text-2xl font-bold mb-4">Créer une annonce</h2>
+                <div className="flex items-center gap-4 mb-4">
+                  {(() => {
+                    const card = myCards.find(c => c.card_id === selectedCard);
+                    return card ? (
+                      <>
+                        <img
+                          src={card.image_url || card.fallback_image_url || '/placeholder-card.png'}
+                          alt={card.name}
+                          className="w-24 h-32 object-contain rounded border border-gray-700"
+                          onError={(e) => {
+                            e.currentTarget.src = '/placeholder-card.png';
+                          }}
+                        />
+                        <div className="flex-1">
+                          <h3 className="font-bold text-xl">{card.name}</h3>
+                          <p className="text-gray-400">{card.character}</p>
+                          <p className={`text-sm font-semibold ${getRarityColor(card.rarity)}`}>
+                            {card.rarity}
+                          </p>
+                          <p className="text-sm text-gray-400">Quantité possédée: {card.quantity}</p>
+                        </div>
+                      </>
+                    ) : null;
+                  })()}
                 </div>
+                <form onSubmit={handleCreateListing} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Prix de vente (Berrys)</label>
+                    <input
+                      type="number"
+                      value={sellPrice}
+                      onChange={(e) => setSellPrice(parseInt(e.target.value) || 0)}
+                      min="1"
+                      max="999999"
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-lg"
+                      required
+                      autoFocus
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Entre 1 et 999,999 Berrys</p>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Prix (Berrys)</label>
-                  <input
-                    type="number"
-                    value={sellPrice}
-                    onChange={(e) => setSellPrice(parseInt(e.target.value) || 0)}
-                    min="1"
-                    max="999999"
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                    required
-                  />
-                  <p className="text-xs text-gray-400 mt-1">Entre 1 et 999,999 Berrys</p>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedCard('');
+                        setSellPrice(10);
+                      }}
+                      className="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition-all"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading || myListings.filter(l => l.status === 'active').length >= 3}
+                      className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
+                        loading || myListings.filter(l => l.status === 'active').length >= 3
+                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                          : 'bg-green-600 hover:bg-green-700 text-white'
+                      }`}
+                    >
+                      {myListings.filter(l => l.status === 'active').length >= 3
+                        ? 'Limite de 3 annonces atteinte'
+                        : 'Mettre en vente'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* Instructions si aucune carte sélectionnée */}
+            {!selectedCard && (
+              <div className="bg-gray-800 rounded-lg p-6 mb-6 text-center">
+                <h2 className="text-2xl font-bold mb-2">Vendre une carte</h2>
+                <p className="text-gray-400 mb-4">
+                  Sélectionnez une carte ci-dessous pour la mettre en vente sur le marketplace
+                </p>
+                <div className="flex items-center justify-center gap-4 text-sm text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-400">✓</span>
+                    <span>Minimum 2 exemplaires requis</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-400">ℹ</span>
+                    <span>Maximum 3 annonces actives</span>
+                  </div>
                 </div>
+              </div>
+            )}
 
-                <button
-                  type="submit"
-                  disabled={loading || !selectedCard || myListings.filter(l => l.status === 'active').length >= 3}
-                  className={`w-full px-6 py-3 rounded-lg font-semibold transition-all ${
-                    loading || !selectedCard || myListings.filter(l => l.status === 'active').length >= 3
-                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 text-white'
-                  }`}
-                >
-                  {myListings.filter(l => l.status === 'active').length >= 3
-                    ? 'Limite de 3 annonces atteinte'
-                    : 'Créer l\'annonce'}
-                </button>
-              </form>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {myCards.map((card) => (
-                <div
-                  key={card.card_id}
-                  className="bg-gray-800 rounded-lg p-4 border-2 border-gray-700"
-                >
-                  <img
-                    src={card.image_url || '/placeholder-card.png'}
-                    alt={card.name}
-                    className="w-full h-64 object-contain mb-3 rounded"
-                    onError={(e) => {
-                      e.currentTarget.src = '/placeholder-card.png';
+            {/* Grille des cartes vendables */}
+            {myCards.length === 0 ? (
+              <div className="text-center py-12 bg-gray-800 rounded-lg">
+                <p className="text-gray-400 text-lg mb-2">Aucune carte vendable</p>
+                <p className="text-sm text-gray-500">
+                  Vous devez posséder au moins 2 exemplaires d'une carte pour la vendre
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {myCards.map((card) => (
+                  <div
+                    key={card.card_id}
+                    onClick={() => {
+                      setSelectedCard(card.card_id);
+                      setSellPrice(10);
                     }}
-                  />
-                  <h3 className="font-bold text-lg mb-1">{card.name}</h3>
-                  <p className="text-sm text-gray-400 mb-2">{card.character}</p>
-                  <p className={`text-sm font-semibold mb-2 ${getRarityColor(card.rarity)}`}>
-                    {card.rarity}
-                  </p>
-                  <p className="text-xs text-gray-400">Quantité: {card.quantity}</p>
-                </div>
-              ))}
-            </div>
+                    className={`bg-gray-800 rounded-lg p-4 border-2 transition-all cursor-pointer hover:scale-105 ${
+                      selectedCard === card.card_id
+                        ? 'border-blue-500 shadow-lg shadow-blue-500/50'
+                        : 'border-gray-700 hover:border-blue-400'
+                    }`}
+                  >
+                    <div className="relative">
+                      <img
+                        src={card.image_url || card.fallback_image_url || '/placeholder-card.png'}
+                        alt={card.name}
+                        className="w-full h-64 object-contain mb-3 rounded"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder-card.png';
+                        }}
+                      />
+                      {selectedCard === card.card_id && (
+                        <div className="absolute top-2 right-2 bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                          ✓
+                        </div>
+                      )}
+                      <div className="absolute top-2 left-2 bg-gray-900/80 text-white px-2 py-1 rounded text-xs font-semibold">
+                        x{card.quantity}
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-lg mb-1 truncate">{card.name}</h3>
+                    <p className="text-sm text-gray-400 mb-2 truncate">{card.character}</p>
+                    <div className="flex items-center justify-between">
+                      <p className={`text-sm font-semibold ${getRarityColor(card.rarity)}`}>
+                        {card.rarity}
+                      </p>
+                      {card.power && (
+                        <p className="text-xs text-gray-400">
+                          {card.cost && `${card.cost} / `}{card.power}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

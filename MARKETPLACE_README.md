@@ -29,9 +29,12 @@ Le **Marketplace** est une nouvelle fonctionnalité permettant aux joueurs d'éc
 - Statistiques de vos ventes
 
 #### 3. Vendre une carte
-- Sélectionner une carte que vous possédez en au moins 2 exemplaires
+- **Interface visuelle améliorée** : Vue en grille de toutes vos cartes vendables (≥2 exemplaires)
+- **Sélection intuitive** : Cliquez sur une carte pour la sélectionner (bordure bleue + icône ✓)
+- **Badge de quantité** : Chaque carte affiche son nombre d'exemplaires dans un badge
 - Définir un prix entre 1 et 999,999 Berrys
 - Créer l'annonce (maximum 3 annonces actives)
+- **Aperçu de la carte** : Visualisez la carte sélectionnée avant de confirmer le prix
 
 ## Architecture technique
 
