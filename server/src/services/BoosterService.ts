@@ -100,7 +100,15 @@ export class BoosterService {
 
       query += ` ORDER BY RANDOM() LIMIT 1`;
 
+      // DEBUG: Log la requête complète
+      console.log(`🔍 DEBUG - Requête SQL pour ${rarity}:`, query);
+      console.log(`🔍 DEBUG - Paramètres:`, params);
+      console.log(`🔍 DEBUG - shouldBeAlternate:`, shouldBeAlternate);
+      console.log(`🔍 DEBUG - boosterId:`, boosterId);
+
       const cards = await Database.all(query, params);
+
+      console.log(`🔍 DEBUG - Nombre de cartes trouvées:`, cards.length);
 
       if (cards.length === 0) {
         // Si aucune carte alternate trouvée, fallback sur une carte normale
@@ -109,8 +117,24 @@ export class BoosterService {
           return this.getRandomCardByRarity(rarity, boosterId, true); // Retry avec forceNonAlternate
         }
 
-        // Si aucune carte trouvée, cela indique un problème de données
+        // Diagnostic détaillé
         console.error(`ERREUR: Aucune carte ${rarity} trouvée dans le booster ${boosterId || 'non spécifié'}`);
+
+        // Vérifier combien de cartes existent sans le filtre vegapull_id
+        const debugQuery1 = `SELECT COUNT(*) as count FROM cards WHERE rarity = ? AND is_active = 1 AND booster_id = ?`;
+        const debugResult1 = await Database.get(debugQuery1, [rarity, boosterId]);
+        console.error(`🔍 DEBUG - Cartes ${rarity} dans booster ${boosterId} (total):`, debugResult1?.count || 0);
+
+        // Vérifier avec le filtre vegapull_id
+        const debugQuery2 = `SELECT COUNT(*) as count FROM cards WHERE rarity = ? AND is_active = 1 AND booster_id = ? AND (vegapull_id NOT LIKE '%_p%' OR vegapull_id IS NULL)`;
+        const debugResult2 = await Database.get(debugQuery2, [rarity, boosterId]);
+        console.error(`🔍 DEBUG - Cartes ${rarity} non-alternate dans booster ${boosterId}:`, debugResult2?.count || 0);
+
+        // Montrer quelques exemples de vegapull_id
+        const debugQuery3 = `SELECT vegapull_id FROM cards WHERE rarity = ? AND booster_id = ? LIMIT 5`;
+        const debugResult3 = await Database.all(debugQuery3, [rarity, boosterId]);
+        console.error(`🔍 DEBUG - Exemples de vegapull_id:`, debugResult3.map((r: any) => r.vegapull_id));
+
         console.error(`Ceci indique un problème de synchronisation des données. Vérifiez que:`);
         console.error(`1. Le booster ${boosterId} existe et contient des cartes ${rarity}`);
         console.error(`2. Les cartes ont is_active = 1`);
