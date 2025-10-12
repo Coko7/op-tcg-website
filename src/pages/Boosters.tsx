@@ -105,24 +105,27 @@ const Boosters: React.FC = () => {
 
     setAnimationPhase('opening');
 
-    setTimeout(async () => {
-      const result = await GameService.openBooster(selectedBooster.id);
-      if (result) {
-        setBoosterResult(result);
+    // Appeler l'API immédiatement pour avoir les cartes pendant l'animation
+    const result = await GameService.openBooster(selectedBooster.id);
+    if (result) {
+      setBoosterResult(result);
+
+      // Attendre la fin de l'animation du coffre avant de passer à la phase deck
+      setTimeout(() => {
         setAnimationPhase('deck');
         setRevealedCards(0);
+      }, 2500); // Durée de l'animation du coffre + cartes qui volent
 
-        // Utiliser le statut retourné par l'API openBooster (plus besoin d'appeler getBoosterStatus)
-        if (result.available_boosters !== undefined) {
-          setBoosterStatus((prev: any) => prev ? {
-            ...prev,
-            available_boosters: result.available_boosters!,
-            next_booster_time: result.next_booster_time ? new Date(result.next_booster_time) : undefined
-          } : null);
-          setCanOpen(result.available_boosters > 0);
-        }
+      // Mettre à jour le statut
+      if (result.available_boosters !== undefined) {
+        setBoosterStatus((prev: any) => prev ? {
+          ...prev,
+          available_boosters: result.available_boosters!,
+          next_booster_time: result.next_booster_time ? new Date(result.next_booster_time) : undefined
+        } : null);
+        setCanOpen(result.available_boosters > 0);
       }
-    }, 2000);
+    }
   };
 
   const handleCardRevealed = (card: CardType, index: number) => {
@@ -177,33 +180,35 @@ const Boosters: React.FC = () => {
 
     setAnimationPhase('opening');
 
-    setTimeout(async () => {
-      try {
-        const result = await GameService.buyBoosterWithBerrys();
-        if (result) {
-          setBoosterResult(result);
+    try {
+      const result = await GameService.buyBoosterWithBerrys();
+      if (result) {
+        setBoosterResult(result);
+
+        // Attendre la fin de l'animation du coffre avant de passer à la phase deck
+        setTimeout(() => {
           setAnimationPhase('deck');
           setRevealedCards(0);
+        }, 2500); // Durée de l'animation du coffre + cartes qui volent
 
-          // Mettre à jour le solde de Berrys
-          const newBalance = await GameService.getBerrysBalance();
-          setBerrysBalance(newBalance);
+        // Mettre à jour le solde de Berrys
+        const newBalance = await GameService.getBerrysBalance();
+        setBerrysBalance(newBalance);
 
-          // Mettre à jour le statut des boosters
-          if (result.available_boosters !== undefined) {
-            setBoosterStatus((prev: any) => prev ? {
-              ...prev,
-              available_boosters: result.available_boosters!,
-              next_booster_time: result.next_booster_time ? new Date(result.next_booster_time) : undefined
-            } : null);
-            setCanOpen(result.available_boosters > 0);
-          }
+        // Mettre à jour le statut des boosters
+        if (result.available_boosters !== undefined) {
+          setBoosterStatus((prev: any) => prev ? {
+            ...prev,
+            available_boosters: result.available_boosters!,
+            next_booster_time: result.next_booster_time ? new Date(result.next_booster_time) : undefined
+          } : null);
+          setCanOpen(result.available_boosters > 0);
         }
-      } catch (error: any) {
-        alert(error.message || 'Erreur lors de l\'achat du booster');
-        setAnimationPhase('idle');
       }
-    }, 2000);
+    } catch (error: any) {
+      alert(error.message || 'Erreur lors de l\'achat du booster');
+      setAnimationPhase('idle');
+    }
   };
 
 
@@ -380,6 +385,7 @@ const Boosters: React.FC = () => {
           <ChestAnimationCSS
             isOpening={true}
             animationPhase={animationPhase}
+            cards={boosterResult?.cards}
             onClick={() => {}}
           />
         </div>

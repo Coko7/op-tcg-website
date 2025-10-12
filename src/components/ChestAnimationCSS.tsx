@@ -9,6 +9,13 @@ interface ChestAnimationCSSProps {
   onClick?: () => void;
 }
 
+interface CardPosition {
+  x: number;
+  y: number;
+  rotation: number;
+  scale: number;
+}
+
 const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
   isOpening,
   animationPhase,
@@ -18,6 +25,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
 }) => {
   const [revealedCount, setRevealedCount] = useState(0);
   const [animating, setAnimating] = useState(false);
+  const [showCardsFromChest, setShowCardsFromChest] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Array<{
     x: number;
@@ -28,6 +36,20 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
     size: number;
     color: string;
   }>>([]);
+
+  // Déclencher l'animation des cartes sortant du coffre
+  useEffect(() => {
+    if (animationPhase === 'opening') {
+      setShowCardsFromChest(false);
+      // Attendre que le coffre s'ouvre avant de faire sortir les cartes
+      const timer = setTimeout(() => {
+        setShowCardsFromChest(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (animationPhase === 'deck') {
+      setShowCardsFromChest(false);
+    }
+  }, [animationPhase]);
 
   // Animation des particules avec Canvas
   useEffect(() => {
@@ -146,6 +168,52 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
         className="absolute inset-0 w-full h-full pointer-events-none z-10"
       />
 
+      {/* Cartes qui sortent du coffre pendant l'ouverture */}
+      {animationPhase === 'opening' && showCardsFromChest && cards && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          {cards.slice(0, 5).map((card, i) => (
+            <div
+              key={`flying-${card.id}-${i}`}
+              className="absolute cards-fly-out"
+              style={{
+                width: '180px',
+                height: '252px',
+                animationDelay: `${i * 0.15}s`,
+                animationDuration: '1.5s',
+                animationFillMode: 'forwards',
+                zIndex: 30 + i,
+              }}
+            >
+              <div
+                className="absolute inset-0 rounded-xl p-1"
+                style={{
+                  background: `linear-gradient(135deg, ${getRarityColor(card.rarity)}, ${getRarityColor(card.rarity)}dd)`,
+                  boxShadow: `0 0 30px ${getRarityColor(card.rarity)}`,
+                }}
+              >
+                <div className="w-full h-full bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-lg overflow-hidden">
+                  {card.image_url ? (
+                    <img
+                      src={card.image_url}
+                      alt={card.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src =
+                          'https://via.placeholder.com/180x252?text=No+Image';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                      <span className="text-gray-500 text-xs">🃏</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Phase IDLE - Coffre fermé */}
       {(animationPhase === 'idle' || animationPhase === 'opening') && (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -249,7 +317,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
         </div>
       )}
 
-      {/* Phase DECK - Pile de cartes */}
+      {/* Phase DECK - Pile de cartes avec images */}
       {animationPhase === 'deck' && cards && (
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           {/* Instructions */}
@@ -264,82 +332,119 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
             </div>
           </div>
 
-          {/* Pile de cartes au centre */}
+          {/* Pile de cartes au centre avec images */}
           <div
             className={`relative cursor-pointer transition-transform hover:scale-105 ${
               animating ? 'animate-bounce' : ''
             }`}
             onClick={handleStackClick}
-            style={{ width: '200px', height: '280px' }}
+            style={{ width: '250px', height: '350px', perspective: '1000px' }}
           >
             {cards
               .slice(revealedCount, Math.min(revealedCount + 5, cards.length))
               .map((card, i) => {
                 const cardIndex = revealedCount + i;
                 const isTop = i === 0;
-                const offset = i * 4;
+                const offset = i * 6;
 
                 return (
                   <div
                     key={`stack-${cardIndex}`}
-                    className={`absolute card-back transition-all duration-300 ${
-                      isTop ? 'hover:translate-y-[-8px]' : ''
+                    className={`absolute card-3d transition-all duration-500 ${
+                      isTop ? 'hover:translate-y-[-12px]' : ''
                     }`}
                     style={{
-                      width: '200px',
-                      height: '280px',
-                      transform: `translateY(${offset}px) translateZ(${-i * 10}px)`,
+                      width: '250px',
+                      height: '350px',
+                      transform: `translateY(${offset}px) translateX(${i * 2}px) rotateY(${i * 2}deg)`,
                       zIndex: 10 - i,
+                      transformStyle: 'preserve-3d',
                     }}
                   >
-                    {/* Bordure de rareté */}
+                    {/* Bordure de rareté avec effet 3D */}
                     <div
-                      className="absolute inset-0 rounded-xl p-1"
+                      className="absolute inset-0 rounded-xl p-1.5"
                       style={{
                         background: `linear-gradient(135deg, ${getRarityColor(card.rarity)}, ${getRarityColor(card.rarity)}dd)`,
-                        boxShadow: isTop ? `0 0 30px ${getRarityColor(card.rarity)}` : 'none',
+                        boxShadow: isTop
+                          ? `0 0 40px ${getRarityColor(card.rarity)}, 0 0 80px ${getRarityColor(card.rarity)}66`
+                          : `0 4px 12px rgba(0,0,0,0.5)`,
                       }}
                     >
-                      {/* Dos de carte */}
-                      <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg flex items-center justify-center relative overflow-hidden">
-                        {/* Pattern de fond */}
-                        <div className="absolute inset-0 opacity-20">
-                          <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black" />
-                          {[...Array(8)].map((_, i) => (
-                            <div
-                              key={i}
-                              className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-gray-600 to-transparent"
-                              style={{ top: `${(i + 1) * 12.5}%` }}
-                            />
-                          ))}
-                        </div>
-
-                        {/* Logo central animé pour la carte du dessus */}
-                        {isTop && (
-                          <div className="relative z-10">
-                            <div
-                              className="w-24 h-24 rounded-full animate-pulse"
-                              style={{
-                                background: `radial-gradient(circle, ${getRarityColor(card.rarity)}, transparent)`,
-                              }}
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div
-                                className="w-16 h-16 rounded-full border-4 animate-spin-slow"
-                                style={{ borderColor: `${getRarityColor(card.rarity)} transparent ${getRarityColor(card.rarity)} transparent` }}
-                              />
+                      {/* Carte avec image */}
+                      <div className="w-full h-full bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-lg overflow-hidden relative">
+                        {card.image_url ? (
+                          <img
+                            src={card.image_url}
+                            alt={card.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src =
+                                'https://via.placeholder.com/250x350?text=No+Image';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                            <div className="text-center">
+                              <div className="text-6xl mb-4">🃏</div>
+                              <span className="text-gray-500 text-sm">No Image</span>
                             </div>
-                            <div className="absolute inset-0 flex items-center justify-center text-4xl">
-                              🃏
+                          </div>
+                        )}
+
+                        {/* Overlay gradient pour effet de profondeur */}
+                        {!isTop && (
+                          <div
+                            className="absolute inset-0 bg-black"
+                            style={{ opacity: i * 0.15 }}
+                          />
+                        )}
+
+                        {/* Info carte en overlay pour la carte du dessus */}
+                        {isTop && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/90 to-transparent p-3">
+                            <p className="text-white font-bold text-sm truncate">{card.name}</p>
+                            <div className="flex justify-between items-center mt-1">
+                              <span className="text-xs text-blue-300">{card.cost} 💎</span>
+                              <span
+                                className="text-xs font-semibold px-2 py-0.5 rounded"
+                                style={{
+                                  backgroundColor: getRarityColor(card.rarity),
+                                  color: 'white'
+                                }}
+                              >
+                                {card.rarity === 'secret_rare' ? 'Secret' :
+                                 card.rarity === 'super_rare' ? 'Super' :
+                                 card.rarity === 'rare' ? 'Rare' :
+                                 card.rarity === 'uncommon' ? 'Peu Com.' :
+                                 'Commune'}
+                              </span>
                             </div>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Effet de brillance */}
+                    {/* Effet de brillance sur la carte du dessus */}
                     {isTop && (
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent rounded-xl pointer-events-none" />
+                      <>
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent rounded-xl pointer-events-none" />
+                        {/* Particules brillantes */}
+                        <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
+                          {[...Array(5)].map((_, sparkle) => (
+                            <div
+                              key={sparkle}
+                              className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+                              style={{
+                                top: `${Math.random() * 100}%`,
+                                left: `${Math.random() * 100}%`,
+                                animationDelay: `${sparkle * 0.3}s`,
+                                animationDuration: '2s',
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </>
                     )}
                   </div>
                 );
@@ -347,26 +452,42 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
 
             {/* Message quand toutes les cartes sont révélées */}
             {revealedCount >= cards.length && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center backdrop-blur-sm bg-green-500/80 p-6 rounded-xl">
-                  <div className="text-4xl mb-2">✨</div>
-                  <p className="text-white font-bold text-xl">Toutes révélées !</p>
+              <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 20 }}>
+                <div className="text-center backdrop-blur-md bg-gradient-to-br from-green-500/90 to-blue-500/90 p-8 rounded-2xl shadow-2xl">
+                  <div className="text-5xl mb-3 animate-bounce">✨</div>
+                  <p className="text-white font-bold text-2xl mb-2">Toutes révélées !</p>
+                  <p className="text-white/80 text-sm">Cliquez sur "Voir le résumé" ci-dessous</p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Cartes révélées sur le côté droit */}
-          <div className="absolute right-4 top-24 bottom-4 w-48 overflow-y-auto space-y-3 z-10">
+          {/* Cartes révélées sur le côté droit avec animations améliorées */}
+          <div className="absolute right-4 top-24 bottom-4 w-56 overflow-y-auto space-y-3 z-10 pr-2 custom-scrollbar">
             {cards.slice(0, revealedCount).map((card, i) => (
               <div
                 key={`revealed-${card.id}-${i}`}
-                className={`bg-gradient-to-br ${getRarityGradient(card.rarity)} rounded-lg p-2 shadow-2xl transform transition-all duration-500 hover:scale-105`}
+                className={`bg-gradient-to-br ${getRarityGradient(card.rarity)} rounded-lg p-2 shadow-2xl transform transition-all duration-500 hover:scale-105 hover:rotate-1`}
                 style={{
-                  animation: `slideInRight 0.5s ease-out ${i * 0.1}s both`,
+                  animation: `slideInRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.15}s both`,
                 }}
               >
-                <div className="bg-gray-900 rounded-md overflow-hidden">
+                <div className="bg-gray-900 rounded-md overflow-hidden relative">
+                  {/* Badge de rareté */}
+                  <div
+                    className="absolute top-2 right-2 z-10 px-2 py-1 rounded-full text-xs font-bold shadow-lg"
+                    style={{
+                      backgroundColor: getRarityColor(card.rarity),
+                      color: 'white'
+                    }}
+                  >
+                    {card.rarity === 'secret_rare' ? '★' :
+                     card.rarity === 'super_rare' ? '◆' :
+                     card.rarity === 'rare' ? '●' :
+                     card.rarity === 'uncommon' ? '▲' :
+                     '○'}
+                  </div>
+
                   {card.image_url ? (
                     <img
                       src={card.image_url}
@@ -442,6 +563,10 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
           transform-style: preserve-3d;
         }
 
+        .card-3d {
+          transform-style: preserve-3d;
+        }
+
         @keyframes spin-slow {
           from {
             transform: rotate(0deg);
@@ -453,6 +578,53 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
 
         .animate-spin-slow {
           animation: spin-slow 3s linear infinite;
+        }
+
+        /* Animation des cartes qui sortent du coffre */
+        @keyframes cards-fly-out {
+          0% {
+            transform: translate(0, 50px) scale(0.3) rotateY(0deg) rotateZ(0deg);
+            opacity: 0;
+          }
+          30% {
+            opacity: 1;
+          }
+          50% {
+            transform: translate(0, -150px) scale(0.8) rotateY(180deg) rotateZ(360deg);
+            opacity: 1;
+          }
+          70% {
+            transform: translate(0, -200px) scale(1) rotateY(360deg) rotateZ(720deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(0, -250px) scale(1.2) rotateY(360deg) rotateZ(1080deg);
+            opacity: 0;
+          }
+        }
+
+        .cards-fly-out {
+          animation-name: cards-fly-out;
+          animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Scrollbar personnalisée */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(59, 130, 246, 0.5);
+          border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(59, 130, 246, 0.7);
         }
       `}</style>
     </div>
