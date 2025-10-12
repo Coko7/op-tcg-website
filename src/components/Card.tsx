@@ -67,7 +67,7 @@ const Card: React.FC<CardProps> = ({
 
       {/* Full-size card image */}
       <div className={`w-full aspect-[2.5/3.5] relative overflow-hidden bg-gray-800 ${
-        card.rarity === 'super_rare' ? 'holographic-shimmer' : ''
+        card.rarity === 'super_rare' || card.rarity === 'leader' ? 'holographic-shimmer' : ''
       } ${card.rarity === 'secret_rare' ? 'rainbow-foil' : ''}`}>
         {card.image_url ? (
           <img

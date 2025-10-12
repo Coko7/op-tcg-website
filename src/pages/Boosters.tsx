@@ -511,33 +511,6 @@ const Boosters: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30">
-        <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">
-          🎯 Taux de drop
-        </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 text-xs sm:text-sm">
-          <div className="text-center">
-            <div className="text-gray-300">Commune</div>
-            <div className="text-white font-bold">60%</div>
-          </div>
-          <div className="text-center">
-            <div className="text-green-300">Peu Commune</div>
-            <div className="text-white font-bold">25%</div>
-          </div>
-          <div className="text-center">
-            <div className="text-blue-300">Rare</div>
-            <div className="text-white font-bold">10%</div>
-          </div>
-          <div className="text-center">
-            <div className="text-purple-300">Super Rare</div>
-            <div className="text-white font-bold">4%</div>
-          </div>
-          <div className="text-center">
-            <div className="text-yellow-300">Secrète Rare</div>
-            <div className="text-white font-bold">1%</div>
-          </div>
-        </div>
-      </div>
 
       {isModalOpen && selectedCard && (
         <CardModal

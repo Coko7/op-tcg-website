@@ -596,7 +596,7 @@
     animation: sparkle-animation 1.5s ease-in-out infinite;
   }
 
-  /* Effet holographique subtil pour SuperRare et SecretRare */
+  /* Effet holographique avancé inspiré de pokemon-cards-css */
   @keyframes holographic {
     0% {
       background-position: 0% 50%;
@@ -609,64 +609,120 @@
     }
   }
 
+  @keyframes holo-sparkle {
+    0%, 100% {
+      opacity: 0.3;
+      background-position: 0% 0%;
+    }
+    50% {
+      opacity: 0.8;
+      background-position: 100% 100%;
+    }
+  }
+
   .holographic-effect {
     position: relative;
     overflow: hidden;
   }
 
-  .holographic-effect::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(
-      45deg,
-      transparent 30%,
-      rgba(255, 255, 255, 0.1) 35%,
-      rgba(255, 255, 255, 0.3) 40%,
-      transparent 45%,
-      transparent 55%,
-      rgba(255, 255, 255, 0.1) 60%,
-      rgba(255, 255, 255, 0.3) 65%,
-      transparent 70%
-    );
-    background-size: 200% 200%;
-    animation: holographic 3s linear infinite;
-    pointer-events: none;
-    mix-blend-mode: overlay;
-    opacity: 0.6;
-  }
-
-  /* Effet de reflets colorés pour holographique */
-  .holographic-shimmer {
-    position: relative;
-  }
-
-  .holographic-shimmer::before {
+  /* Effet de base holographique - brillance */
+  .holographic-effect::before {
     content: '';
     position: absolute;
     inset: 0;
     background: linear-gradient(
-      135deg,
-      rgba(255, 0, 255, 0.15) 0%,
-      rgba(0, 255, 255, 0.15) 25%,
-      rgba(255, 255, 0, 0.15) 50%,
-      rgba(255, 0, 255, 0.15) 75%,
-      rgba(0, 255, 255, 0.15) 100%
+      115deg,
+      transparent 0%,
+      rgba(0, 231, 255, 0.3) 30%,
+      rgba(255, 0, 231, 0.3) 50%,
+      rgba(255, 231, 0, 0.3) 70%,
+      transparent 100%
     );
-    background-size: 400% 400%;
-    animation: holographic-shimmer 4s ease-in-out infinite;
-    opacity: 0;
+    background-size: 200% 200%;
+    animation: holographic 4s ease-in-out infinite;
+    pointer-events: none;
+    mix-blend-mode: color-dodge;
+    opacity: 0.7;
+    z-index: 1;
+  }
+
+  /* Effet de reflets arc-en-ciel */
+  .holographic-effect::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(255, 119, 115, 0.2) 0px,
+      rgba(255, 237, 95, 0.2) 2px,
+      rgba(168, 255, 95, 0.2) 4px,
+      rgba(131, 255, 247, 0.2) 6px,
+      rgba(120, 148, 255, 0.2) 8px,
+      rgba(216, 117, 255, 0.2) 10px,
+      rgba(255, 119, 115, 0.2) 12px
+    );
+    background-size: 100% 300%;
+    animation: holo-sparkle 3s linear infinite;
+    pointer-events: none;
+    mix-blend-mode: color-dodge;
+    opacity: 0.5;
+    z-index: 1;
+  }
+
+  /* Effet de reflets colorés pour holographique - amélioration */
+  .holographic-shimmer {
+    position: relative;
+  }
+
+  /* Première couche - effet métallique arc-en-ciel */
+  .holographic-shimmer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        125deg,
+        rgba(255, 0, 255, 0.4) 0%,
+        rgba(0, 255, 255, 0.4) 15%,
+        rgba(255, 255, 0, 0.4) 30%,
+        rgba(255, 0, 0, 0.4) 45%,
+        rgba(0, 255, 0, 0.4) 60%,
+        rgba(0, 0, 255, 0.4) 75%,
+        rgba(255, 0, 255, 0.4) 100%
+      );
+    background-size: 300% 300%;
+    animation: holographic-shimmer 5s ease-in-out infinite;
+    opacity: 0.6;
     transition: opacity 0.3s ease;
     pointer-events: none;
-    mix-blend-mode: screen;
+    mix-blend-mode: color-dodge;
     border-radius: inherit;
+    z-index: 1;
   }
 
   .holographic-shimmer:hover::before {
-    opacity: 1;
+    opacity: 0.9;
+    animation-duration: 2s;
+  }
+
+  /* Deuxième couche - étoiles scintillantes */
+  .holographic-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.8) 0%, transparent 2%),
+      radial-gradient(circle at 80% 20%, rgba(255, 200, 255, 0.8) 0%, transparent 2%),
+      radial-gradient(circle at 40% 40%, rgba(200, 255, 255, 0.8) 0%, transparent 2%),
+      radial-gradient(circle at 60% 60%, rgba(255, 255, 200, 0.8) 0%, transparent 2%),
+      radial-gradient(circle at 30% 60%, rgba(255, 255, 255, 0.8) 0%, transparent 2%),
+      radial-gradient(circle at 70% 30%, rgba(255, 200, 255, 0.8) 0%, transparent 2%);
+    background-size: 200% 200%;
+    animation: sparkle-move 6s ease-in-out infinite;
+    opacity: 0.4;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    z-index: 2;
   }
 
   @keyframes holographic-shimmer {
@@ -678,41 +734,92 @@
     }
   }
 
-  /* Effet Rainbow pour les cartes super rares */
+  @keyframes sparkle-move {
+    0%, 100% {
+      background-position: 0% 0%;
+      opacity: 0.4;
+    }
+    50% {
+      background-position: 100% 100%;
+      opacity: 0.8;
+    }
+  }
+
+  /* Effet Rainbow amélioré pour les cartes secret rares */
   .rainbow-foil {
     position: relative;
     overflow: hidden;
   }
 
+  /* Base - gradient arc-en-ciel animé */
+  .rainbow-foil::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.5) 0%,
+      rgba(255, 154, 0, 0.5) 10%,
+      rgba(208, 222, 33, 0.5) 20%,
+      rgba(79, 220, 74, 0.5) 30%,
+      rgba(63, 218, 216, 0.5) 40%,
+      rgba(47, 201, 226, 0.5) 50%,
+      rgba(28, 127, 238, 0.5) 60%,
+      rgba(95, 21, 242, 0.5) 70%,
+      rgba(186, 12, 248, 0.5) 80%,
+      rgba(251, 7, 217, 0.5) 90%,
+      rgba(255, 0, 0, 0.5) 100%
+    );
+    background-size: 200% 100%;
+    animation: rainbow-shift 4s linear infinite;
+    pointer-events: none;
+    mix-blend-mode: color-dodge;
+    opacity: 0.7;
+    z-index: 1;
+  }
+
+  /* Overlay - lignes prismatiques */
   .rainbow-foil::after {
     content: '';
     position: absolute;
     inset: 0;
     background:
       repeating-linear-gradient(
-        90deg,
+        45deg,
         transparent,
-        rgba(255, 0, 0, 0.1) 2px,
-        rgba(255, 127, 0, 0.1) 4px,
-        rgba(255, 255, 0, 0.1) 6px,
-        rgba(0, 255, 0, 0.1) 8px,
-        rgba(0, 0, 255, 0.1) 10px,
-        rgba(75, 0, 130, 0.1) 12px,
-        rgba(148, 0, 211, 0.1) 14px,
-        transparent 16px
+        transparent 8px,
+        rgba(255, 255, 255, 0.15) 8px,
+        rgba(255, 255, 255, 0.15) 10px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 8px,
+        rgba(255, 255, 255, 0.1) 8px,
+        rgba(255, 255, 255, 0.1) 10px
       );
-    animation: rainbow-scroll 8s linear infinite;
+    animation: prism-shift 6s linear infinite;
     pointer-events: none;
     mix-blend-mode: overlay;
-    opacity: 0.4;
+    opacity: 0.6;
+    z-index: 2;
   }
 
-  @keyframes rainbow-scroll {
+  @keyframes rainbow-shift {
     0% {
-      transform: translateX(0);
+      background-position: 0% 0%;
     }
     100% {
-      transform: translateX(16px);
+      background-position: 200% 0%;
+    }
+  }
+
+  @keyframes prism-shift {
+    0% {
+      transform: translateX(0) translateY(0);
+    }
+    100% {
+      transform: translateX(20px) translateY(20px);
     }
   }
 }

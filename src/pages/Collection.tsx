@@ -78,7 +78,7 @@ const Collection: React.FC = () => {
           .filter(uc => uc.is_favorite)
           .map(uc => uc.card_id);
         filtered = filtered.filter(card => favoriteCardIds.includes(card.id));
-      } else if (['common', 'uncommon', 'rare', 'super_rare', 'secret_rare'].includes(selectedFilter)) {
+      } else if (['common', 'uncommon', 'rare', 'leader', 'super_rare', 'secret_rare'].includes(selectedFilter)) {
         filtered = filtered.filter(card => card.rarity === selectedFilter);
       } else {
         // Filtre par booster
@@ -183,6 +183,7 @@ const Collection: React.FC = () => {
     { value: 'common', label: RARITY_LABELS.common, count: stats?.rarity_breakdown?.common || 0, category: 'rareté' },
     { value: 'uncommon', label: RARITY_LABELS.uncommon, count: stats?.rarity_breakdown?.uncommon || 0, category: 'rareté' },
     { value: 'rare', label: RARITY_LABELS.rare, count: stats?.rarity_breakdown?.rare || 0, category: 'rareté' },
+    { value: 'leader', label: RARITY_LABELS.leader, count: stats?.rarity_breakdown?.leader || 0, category: 'rareté' },
     { value: 'super_rare', label: RARITY_LABELS.super_rare, count: stats?.rarity_breakdown?.super_rare || 0, category: 'rareté' },
     { value: 'secret_rare', label: RARITY_LABELS.secret_rare, count: stats?.rarity_breakdown?.secret_rare || 0, category: 'rareté' },
     // Boosters (ajoutés dynamiquement)

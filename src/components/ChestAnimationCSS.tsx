@@ -148,22 +148,24 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
 
   const getRarityColor = (rarity: string) => {
     const colors: Record<string, string> = {
-      common: '#9CA3AF',
-      uncommon: '#10B981',
-      rare: '#3B82F6',
-      super_rare: '#A855F7',
-      secret_rare: '#FBBF24',
+      common: '#FFFFFF',      // Blanc
+      uncommon: '#10B981',    // Vert
+      rare: '#3B82F6',        // Bleu
+      leader: '#EF4444',      // Rouge
+      super_rare: '#FBBF24',  // Doré
+      secret_rare: '#A855F7', // Multicolor (violet comme base)
     };
     return colors[rarity] || colors.common;
   };
 
   const getRarityGradient = (rarity: string) => {
     const gradients: Record<string, string> = {
-      common: 'from-gray-600 to-gray-800',
-      uncommon: 'from-green-600 to-green-800',
-      rare: 'from-blue-600 to-blue-800',
-      super_rare: 'from-purple-600 to-purple-800',
-      secret_rare: 'from-yellow-500 to-yellow-700',
+      common: 'from-gray-400 to-gray-600',
+      uncommon: 'from-green-500 to-green-700',
+      rare: 'from-blue-500 to-blue-700',
+      leader: 'from-red-500 to-red-700',
+      super_rare: 'from-yellow-400 to-yellow-600',
+      secret_rare: 'from-purple-500 via-pink-500 to-blue-500',
     };
     return gradients[rarity] || gradients.common;
   };
