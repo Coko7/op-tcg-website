@@ -34,7 +34,24 @@ const CardModal: React.FC<CardModalProps> = ({
       setGlareX(50);
       setGlareY(50);
       setIsHovering(false);
+
+      // Empêcher le scroll de l'arrière-plan sur mobile
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      // Restaurer le scroll quand le modal est fermé
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     }
+
+    return () => {
+      // Cleanup au démontage
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -99,8 +116,11 @@ const CardModal: React.FC<CardModalProps> = ({
 
   const transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(${isHovering ? 1.05 : 1})`;
 
-  // Vérifier si la carte a un effet holographique
-  const hasHolographicEffect = ['super_rare', 'secret_rare', 'leader'].includes(card.rarity);
+  // Vérifier si la carte a un effet holographique (Leader n'a pas d'effet holo IRL)
+  const hasHolographicEffect = ['super_rare', 'secret_rare'].includes(card.rarity);
+
+  // Effet de lumière simple pour les cartes non-holographiques
+  const hasSimpleLightEffect = !hasHolographicEffect;
 
   return (
     <div
@@ -111,7 +131,7 @@ const CardModal: React.FC<CardModalProps> = ({
         }
       }}
     >
-      <div className="relative max-w-4xl w-full bg-gray-900 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+      <div className="relative max-w-4xl w-full bg-gray-900 rounded-2xl p-6 max-h-[90vh] overflow-y-auto scrollbar-stable">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors z-10"
@@ -165,38 +185,38 @@ const CardModal: React.FC<CardModalProps> = ({
                   )}
                 </div>
 
-                {/* Effet holographique interactif pour les cartes rares */}
+                {/* Effet holographique interactif pour les cartes Super Rare et Secret Rare */}
                 {hasHolographicEffect && (
                   <>
-                    {/* Couche de brillance qui suit la souris */}
+                    {/* Couche de brillance principale qui suit la souris */}
                     <div
                       className="absolute inset-0 pointer-events-none z-10 opacity-0 transition-opacity duration-300"
                       style={{
-                        opacity: isHovering ? 0.6 : 0,
-                        background: `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 20%, transparent 50%)`,
+                        opacity: isHovering ? 0.7 : 0,
+                        background: `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.5) 15%, transparent 40%)`,
                       }}
                     />
 
-                    {/* Effet holographique arc-en-ciel dynamique */}
+                    {/* Effet holographique arc-en-ciel dynamique pour Secret Rare */}
                     {card.rarity === 'secret_rare' && (
                       <div
                         className="absolute inset-0 pointer-events-none z-10 opacity-0 transition-opacity duration-300"
                         style={{
-                          opacity: isHovering ? 0.7 : 0,
+                          opacity: isHovering ? 0.65 : 0,
                           background: `
                             linear-gradient(
                               ${(glareX - 50) * 3.6}deg,
-                              rgba(255, 0, 0, 0.5) 0%,
-                              rgba(255, 154, 0, 0.5) 10%,
-                              rgba(208, 222, 33, 0.5) 20%,
-                              rgba(79, 220, 74, 0.5) 30%,
-                              rgba(63, 218, 216, 0.5) 40%,
-                              rgba(47, 201, 226, 0.5) 50%,
-                              rgba(28, 127, 238, 0.5) 60%,
-                              rgba(95, 21, 242, 0.5) 70%,
-                              rgba(186, 12, 248, 0.5) 80%,
-                              rgba(251, 7, 217, 0.5) 90%,
-                              rgba(255, 0, 0, 0.5) 100%
+                              rgba(255, 0, 0, 0.6) 0%,
+                              rgba(255, 154, 0, 0.6) 10%,
+                              rgba(208, 222, 33, 0.6) 20%,
+                              rgba(79, 220, 74, 0.6) 30%,
+                              rgba(63, 218, 216, 0.6) 40%,
+                              rgba(47, 201, 226, 0.6) 50%,
+                              rgba(28, 127, 238, 0.6) 60%,
+                              rgba(95, 21, 242, 0.6) 70%,
+                              rgba(186, 12, 248, 0.6) 80%,
+                              rgba(251, 7, 217, 0.6) 90%,
+                              rgba(255, 0, 0, 0.6) 100%
                             )
                           `,
                           mixBlendMode: 'color-dodge',
@@ -204,45 +224,39 @@ const CardModal: React.FC<CardModalProps> = ({
                       />
                     )}
 
-                    {/* Effet holographique pour super_rare et leader */}
-                    {(card.rarity === 'super_rare' || card.rarity === 'leader') && (
+                    {/* Effet holographique pour super_rare */}
+                    {card.rarity === 'super_rare' && (
                       <div
                         className="absolute inset-0 pointer-events-none z-10 opacity-0 transition-opacity duration-300"
                         style={{
                           opacity: isHovering ? 0.6 : 0,
                           background: `
                             linear-gradient(
-                              ${(glareX - 50) * 2}deg,
-                              rgba(255, 0, 255, 0.4) 0%,
-                              rgba(0, 255, 255, 0.4) 25%,
-                              rgba(255, 255, 0, 0.4) 50%,
-                              rgba(255, 0, 0, 0.4) 75%,
-                              rgba(255, 0, 255, 0.4) 100%
+                              ${(glareX - 50) * 2.5}deg,
+                              rgba(255, 0, 255, 0.5) 0%,
+                              rgba(0, 255, 255, 0.5) 25%,
+                              rgba(255, 255, 0, 0.5) 50%,
+                              rgba(255, 0, 0, 0.5) 75%,
+                              rgba(255, 0, 255, 0.5) 100%
                             )
                           `,
                           mixBlendMode: 'color-dodge',
                         }}
                       />
                     )}
-
-                    {/* Effet de reflets prismatiques qui suivent la souris */}
-                    <div
-                      className="absolute inset-0 pointer-events-none z-10 opacity-0 transition-opacity duration-300"
-                      style={{
-                        opacity: isHovering ? 0.3 : 0,
-                        background: `
-                          repeating-linear-gradient(
-                            ${(glareX - 50) * 2 + 45}deg,
-                            transparent,
-                            transparent 10px,
-                            rgba(255, 255, 255, 0.4) 10px,
-                            rgba(255, 255, 255, 0.4) 12px
-                          )
-                        `,
-                        mixBlendMode: 'overlay',
-                      }}
-                    />
                   </>
+                )}
+
+                {/* Effet de lumière simple pour les cartes non-holographiques */}
+                {hasSimpleLightEffect && (
+                  <div
+                    className="absolute inset-0 pointer-events-none z-10 opacity-0 transition-opacity duration-300"
+                    style={{
+                      opacity: isHovering ? 0.4 : 0,
+                      background: `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.3) 15%, transparent 35%)`,
+                      mixBlendMode: 'overlay',
+                    }}
+                  />
                 )}
 
                 {/* Ring animé pour les cartes très rares */}

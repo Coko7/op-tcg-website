@@ -822,4 +822,28 @@
       transform: translateX(20px) translateY(20px);
     }
   }
+
+  /* Scrollbar stable - évite l'apparition/disparition de la scrollbar */
+  .scrollbar-stable {
+    scrollbar-gutter: stable;
+  }
+
+  /* Style de scrollbar personnalisé */
+  .scrollbar-stable::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-stable::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+  }
+
+  .scrollbar-stable::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 10px;
+  }
+
+  .scrollbar-stable::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.7);
+  }
 }

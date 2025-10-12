@@ -425,8 +425,10 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
                           : `0 4px 12px rgba(0,0,0,0.5)`,
                       }}
                     >
-                      {/* Carte avec image */}
-                      <div className="w-full h-full bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-lg overflow-hidden relative">
+                      {/* Carte avec image et effet holographique */}
+                      <div className={`w-full h-full bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-lg overflow-hidden relative ${
+                        card.rarity === 'super_rare' ? 'holographic-shimmer' : ''
+                      } ${card.rarity === 'secret_rare' ? 'rainbow-foil' : ''}`}>
                         {card.image_url ? (
                           <img
                             src={card.image_url}
