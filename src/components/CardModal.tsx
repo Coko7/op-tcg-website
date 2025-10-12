@@ -22,6 +22,8 @@ const CardModal: React.FC<CardModalProps> = ({
 }) => {
   const [tiltX, setTiltX] = useState(0);
   const [tiltY, setTiltY] = useState(0);
+  const [glareX, setGlareX] = useState(50);
+  const [glareY, setGlareY] = useState(50);
   const [isHovering, setIsHovering] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -29,30 +31,52 @@ const CardModal: React.FC<CardModalProps> = ({
     if (isOpen) {
       setTiltX(0);
       setTiltY(0);
+      setGlareX(50);
+      setGlareY(50);
       setIsHovering(false);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleInteraction = (clientX: number, clientY: number) => {
     if (!cardRef.current) return;
 
     const rect = cardRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
-    const maxTilt = 15;
-    const newTiltX = ((e.clientY - centerY) / (rect.height / 2)) * maxTilt;
-    const newTiltY = ((e.clientX - centerX) / (rect.width / 2)) * -maxTilt;
+    // Calculer la position relative (0-100%)
+    const relativeX = ((clientX - rect.left) / rect.width) * 100;
+    const relativeY = ((clientY - rect.top) / rect.height) * 100;
+
+    // Effet de tilt (plus prononcé pour les cartes holographiques)
+    const maxTilt = ['super_rare', 'secret_rare', 'leader'].includes(card.rarity) ? 20 : 15;
+    const newTiltX = ((clientY - centerY) / (rect.height / 2)) * maxTilt;
+    const newTiltY = ((clientX - centerX) / (rect.width / 2)) * -maxTilt;
 
     setTiltX(newTiltX);
     setTiltY(newTiltY);
+    setGlareX(relativeX);
+    setGlareY(relativeY);
+  };
+
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    handleInteraction(e.clientX, e.clientY);
+  };
+
+  const handleCardTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      handleInteraction(touch.clientX, touch.clientY);
+    }
   };
 
   const resetTilt = () => {
     setTiltX(0);
     setTiltY(0);
+    setGlareX(50);
+    setGlareY(50);
   };
 
   const handleCardMouseEnter = () => {
@@ -66,7 +90,17 @@ const CardModal: React.FC<CardModalProps> = ({
     }, 100);
   };
 
+  const handleCardTouchEnd = () => {
+    setIsHovering(false);
+    setTimeout(() => {
+      resetTilt();
+    }, 100);
+  };
+
   const transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(${isHovering ? 1.05 : 1})`;
+
+  // Vérifier si la carte a un effet holographique
+  const hasHolographicEffect = ['super_rare', 'secret_rare', 'leader'].includes(card.rarity);
 
   return (
     <div
@@ -89,18 +123,26 @@ const CardModal: React.FC<CardModalProps> = ({
           <div className="relative">
             <div
               ref={cardRef}
-              className="relative w-full max-w-md mx-auto transition-transform duration-300 ease-out"
-              style={{ transform }}
+              className="relative w-full max-w-md mx-auto transition-transform duration-100 ease-out"
+              style={{
+                transform,
+                transformStyle: 'preserve-3d'
+              }}
               onMouseMove={handleCardMouseMove}
               onMouseEnter={handleCardMouseEnter}
               onMouseLeave={handleCardMouseLeave}
+              onTouchMove={handleCardTouchMove}
+              onTouchEnd={handleCardTouchEnd}
+              onTouchStart={() => setIsHovering(true)}
             >
               <div className={`relative aspect-[2.5/3.5] rounded-xl overflow-hidden shadow-2xl card-${card.rarity.replace('_', '-')}`}>
+                {/* Image de la carte */}
                 {card.image_url ? (
                   <img
                     src={card.image_url}
                     alt={card.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover relative z-0"
+                    style={{ pointerEvents: 'none' }}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       if (card.fallback_image_url && target.src !== card.fallback_image_url) {
@@ -112,7 +154,9 @@ const CardModal: React.FC<CardModalProps> = ({
                     }}
                   />
                 ) : null}
-                <div className={`absolute inset-0 flex flex-col items-center justify-center text-white/80 bg-gradient-to-br ${RARITY_COLORS[card.rarity]} ${card.image_url ? 'hidden' : ''}`}>
+
+                {/* Fallback si pas d'image */}
+                <div className={`absolute inset-0 flex flex-col items-center justify-center text-white/80 bg-gradient-to-br ${RARITY_COLORS[card.rarity]} ${card.image_url ? 'hidden' : ''} z-0`}>
                   <div className="text-6xl mb-4">🏴‍☠️</div>
                   <div className="text-lg font-bold text-center px-4">{card.character}</div>
                   <div className="text-sm mt-2">{RARITY_LABELS[card.rarity]}</div>
@@ -121,14 +165,102 @@ const CardModal: React.FC<CardModalProps> = ({
                   )}
                 </div>
 
+                {/* Effet holographique interactif pour les cartes rares */}
+                {hasHolographicEffect && (
+                  <>
+                    {/* Couche de brillance qui suit la souris */}
+                    <div
+                      className="absolute inset-0 pointer-events-none z-10 opacity-0 transition-opacity duration-300"
+                      style={{
+                        opacity: isHovering ? 0.6 : 0,
+                        background: `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 20%, transparent 50%)`,
+                      }}
+                    />
+
+                    {/* Effet holographique arc-en-ciel dynamique */}
+                    {card.rarity === 'secret_rare' && (
+                      <div
+                        className="absolute inset-0 pointer-events-none z-10 opacity-0 transition-opacity duration-300"
+                        style={{
+                          opacity: isHovering ? 0.7 : 0,
+                          background: `
+                            linear-gradient(
+                              ${(glareX - 50) * 3.6}deg,
+                              rgba(255, 0, 0, 0.5) 0%,
+                              rgba(255, 154, 0, 0.5) 10%,
+                              rgba(208, 222, 33, 0.5) 20%,
+                              rgba(79, 220, 74, 0.5) 30%,
+                              rgba(63, 218, 216, 0.5) 40%,
+                              rgba(47, 201, 226, 0.5) 50%,
+                              rgba(28, 127, 238, 0.5) 60%,
+                              rgba(95, 21, 242, 0.5) 70%,
+                              rgba(186, 12, 248, 0.5) 80%,
+                              rgba(251, 7, 217, 0.5) 90%,
+                              rgba(255, 0, 0, 0.5) 100%
+                            )
+                          `,
+                          mixBlendMode: 'color-dodge',
+                        }}
+                      />
+                    )}
+
+                    {/* Effet holographique pour super_rare et leader */}
+                    {(card.rarity === 'super_rare' || card.rarity === 'leader') && (
+                      <div
+                        className="absolute inset-0 pointer-events-none z-10 opacity-0 transition-opacity duration-300"
+                        style={{
+                          opacity: isHovering ? 0.6 : 0,
+                          background: `
+                            linear-gradient(
+                              ${(glareX - 50) * 2}deg,
+                              rgba(255, 0, 255, 0.4) 0%,
+                              rgba(0, 255, 255, 0.4) 25%,
+                              rgba(255, 255, 0, 0.4) 50%,
+                              rgba(255, 0, 0, 0.4) 75%,
+                              rgba(255, 0, 255, 0.4) 100%
+                            )
+                          `,
+                          mixBlendMode: 'color-dodge',
+                        }}
+                      />
+                    )}
+
+                    {/* Effet de reflets prismatiques qui suivent la souris */}
+                    <div
+                      className="absolute inset-0 pointer-events-none z-10 opacity-0 transition-opacity duration-300"
+                      style={{
+                        opacity: isHovering ? 0.3 : 0,
+                        background: `
+                          repeating-linear-gradient(
+                            ${(glareX - 50) * 2 + 45}deg,
+                            transparent,
+                            transparent 10px,
+                            rgba(255, 255, 255, 0.4) 10px,
+                            rgba(255, 255, 255, 0.4) 12px
+                          )
+                        `,
+                        mixBlendMode: 'overlay',
+                      }}
+                    />
+                  </>
+                )}
+
+                {/* Ring animé pour les cartes très rares */}
                 {(card.rarity === 'super_rare' || card.rarity === 'secret_rare') && (
                   <div className="absolute -inset-2 ring-4 ring-yellow-400 ring-opacity-50 rounded-xl pointer-events-none animate-pulse"></div>
                 )}
               </div>
+
+              {/* Indication tactile pour mobile */}
+              {!isHovering && hasHolographicEffect && (
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black/70 text-white text-xs px-3 py-1 rounded-full pointer-events-none opacity-70 md:hidden">
+                  👆 Toucher pour voir l'effet
+                </div>
+              )}
             </div>
 
             {quantity > 1 && (
-              <div className="absolute top-4 left-4 bg-black/80 text-white text-lg px-4 py-2 rounded-full font-bold">
+              <div className="absolute top-4 left-4 bg-black/80 text-white text-lg px-4 py-2 rounded-full font-bold z-20">
                 x{quantity}
               </div>
             )}
@@ -136,7 +268,7 @@ const CardModal: React.FC<CardModalProps> = ({
             {onToggleFavorite && (
               <button
                 onClick={onToggleFavorite}
-                className="absolute top-4 right-4 p-3 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
+                className="absolute top-4 right-4 p-3 rounded-full bg-black/60 hover:bg-black/80 transition-colors z-20"
               >
                 <Heart
                   size={24}
@@ -155,6 +287,7 @@ const CardModal: React.FC<CardModalProps> = ({
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                   card.rarity === 'secret_rare' ? 'bg-purple-600 text-white' :
                   card.rarity === 'super_rare' ? 'bg-yellow-600 text-white' :
+                  card.rarity === 'leader' ? 'bg-red-600 text-white' :
                   card.rarity === 'rare' ? 'bg-blue-600 text-white' :
                   card.rarity === 'uncommon' ? 'bg-green-600 text-white' :
                   'bg-gray-600 text-white'
@@ -225,6 +358,15 @@ const CardModal: React.FC<CardModalProps> = ({
                   🌟 Capacité Spéciale
                 </h3>
                 <p className="text-white/90 leading-relaxed">{card.special_ability}</p>
+              </div>
+            )}
+
+            {/* Indication pour les utilisateurs desktop */}
+            {hasHolographicEffect && (
+              <div className="hidden md:block bg-blue-900/30 border border-blue-600/30 rounded-lg p-3">
+                <p className="text-blue-300 text-sm text-center">
+                  🖱️ Déplacez votre souris sur la carte pour voir l'effet holographique !
+                </p>
               </div>
             )}
           </div>
