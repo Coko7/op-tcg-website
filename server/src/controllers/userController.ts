@@ -73,7 +73,7 @@ export class UserController {
           uc.is_favorite,
           c.id,
           c.name,
-          c.character,
+          c.character_name as character,
           c.rarity,
           c.type,
           c.color,

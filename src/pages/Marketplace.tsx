@@ -106,9 +106,15 @@ const Marketplace: React.FC = () => {
       const data = await response.json();
 
       if (data.success) {
+        console.log('Collection complète reçue:', data.data.length, 'cartes');
+        console.log('Exemple de carte:', data.data[0]);
+
         // Filtrer uniquement les cartes avec quantity >= 2
         const sellableCards = data.data
-          .filter((card: any) => card.quantity >= 2)
+          .filter((card: any) => {
+            console.log(`Carte ${card.name}: quantity = ${card.quantity}, type = ${typeof card.quantity}`);
+            return card.quantity >= 2;
+          })
           .map((card: any) => ({
             card_id: card.card_id || card.id,
             id: card.id || card.card_id,
@@ -123,7 +129,7 @@ const Marketplace: React.FC = () => {
             power: card.power
           }));
 
-        console.log('Cartes vendables chargées:', sellableCards.length);
+        console.log('Cartes vendables après filtre (quantity >= 2):', sellableCards.length);
         setMyCards(sellableCards);
       }
     } catch (error: any) {
