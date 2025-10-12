@@ -648,16 +648,16 @@
     background: linear-gradient(
       115deg,
       transparent 0%,
-      rgba(0, 231, 255, 0.15) 30%,
-      rgba(255, 0, 231, 0.15) 50%,
-      rgba(255, 231, 0, 0.15) 70%,
+      rgba(0, 231, 255, 0.3) 30%,
+      rgba(255, 0, 231, 0.3) 50%,
+      rgba(255, 231, 0, 0.3) 70%,
       transparent 100%
     );
     background-size: 200% 200%;
     animation: holographic 4s ease-in-out infinite;
     pointer-events: none;
     mix-blend-mode: color-dodge;
-    opacity: 0.4;
+    opacity: 0.65;
     z-index: 1;
   }
 
@@ -668,19 +668,19 @@
     inset: 0;
     background: repeating-linear-gradient(
       0deg,
-      rgba(255, 119, 115, 0.1) 0px,
-      rgba(255, 237, 95, 0.1) 2px,
-      rgba(168, 255, 95, 0.1) 4px,
-      rgba(131, 255, 247, 0.1) 6px,
-      rgba(120, 148, 255, 0.1) 8px,
-      rgba(216, 117, 255, 0.1) 10px,
-      rgba(255, 119, 115, 0.1) 12px
+      rgba(255, 119, 115, 0.2) 0px,
+      rgba(255, 237, 95, 0.2) 2px,
+      rgba(168, 255, 95, 0.2) 4px,
+      rgba(131, 255, 247, 0.2) 6px,
+      rgba(120, 148, 255, 0.2) 8px,
+      rgba(216, 117, 255, 0.2) 10px,
+      rgba(255, 119, 115, 0.2) 12px
     );
     background-size: 100% 300%;
     animation: holo-sparkle 3s linear infinite;
     pointer-events: none;
     mix-blend-mode: color-dodge;
-    opacity: 0.3;
+    opacity: 0.5;
     z-index: 1;
   }
 
@@ -697,17 +697,17 @@
     background:
       linear-gradient(
         125deg,
-        rgba(255, 0, 255, 0.2) 0%,
-        rgba(0, 255, 255, 0.2) 15%,
-        rgba(255, 255, 0, 0.2) 30%,
-        rgba(255, 0, 0, 0.2) 45%,
-        rgba(0, 255, 0, 0.2) 60%,
-        rgba(0, 0, 255, 0.2) 75%,
-        rgba(255, 0, 255, 0.2) 100%
+        rgba(255, 0, 255, 0.35) 0%,
+        rgba(0, 255, 255, 0.35) 15%,
+        rgba(255, 255, 0, 0.35) 30%,
+        rgba(255, 0, 0, 0.35) 45%,
+        rgba(0, 255, 0, 0.35) 60%,
+        rgba(0, 0, 255, 0.35) 75%,
+        rgba(255, 0, 255, 0.35) 100%
       );
     background-size: 300% 300%;
     animation: holographic-shimmer 5s ease-in-out infinite;
-    opacity: 0.3;
+    opacity: 0.5;
     transition: opacity 0.3s ease;
     pointer-events: none;
     mix-blend-mode: color-dodge;
@@ -716,7 +716,7 @@
   }
 
   .holographic-shimmer:hover::before {
-    opacity: 0.5;
+    opacity: 0.7;
     animation-duration: 2s;
   }
 
@@ -726,15 +726,15 @@
     position: absolute;
     inset: 0;
     background-image:
-      radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.4) 0%, transparent 2%),
-      radial-gradient(circle at 80% 20%, rgba(255, 200, 255, 0.4) 0%, transparent 2%),
-      radial-gradient(circle at 40% 40%, rgba(200, 255, 255, 0.4) 0%, transparent 2%),
-      radial-gradient(circle at 60% 60%, rgba(255, 255, 200, 0.4) 0%, transparent 2%),
-      radial-gradient(circle at 30% 60%, rgba(255, 255, 255, 0.4) 0%, transparent 2%),
-      radial-gradient(circle at 70% 30%, rgba(255, 200, 255, 0.4) 0%, transparent 2%);
+      radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.5) 0%, transparent 2%),
+      radial-gradient(circle at 80% 20%, rgba(255, 200, 255, 0.5) 0%, transparent 2%),
+      radial-gradient(circle at 40% 40%, rgba(200, 255, 255, 0.5) 0%, transparent 2%),
+      radial-gradient(circle at 60% 60%, rgba(255, 255, 200, 0.5) 0%, transparent 2%),
+      radial-gradient(circle at 30% 60%, rgba(255, 255, 255, 0.5) 0%, transparent 2%),
+      radial-gradient(circle at 70% 30%, rgba(255, 200, 255, 0.5) 0%, transparent 2%);
     background-size: 200% 200%;
     animation: sparkle-move 6s ease-in-out infinite;
-    opacity: 0.2;
+    opacity: 0.35;
     pointer-events: none;
     mix-blend-mode: screen;
     z-index: 2;
@@ -773,23 +773,23 @@
     inset: 0;
     background: linear-gradient(
       90deg,
-      rgba(255, 0, 0, 0.25) 0%,
-      rgba(255, 154, 0, 0.25) 10%,
-      rgba(208, 222, 33, 0.25) 20%,
-      rgba(79, 220, 74, 0.25) 30%,
-      rgba(63, 218, 216, 0.25) 40%,
-      rgba(47, 201, 226, 0.25) 50%,
-      rgba(28, 127, 238, 0.25) 60%,
-      rgba(95, 21, 242, 0.25) 70%,
-      rgba(186, 12, 248, 0.25) 80%,
-      rgba(251, 7, 217, 0.25) 90%,
-      rgba(255, 0, 0, 0.25) 100%
+      rgba(255, 0, 0, 0.4) 0%,
+      rgba(255, 154, 0, 0.4) 10%,
+      rgba(208, 222, 33, 0.4) 20%,
+      rgba(79, 220, 74, 0.4) 30%,
+      rgba(63, 218, 216, 0.4) 40%,
+      rgba(47, 201, 226, 0.4) 50%,
+      rgba(28, 127, 238, 0.4) 60%,
+      rgba(95, 21, 242, 0.4) 70%,
+      rgba(186, 12, 248, 0.4) 80%,
+      rgba(251, 7, 217, 0.4) 90%,
+      rgba(255, 0, 0, 0.4) 100%
     );
     background-size: 200% 100%;
     animation: rainbow-shift 4s linear infinite;
     pointer-events: none;
     mix-blend-mode: color-dodge;
-    opacity: 0.35;
+    opacity: 0.55;
     z-index: 1;
   }
 
@@ -803,20 +803,20 @@
         45deg,
         transparent,
         transparent 8px,
-        rgba(255, 255, 255, 0.08) 8px,
-        rgba(255, 255, 255, 0.08) 10px
+        rgba(255, 255, 255, 0.12) 8px,
+        rgba(255, 255, 255, 0.12) 10px
       ),
       repeating-linear-gradient(
         -45deg,
         transparent,
         transparent 8px,
-        rgba(255, 255, 255, 0.05) 8px,
-        rgba(255, 255, 255, 0.05) 10px
+        rgba(255, 255, 255, 0.08) 8px,
+        rgba(255, 255, 255, 0.08) 10px
       );
     animation: prism-shift 6s linear infinite;
     pointer-events: none;
     mix-blend-mode: overlay;
-    opacity: 0.3;
+    opacity: 0.45;
     z-index: 2;
   }
 
