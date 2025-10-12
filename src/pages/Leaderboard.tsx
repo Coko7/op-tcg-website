@@ -157,19 +157,21 @@ const Leaderboard: React.FC = () => {
                 {entry.favorite_card_image && (
                   <div className="flex flex-col items-center justify-center bg-black/30 rounded-lg p-4 lg:min-w-[200px]">
                     <p className="text-xs opacity-80 mb-2">⭐ Carte favorite</p>
-                    <div className="relative">
+                    <div className={`relative w-40 aspect-[2.5/3.5] overflow-hidden rounded-lg ${
+                      entry.favorite_card_rarity === 'super_rare' ? 'holographic-shimmer' : ''
+                    } ${entry.favorite_card_rarity === 'secret_rare' ? 'rainbow-foil' : ''}`}>
                       <img
                         src={entry.favorite_card_image}
                         alt={entry.favorite_card_name || 'Carte favorite'}
-                        className={`w-40 h-56 object-cover rounded-lg shadow-2xl mb-2 ${
+                        className={`w-full h-full object-cover shadow-2xl ${
                           entry.favorite_card_rarity === 'super_rare' || entry.favorite_card_rarity === 'secret_rare'
-                            ? 'holographic-card'
+                            ? 'holographic-effect'
                             : ''
                         }`}
                         title={entry.favorite_card_name || undefined}
                       />
                     </div>
-                    <p className="font-semibold text-sm text-center">{entry.favorite_card_name}</p>
+                    <p className="font-semibold text-sm text-center mt-2">{entry.favorite_card_name}</p>
                     <p className="text-xs opacity-70">{entry.favorite_card_rarity}</p>
                   </div>
                 )}
