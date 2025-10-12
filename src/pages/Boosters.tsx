@@ -110,11 +110,12 @@ const Boosters: React.FC = () => {
     if (result) {
       setBoosterResult(result);
 
-      // Attendre la fin de l'animation du coffre avant de passer à la phase deck
+      // Attendre la fin de l'animation du coffre + toutes les cartes qui sortent une par une
+      // 1000ms (ouverture coffre) + 400ms * 5 cartes + 1500ms (animation vol dernière carte) = 4500ms
       setTimeout(() => {
         setAnimationPhase('deck');
         setRevealedCards(0);
-      }, 2500); // Durée de l'animation du coffre + cartes qui volent
+      }, 4500);
 
       // Mettre à jour le statut
       if (result.available_boosters !== undefined) {
@@ -185,11 +186,12 @@ const Boosters: React.FC = () => {
       if (result) {
         setBoosterResult(result);
 
-        // Attendre la fin de l'animation du coffre avant de passer à la phase deck
+        // Attendre la fin de l'animation du coffre + toutes les cartes qui sortent une par une
+        // 1000ms (ouverture coffre) + 400ms * 5 cartes + 1500ms (animation vol dernière carte) = 4500ms
         setTimeout(() => {
           setAnimationPhase('deck');
           setRevealedCards(0);
-        }, 2500); // Durée de l'animation du coffre + cartes qui volent
+        }, 4500);
 
         // Mettre à jour le solde de Berrys
         const newBalance = await GameService.getBerrysBalance();

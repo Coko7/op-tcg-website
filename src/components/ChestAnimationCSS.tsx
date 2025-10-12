@@ -25,7 +25,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
 }) => {
   const [revealedCount, setRevealedCount] = useState(0);
   const [animating, setAnimating] = useState(false);
-  const [showCardsFromChest, setShowCardsFromChest] = useState(false);
+  const [currentFlyingCardIndex, setCurrentFlyingCardIndex] = useState(-1);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Array<{
     x: number;
@@ -37,19 +37,29 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
     color: string;
   }>>([]);
 
-  // Déclencher l'animation des cartes sortant du coffre
+  // Déclencher l'animation des cartes sortant du coffre UNE PAR UNE
   useEffect(() => {
-    if (animationPhase === 'opening') {
-      setShowCardsFromChest(false);
-      // Attendre que le coffre s'ouvre avant de faire sortir les cartes
+    if (animationPhase === 'opening' && cards && cards.length > 0) {
+      setCurrentFlyingCardIndex(-1);
+      // Attendre que le coffre s'ouvre avant de faire sortir la première carte
       const timer = setTimeout(() => {
-        setShowCardsFromChest(true);
+        setCurrentFlyingCardIndex(0);
       }, 1000);
       return () => clearTimeout(timer);
     } else if (animationPhase === 'deck') {
-      setShowCardsFromChest(false);
+      setCurrentFlyingCardIndex(-1);
     }
-  }, [animationPhase]);
+  }, [animationPhase, cards]);
+
+  // Faire sortir les cartes une par une
+  useEffect(() => {
+    if (animationPhase === 'opening' && cards && currentFlyingCardIndex >= 0 && currentFlyingCardIndex < cards.length - 1) {
+      const timer = setTimeout(() => {
+        setCurrentFlyingCardIndex(prev => prev + 1);
+      }, 400); // Délai entre chaque carte
+      return () => clearTimeout(timer);
+    }
+  }, [currentFlyingCardIndex, animationPhase, cards]);
 
   // Animation des particules avec Canvas
   useEffect(() => {
@@ -168,64 +178,61 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
         className="absolute inset-0 w-full h-full pointer-events-none z-10"
       />
 
-      {/* Cartes qui sortent du coffre pendant l'ouverture - FACE CACHÉE */}
-      {animationPhase === 'opening' && showCardsFromChest && cards && (
+      {/* Carte qui sort du coffre pendant l'ouverture - FACE CACHÉE - UNE PAR UNE */}
+      {animationPhase === 'opening' && currentFlyingCardIndex >= 0 && cards && cards[currentFlyingCardIndex] && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          {cards.slice(0, 5).map((card, i) => (
+          <div
+            key={`flying-${cards[currentFlyingCardIndex].id}-${currentFlyingCardIndex}`}
+            className="absolute cards-fly-out w-[120px] h-[168px] sm:w-[150px] sm:h-[210px] md:w-[180px] md:h-[252px]"
+            style={{
+              animationDuration: '1.5s',
+              animationFillMode: 'forwards',
+              zIndex: 30,
+            }}
+          >
+            {/* Bordure de rareté */}
             <div
-              key={`flying-${card.id}-${i}`}
-              className="absolute cards-fly-out w-[120px] h-[168px] sm:w-[150px] sm:h-[210px] md:w-[180px] md:h-[252px]"
+              className="absolute inset-0 rounded-xl p-1"
               style={{
-                animationDelay: `${i * 0.15}s`,
-                animationDuration: '1.5s',
-                animationFillMode: 'forwards',
-                zIndex: 30 + i,
+                background: `linear-gradient(135deg, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}dd)`,
+                boxShadow: `0 0 30px ${getRarityColor(cards[currentFlyingCardIndex].rarity)}`,
               }}
             >
-              {/* Bordure de rareté */}
-              <div
-                className="absolute inset-0 rounded-xl p-1"
-                style={{
-                  background: `linear-gradient(135deg, ${getRarityColor(card.rarity)}, ${getRarityColor(card.rarity)}dd)`,
-                  boxShadow: `0 0 30px ${getRarityColor(card.rarity)}`,
-                }}
-              >
-                {/* DOS DE CARTE */}
-                <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg flex items-center justify-center relative overflow-hidden">
-                  {/* Pattern de fond */}
-                  <div className="absolute inset-0 opacity-20">
-                    <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black" />
-                    {[...Array(8)].map((_, idx) => (
-                      <div
-                        key={idx}
-                        className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-gray-600 to-transparent"
-                        style={{ top: `${(idx + 1) * 12.5}%` }}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Logo central */}
-                  <div className="relative z-10">
+              {/* DOS DE CARTE */}
+              <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg flex items-center justify-center relative overflow-hidden">
+                {/* Pattern de fond */}
+                <div className="absolute inset-0 opacity-20">
+                  <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black" />
+                  {[...Array(8)].map((_, idx) => (
                     <div
-                      className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full animate-pulse"
-                      style={{
-                        background: `radial-gradient(circle, ${getRarityColor(card.rarity)}, transparent)`,
-                      }}
+                      key={idx}
+                      className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-gray-600 to-transparent"
+                      style={{ top: `${(idx + 1) * 12.5}%` }}
                     />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div
-                        className="w-8 h-8 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full border-2 sm:border-3 md:border-4 animate-spin-slow"
-                        style={{ borderColor: `${getRarityColor(card.rarity)} transparent ${getRarityColor(card.rarity)} transparent` }}
-                      />
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center text-xl sm:text-2xl md:text-3xl">
-                      🃏
-                    </div>
+                  ))}
+                </div>
+
+                {/* Logo central */}
+                <div className="relative z-10">
+                  <div
+                    className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full animate-pulse"
+                    style={{
+                      background: `radial-gradient(circle, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}, transparent)`,
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div
+                      className="w-8 h-8 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full border-2 sm:border-3 md:border-4 animate-spin-slow"
+                      style={{ borderColor: `${getRarityColor(cards[currentFlyingCardIndex].rarity)} transparent ${getRarityColor(cards[currentFlyingCardIndex].rarity)} transparent` }}
+                    />
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center text-xl sm:text-2xl md:text-3xl">
+                    🃏
                   </div>
                 </div>
               </div>
             </div>
-          ))}
+          </div>
         </div>
       )}
 
@@ -319,12 +326,44 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
                 ))}
               </div>
 
-              {/* Lueur magique quand le coffre s'ouvre */}
-              {isOpening && (
-                <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-32 h-32">
+              {/* Lueur magique quand le coffre s'ouvre - Couleur selon la rareté de la carte */}
+              {isOpening && currentFlyingCardIndex >= 0 && cards && cards[currentFlyingCardIndex] && (
+                <div className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 w-24 h-24 sm:w-32 sm:h-32">
+                  <div
+                    className="absolute inset-0 rounded-full opacity-60 animate-ping"
+                    style={{
+                      backgroundColor: getRarityColor(cards[currentFlyingCardIndex].rarity),
+                      filter: cards[currentFlyingCardIndex].rarity === 'secret_rare'
+                        ? 'hue-rotate(45deg)'
+                        : 'none'
+                    }}
+                  />
+                  <div
+                    className="absolute inset-2 sm:inset-4 rounded-full opacity-80 animate-pulse"
+                    style={{
+                      backgroundColor: getRarityColor(cards[currentFlyingCardIndex].rarity),
+                      filter: cards[currentFlyingCardIndex].rarity === 'secret_rare'
+                        ? 'hue-rotate(90deg)'
+                        : 'brightness(1.2)'
+                    }}
+                  />
+                  <div
+                    className="absolute inset-4 sm:inset-8 rounded-full opacity-100"
+                    style={{
+                      backgroundColor: getRarityColor(cards[currentFlyingCardIndex].rarity),
+                      filter: cards[currentFlyingCardIndex].rarity === 'secret_rare'
+                        ? 'hue-rotate(135deg)'
+                        : 'brightness(1.5)'
+                    }}
+                  />
+                </div>
+              )}
+              {/* Lueur jaune par défaut quand aucune carte n'est encore sortie */}
+              {isOpening && currentFlyingCardIndex < 0 && (
+                <div className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 w-24 h-24 sm:w-32 sm:h-32">
                   <div className="absolute inset-0 bg-yellow-400 rounded-full opacity-60 animate-ping" />
-                  <div className="absolute inset-4 bg-yellow-300 rounded-full opacity-80 animate-pulse" />
-                  <div className="absolute inset-8 bg-yellow-200 rounded-full opacity-100" />
+                  <div className="absolute inset-2 sm:inset-4 bg-yellow-300 rounded-full opacity-80 animate-pulse" />
+                  <div className="absolute inset-4 sm:inset-8 bg-yellow-200 rounded-full opacity-100" />
                 </div>
               )}
             </div>
@@ -334,7 +373,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
 
       {/* Phase DECK - Pile de cartes avec images */}
       {animationPhase === 'deck' && cards && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-start sm:justify-center pt-16 sm:pt-0">
           {/* Instructions */}
           <div className="absolute top-4 sm:top-8 left-0 right-0 text-center z-20 px-2 sm:px-4">
             <div className="inline-block backdrop-blur-sm bg-black/40 py-2 px-4 sm:py-3 sm:px-6 rounded-lg">
@@ -351,7 +390,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
           <div
             className={`relative cursor-pointer transition-transform hover:scale-105 ${
               animating ? 'animate-bounce' : ''
-            } w-[180px] h-[252px] sm:w-[220px] sm:h-[308px] md:w-[250px] md:h-[350px]`}
+            } w-[160px] h-[224px] sm:w-[220px] sm:h-[308px] md:w-[250px] md:h-[350px] mb-4 sm:mb-0`}
             onClick={handleStackClick}
             style={{ perspective: '1000px' }}
           >
@@ -474,8 +513,8 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
             )}
           </div>
 
-          {/* Cartes révélées sur le côté - En bas sur mobile, à droite sur desktop */}
-          <div className="absolute bottom-2 left-2 right-2 sm:right-2 sm:top-20 sm:bottom-4 sm:left-auto w-auto sm:w-44 md:w-56 flex sm:flex-col gap-2 sm:gap-3 overflow-x-auto sm:overflow-y-auto sm:overflow-x-visible z-10 p-1 sm:pr-2 custom-scrollbar">
+          {/* Cartes révélées - En dessous sur mobile, à droite sur desktop */}
+          <div className="relative sm:absolute w-full sm:w-44 md:w-56 sm:right-2 sm:top-20 sm:bottom-4 flex flex-wrap justify-center sm:flex-col gap-2 sm:gap-3 overflow-visible sm:overflow-y-auto z-10 px-2 sm:pr-2 pb-2 sm:pb-0 custom-scrollbar">
             {cards.slice(0, revealedCount).map((card, i) => (
               <div
                 key={`revealed-${card.id}-${i}`}
