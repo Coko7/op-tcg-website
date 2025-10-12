@@ -6,12 +6,14 @@ import { Card as CardType, UserCard, Rarity, CARD_SELL_PRICES } from '../types';
 import Card from '../components/Card';
 import CardModal from '../components/CardModal';
 import { RARITY_LABELS } from '../data/cards';
+import { useToast } from '../contexts/ToastContext';
 
 type FilterType = 'all' | 'favorites' | Rarity | string; // string pour les IDs de boosters
 
 const CARDS_PER_PAGE = 20;
 
 const Collection: React.FC = () => {
+  const toast = useToast();
   const [userCards, setUserCards] = useState<UserCard[]>([]);
   const [allCards, setAllCards] = useState<CardType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -163,10 +165,10 @@ const Collection: React.FC = () => {
       setUserCards(updatedCards);
 
       // Afficher un message de succès
-      alert(`Carte vendue ! Vous avez gagné ${result.berrys_earned} Berrys. Nouveau solde : ${result.new_balance} Berrys`);
+      toast.success(`Carte vendue ! Vous avez gagné ${result.berrys_earned} Berrys. Nouveau solde : ${result.new_balance} Berrys`);
     } catch (error: any) {
       console.error('Erreur lors de la vente de la carte:', error);
-      alert(error.message || 'Impossible de vendre cette carte');
+      toast.error(error.message || 'Impossible de vendre cette carte');
     }
   };
 

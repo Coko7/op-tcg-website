@@ -23,6 +23,13 @@ router.put(
   UserController.setProfileFavoriteCard
 );
 
+// Route pour changer le mot de passe
+router.put(
+  '/change-password',
+  antiCheatMiddleware('change_password', { maxPerMinute: 3, maxPerHour: 10, minDelay: 5000 }),
+  UserController.changePassword
+);
+
 // Vérifications de cohérence sur toutes les routes
 router.use(resourceConsistencyCheck);
 router.use(temporalConsistencyCheck);

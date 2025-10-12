@@ -1045,6 +1045,73 @@ export class UserController {
   }
 
   /**
+   * Changer le mot de passe
+   */
+  static async changePassword(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      const { currentPassword, newPassword } = req.body;
+
+      if (!userId) {
+        res.status(401).json({ error: 'Utilisateur non authentifié' });
+        return;
+      }
+
+      // SÉCURITÉ: Valider les entrées
+      if (!currentPassword || typeof currentPassword !== 'string') {
+        res.status(400).json({ error: 'Mot de passe actuel requis' });
+        return;
+      }
+
+      if (!newPassword || typeof newPassword !== 'string') {
+        res.status(400).json({ error: 'Nouveau mot de passe requis' });
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        res.status(400).json({ error: 'Le mot de passe doit contenir au moins 6 caractères' });
+        return;
+      }
+
+      // Récupérer l'utilisateur
+      const user = await UserModel.findById(userId);
+      if (!user) {
+        res.status(404).json({ error: 'Utilisateur non trouvé' });
+        return;
+      }
+
+      // Vérifier le mot de passe actuel
+      const isValidPassword = await UserModel.verifyPassword(user, currentPassword);
+      if (!isValidPassword) {
+        // AUDIT: Log tentative de changement avec mauvais mot de passe
+        await AuditLogger.logFailure(AuditAction.USER_PASSWORD_CHANGE, {
+          reason: 'invalid_current_password',
+          userId
+        }, req, userId);
+
+        res.status(401).json({ error: 'Mot de passe actuel incorrect' });
+        return;
+      }
+
+      // Mettre à jour le mot de passe
+      await UserModel.update(userId, { password: newPassword });
+
+      // AUDIT: Log changement de mot de passe réussi
+      await AuditLogger.logSuccess(AuditAction.USER_PASSWORD_CHANGE, userId, {
+        action: 'password_changed'
+      }, req);
+
+      res.json({
+        success: true,
+        message: 'Mot de passe modifié avec succès'
+      });
+    } catch (error) {
+      console.error('Erreur lors du changement de mot de passe:', error);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  }
+
+  /**
    * Définir la carte favorite de profil
    */
   static async setProfileFavoriteCard(req: Request, res: Response): Promise<void> {

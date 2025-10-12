@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ToastProvider } from './contexts/ToastContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
@@ -8,6 +9,7 @@ import Boosters from './pages/Boosters';
 import Collection from './pages/Collection';
 import Achievements from './pages/Achievements';
 import Leaderboard from './pages/Leaderboard';
+import ProfileSettings from './pages/ProfileSettings';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Admin from './pages/Admin';
@@ -15,7 +17,8 @@ import Admin from './pages/Admin';
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <ToastProvider>
+        <Router>
         <Routes>
           {/* Routes d'authentification */}
           <Route
@@ -45,6 +48,16 @@ function App() {
             }
           />
 
+          {/* Route paramètres profil - protégée */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfileSettings />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Routes principales - toutes protégées */}
           <Route
             path="/"
@@ -61,7 +74,8 @@ function App() {
             <Route path="leaderboard" element={<Leaderboard />} />
           </Route>
         </Routes>
-      </Router>
+        </Router>
+      </ToastProvider>
     </AuthProvider>
   );
 }

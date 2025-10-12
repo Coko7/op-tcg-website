@@ -100,72 +100,70 @@ const Leaderboard: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-purple-600 sticky top-0 bg-slate-900 z-10 py-4">
+    <div className="container mx-auto px-4 py-4">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-3xl font-bold text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-purple-600">
           🏆 Leaderboard - Top 3
         </h1>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {leaderboard.map((entry) => (
             <div
               key={entry.user_id}
-              className={`rounded-xl p-6 shadow-2xl transform transition-all duration-300 hover:scale-105 ${getRankStyle(entry.rank)} ${entry.rank <= 3 ? 'sticky top-20 z-' + (10 - entry.rank) : ''}`}
-              style={{ top: entry.rank <= 3 ? `${64 + (entry.rank - 1) * 20}px` : undefined }}
+              className={`rounded-lg p-4 shadow-xl transform transition-all duration-300 hover:scale-[1.02] ${getRankStyle(entry.rank)}`}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-4">
-                  <span className="text-5xl">{getRankIcon(entry.rank)}</span>
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold">{entry.username}</h2>
-                    <p className="text-sm opacity-80">Rang #{entry.rank}</p>
-                  </div>
+              <div className="flex items-center gap-4 mb-3">
+                <span className="text-3xl flex-shrink-0">{getRankIcon(entry.rank)}</span>
 
-                  {/* Afficher la carte favorite si elle existe */}
-                  {entry.favorite_card_image && (
-                    <div className="flex items-center gap-3 bg-black/30 rounded-lg p-2">
-                      <img
-                        src={entry.favorite_card_image}
-                        alt={entry.favorite_card_name || 'Carte favorite'}
-                        className="w-16 h-24 object-cover rounded shadow-lg"
-                        title={entry.favorite_card_name || undefined}
-                      />
-                      <div className="text-left">
-                        <p className="text-xs opacity-80">Carte favorite</p>
-                        <p className="font-semibold text-sm">{entry.favorite_card_name}</p>
-                        <p className="text-xs opacity-70">{entry.favorite_card_rarity}</p>
-                      </div>
-                    </div>
-                  )}
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-xl font-bold truncate">{entry.username}</h2>
+                  <p className="text-xs opacity-80">Rang #{entry.rank}</p>
                 </div>
+
+                {/* Afficher la carte favorite si elle existe */}
+                {entry.favorite_card_image && (
+                  <div className="flex items-center gap-2 bg-black/30 rounded-lg p-2 flex-shrink-0">
+                    <img
+                      src={entry.favorite_card_image}
+                      alt={entry.favorite_card_name || 'Carte favorite'}
+                      className="w-12 h-16 object-cover rounded shadow-lg"
+                      title={entry.favorite_card_name || undefined}
+                    />
+                    <div className="text-left hidden sm:block">
+                      <p className="text-xs opacity-80">Carte favorite</p>
+                      <p className="font-semibold text-sm">{entry.favorite_card_name}</p>
+                      <p className="text-xs opacity-70">{entry.favorite_card_rarity}</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="bg-black bg-opacity-30 rounded-lg p-4">
-                <h3 className="text-lg font-semibold mb-3">Collection de Cartes</h3>
+              <div className="bg-black bg-opacity-30 rounded-lg p-3">
+                <h3 className="text-sm font-semibold mb-2">Collection de Cartes</h3>
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-white border-opacity-20">
-                        <th className="text-left py-2 px-3">Rareté</th>
-                        <th className="text-right py-2 px-3">Nombre</th>
+                        <th className="text-left py-1 px-2">Rareté</th>
+                        <th className="text-right py-1 px-2">Nombre</th>
                       </tr>
                     </thead>
                     <tbody>
                       {Object.entries(RARITY_LABELS).map(([key, label]) => (
                         <tr key={key} className="border-b border-white border-opacity-10">
-                          <td className={`py-2 px-3 font-medium ${RARITY_COLORS[key as keyof typeof RARITY_COLORS]}`}>
+                          <td className={`py-1 px-2 font-medium ${RARITY_COLORS[key as keyof typeof RARITY_COLORS]}`}>
                             {label}
                           </td>
-                          <td className="text-right py-2 px-3 font-bold">
-                            {entry[key as keyof Omit<LeaderboardEntry, 'rank' | 'username' | 'user_id'>]}
+                          <td className="text-right py-1 px-2 font-bold">
+                            {entry[key as keyof Omit<LeaderboardEntry, 'rank' | 'username' | 'user_id' | 'favorite_card_id' | 'favorite_card_name' | 'favorite_card_image' | 'favorite_card_rarity'>]}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
                       <tr className="border-t-2 border-white border-opacity-30">
-                        <td className="py-2 px-3 font-bold">Total</td>
-                        <td className="text-right py-2 px-3 font-bold text-xl">
+                        <td className="py-1 px-2 font-bold text-sm">Total</td>
+                        <td className="text-right py-1 px-2 font-bold text-lg">
                           {entry.secret_rare + entry.super_rare + entry.rare + entry.uncommon + entry.common}
                         </td>
                       </tr>

@@ -294,6 +294,14 @@ class ApiService {
     });
   }
 
+  // Changer le mot de passe
+  async changePassword(currentPassword: string, newPassword: string): Promise<any> {
+    return await this.request('/users/change-password', {
+      method: 'PUT',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+  }
+
   // Méthodes pour les récompenses quotidiennes
   async checkDailyReward(): Promise<any> {
     return await this.request('/users/daily-reward/check');
