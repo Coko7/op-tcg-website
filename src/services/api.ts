@@ -344,6 +344,35 @@ class ApiService {
     });
   }
 
+  // Méthodes pour le marketplace
+  async getMarketplaceListings(): Promise<any> {
+    return await this.request('/marketplace/listings');
+  }
+
+  async getMyMarketplaceListings(): Promise<any> {
+    return await this.request('/marketplace/my-listings');
+  }
+
+  async createMarketplaceListing(cardId: string, price: number): Promise<any> {
+    return await this.request('/marketplace/listings', {
+      method: 'POST',
+      body: JSON.stringify({ cardId, price }),
+    });
+  }
+
+  async purchaseMarketplaceListing(listingId: string): Promise<any> {
+    return await this.request(`/marketplace/listings/${listingId}/purchase`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  }
+
+  async cancelMarketplaceListing(listingId: string): Promise<any> {
+    return await this.request(`/marketplace/listings/${listingId}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Vérifier si l'utilisateur est connecté
   isAuthenticated(): boolean {
     return !!this.accessToken;

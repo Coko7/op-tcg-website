@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { apiService } from '../services/api';
 
 interface MarketplaceListing {
   id: string;
@@ -30,7 +31,7 @@ interface UserCard {
   power?: number;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// API_URL n'est plus nécessaire car on utilise apiService
 
 const Marketplace: React.FC = () => {
   const { user, refreshUser } = useAuth();
@@ -51,16 +52,10 @@ const Marketplace: React.FC = () => {
   const loadListings = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/marketplace/listings`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await apiService.getMarketplaceListings();
 
-      const data = await response.json();
-
-      if (data.success) {
-        setListings(data.data);
+      if (response.success) {
+        setListings(response.data);
       }
     } catch (error: any) {
       console.error('Erreur chargement annonces:', error);
@@ -74,16 +69,10 @@ const Marketplace: React.FC = () => {
   const loadMyListings = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/marketplace/my-listings`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await apiService.getMyMarketplaceListings();
 
-      const data = await response.json();
-
-      if (data.success) {
-        setMyListings(data.data);
+      if (response.success) {
+        setMyListings(response.data);
       }
     } catch (error: any) {
       console.error('Erreur chargement mes annonces:', error);
@@ -97,20 +86,14 @@ const Marketplace: React.FC = () => {
   const loadMyCollection = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/users/collection`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await apiService.getUserCollection();
 
-      const data = await response.json();
-
-      if (data.success) {
-        console.log('Collection complète reçue:', data.data.length, 'cartes');
-        console.log('Exemple de carte:', data.data[0]);
+      if (response.success) {
+        console.log('Collection complète reçue:', response.data.length, 'cartes');
+        console.log('Exemple de carte:', response.data[0]);
 
         // Filtrer uniquement les cartes avec quantity >= 2
-        const sellableCards = data.data
+        const sellableCards = response.data
           .filter((card: any) => {
             console.log(`Carte ${card.name}: quantity = ${card.quantity}, type = ${typeof card.quantity}`);
             return card.quantity >= 2;
@@ -143,16 +126,10 @@ const Marketplace: React.FC = () => {
   // Charger le solde de Berrys
   const loadBerrysBalance = async () => {
     try {
-      const response = await fetch(`${API_URL}/users/berrys`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await apiService.getBerrysBalance();
 
-      const data = await response.json();
-
-      if (data.success) {
-        setBerrysBalance(data.data.berrys);
+      if (response.success) {
+        setBerrysBalance(response.data.berrys);
       }
     } catch (error) {
       console.error('Erreur chargement solde:', error);
@@ -172,27 +149,15 @@ const Marketplace: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(
-        `${API_URL}/marketplace/listings/${listingId}/purchase`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({})
-        }
-      );
+      const response = await apiService.purchaseMarketplaceListing(listingId);
 
-      const data = await response.json();
-
-      if (data.success) {
-        showToast('success', `Carte achetée avec succès! Nouveau solde: ${data.data.new_balance} ฿`);
-        setBerrysBalance(data.data.new_balance);
+      if (response.success) {
+        showToast('success', `Carte achetée avec succès! Nouveau solde: ${response.data.new_balance} ฿`);
+        setBerrysBalance(response.data.new_balance);
         loadListings();
         refreshUser();
       } else {
-        showToast('error', data.error || 'Erreur lors de l\'achat');
+        showToast('error', response.error || 'Erreur lors de l\'achat');
       }
     } catch (error: any) {
       console.error('Erreur achat:', error);
@@ -218,31 +183,16 @@ const Marketplace: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(
-        `${API_URL}/marketplace/listings`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            cardId: selectedCard,
-            price: sellPrice
-          })
-        }
-      );
+      const response = await apiService.createMarketplaceListing(selectedCard, sellPrice);
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.success) {
         showToast('success', 'Annonce créée avec succès!');
         setSelectedCard('');
         setSellPrice(10);
         setActiveTab('myListings');
         loadMyListings();
       } else {
-        showToast('error', data.error || 'Erreur lors de la création de l\'annonce');
+        showToast('error', response.error || 'Erreur lors de la création de l\'annonce');
       }
     } catch (error: any) {
       console.error('Erreur création annonce:', error);
@@ -260,23 +210,13 @@ const Marketplace: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(
-        `${API_URL}/marketplace/listings/${listingId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
+      const response = await apiService.cancelMarketplaceListing(listingId);
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.success) {
         showToast('success', 'Annonce annulée avec succès');
         loadMyListings();
       } else {
-        showToast('error', data.error || 'Erreur lors de l\'annulation');
+        showToast('error', response.error || 'Erreur lors de l\'annulation');
       }
     } catch (error: any) {
       console.error('Erreur annulation:', error);
