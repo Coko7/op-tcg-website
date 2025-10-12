@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 
@@ -47,18 +46,20 @@ const Marketplace: React.FC = () => {
   const loadListings = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/marketplace/listings`, {
+      const response = await fetch(`${API_URL}/marketplace/listings`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
 
-      if (response.data.success) {
-        setListings(response.data.data);
+      const data = await response.json();
+
+      if (data.success) {
+        setListings(data.data);
       }
     } catch (error: any) {
       console.error('Erreur chargement annonces:', error);
-      showToast(error.response?.data?.error || 'Erreur lors du chargement des annonces', 'error');
+      showToast('error', error.message || 'Erreur lors du chargement des annonces');
     } finally {
       setLoading(false);
     }
@@ -68,18 +69,20 @@ const Marketplace: React.FC = () => {
   const loadMyListings = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/marketplace/my-listings`, {
+      const response = await fetch(`${API_URL}/marketplace/my-listings`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
 
-      if (response.data.success) {
-        setMyListings(response.data.data);
+      const data = await response.json();
+
+      if (data.success) {
+        setMyListings(data.data);
       }
     } catch (error: any) {
       console.error('Erreur chargement mes annonces:', error);
-      showToast(error.response?.data?.error || 'Erreur lors du chargement de vos annonces', 'error');
+      showToast('error', error.message || 'Erreur lors du chargement de vos annonces');
     } finally {
       setLoading(false);
     }
@@ -89,15 +92,17 @@ const Marketplace: React.FC = () => {
   const loadMyCollection = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/users/collection`, {
+      const response = await fetch(`${API_URL}/users/collection`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
 
-      if (response.data.success) {
+      const data = await response.json();
+
+      if (data.success) {
         // Filtrer uniquement les cartes avec quantity >= 2
-        const sellableCards = response.data.data
+        const sellableCards = data.data
           .filter((card: any) => card.quantity >= 2)
           .map((card: any) => ({
             card_id: card.card_id || card.id,
@@ -111,7 +116,7 @@ const Marketplace: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Erreur chargement collection:', error);
-      showToast(error.response?.data?.error || 'Erreur lors du chargement de votre collection', 'error');
+      showToast('error', error.message || 'Erreur lors du chargement de votre collection');
     } finally {
       setLoading(false);
     }
@@ -120,14 +125,16 @@ const Marketplace: React.FC = () => {
   // Charger le solde de Berrys
   const loadBerrysBalance = async () => {
     try {
-      const response = await axios.get(`${API_URL}/users/berrys`, {
+      const response = await fetch(`${API_URL}/users/berrys`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
 
-      if (response.data.success) {
-        setBerrysBalance(response.data.data.berrys);
+      const data = await response.json();
+
+      if (data.success) {
+        setBerrysBalance(data.data.berrys);
       }
     } catch (error) {
       console.error('Erreur chargement solde:', error);
@@ -137,7 +144,7 @@ const Marketplace: React.FC = () => {
   // Acheter une carte
   const handlePurchase = async (listingId: string, price: number) => {
     if (berrysBalance < price) {
-      showToast(`Berrys insuffisants! Vous avez ${berrysBalance} ฿, mais ${price} ฿ sont nécessaires.`, 'error');
+      showToast('error', `Berrys insuffisants! Vous avez ${berrysBalance} ฿, mais ${price} ฿ sont nécessaires.`);
       return;
     }
 
@@ -147,25 +154,31 @@ const Marketplace: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post(
+      const response = await fetch(
         `${API_URL}/marketplace/listings/${listingId}/purchase`,
-        {},
         {
+          method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+          },
+          body: JSON.stringify({})
         }
       );
 
-      if (response.data.success) {
-        showToast(`Carte achetée avec succès! Nouveau solde: ${response.data.data.new_balance} ฿`, 'success');
-        setBerrysBalance(response.data.data.new_balance);
+      const data = await response.json();
+
+      if (data.success) {
+        showToast('success', `Carte achetée avec succès! Nouveau solde: ${data.data.new_balance} ฿`);
+        setBerrysBalance(data.data.new_balance);
         loadListings();
         refreshUser();
+      } else {
+        showToast('error', data.error || 'Erreur lors de l\'achat');
       }
     } catch (error: any) {
       console.error('Erreur achat:', error);
-      showToast(error.response?.data?.error || 'Erreur lors de l\'achat', 'error');
+      showToast('error', error.message || 'Erreur lors de l\'achat');
     } finally {
       setLoading(false);
     }
@@ -176,40 +189,46 @@ const Marketplace: React.FC = () => {
     e.preventDefault();
 
     if (!selectedCard) {
-      showToast('Veuillez sélectionner une carte', 'error');
+      showToast('error', 'Veuillez sélectionner une carte');
       return;
     }
 
     if (sellPrice < 1 || sellPrice > 999999) {
-      showToast('Le prix doit être entre 1 et 999999 Berrys', 'error');
+      showToast('error', 'Le prix doit être entre 1 et 999999 Berrys');
       return;
     }
 
     try {
       setLoading(true);
-      const response = await axios.post(
+      const response = await fetch(
         `${API_URL}/marketplace/listings`,
         {
-          cardId: selectedCard,
-          price: sellPrice
-        },
-        {
+          method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+          },
+          body: JSON.stringify({
+            cardId: selectedCard,
+            price: sellPrice
+          })
         }
       );
 
-      if (response.data.success) {
-        showToast('Annonce créée avec succès!', 'success');
+      const data = await response.json();
+
+      if (data.success) {
+        showToast('success', 'Annonce créée avec succès!');
         setSelectedCard('');
         setSellPrice(10);
         setActiveTab('myListings');
         loadMyListings();
+      } else {
+        showToast('error', data.error || 'Erreur lors de la création de l\'annonce');
       }
     } catch (error: any) {
       console.error('Erreur création annonce:', error);
-      showToast(error.response?.data?.error || 'Erreur lors de la création de l\'annonce', 'error');
+      showToast('error', error.message || 'Erreur lors de la création de l\'annonce');
     } finally {
       setLoading(false);
     }
@@ -223,22 +242,27 @@ const Marketplace: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await axios.delete(
+      const response = await fetch(
         `${API_URL}/marketplace/listings/${listingId}`,
         {
+          method: 'DELETE',
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
         }
       );
 
-      if (response.data.success) {
-        showToast('Annonce annulée avec succès', 'success');
+      const data = await response.json();
+
+      if (data.success) {
+        showToast('success', 'Annonce annulée avec succès');
         loadMyListings();
+      } else {
+        showToast('error', data.error || 'Erreur lors de l\'annulation');
       }
     } catch (error: any) {
       console.error('Erreur annulation:', error);
-      showToast(error.response?.data?.error || 'Erreur lors de l\'annulation', 'error');
+      showToast('error', error.message || 'Erreur lors de l\'annulation');
     } finally {
       setLoading(false);
     }
