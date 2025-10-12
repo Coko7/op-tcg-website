@@ -7,11 +7,12 @@ export enum AuditAction {
   USER_LOGOUT = 'user_logout',
   USER_REGISTER = 'user_register',
   USER_PASSWORD_CHANGE = 'user_password_change',
-  
+  USER_PROFILE_UPDATED = 'user_profile_updated',
+
   // Boosters
   BOOSTER_OPENED = 'booster_opened',
   BOOSTER_PURCHASED = 'booster_purchased',
-  
+
   // Cartes
   CARD_SOLD = 'card_sold',
   CARD_FAVORITE_TOGGLE = 'card_favorite_toggle',

@@ -100,7 +100,7 @@ const Header: React.FC = () => {
             </Link>
 
             {/* Lien Admin visible uniquement pour les admins */}
-            {isAuthenticated && user?.is_admin === 1 && (
+            {isAuthenticated && user?.is_admin && (
               <Link
                 to="/admin"
                 className="flex items-center space-x-1 sm:space-x-2 px-3 py-2 rounded-xl transition-all duration-300 font-medium bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105"
