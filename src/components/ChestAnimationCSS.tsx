@@ -51,12 +51,12 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
     }
   }, [animationPhase, cards]);
 
-  // Faire sortir les cartes une par une
+  // Faire sortir les cartes une par une - RALENTI
   useEffect(() => {
     if (animationPhase === 'opening' && cards && currentFlyingCardIndex >= 0 && currentFlyingCardIndex < cards.length - 1) {
       const timer = setTimeout(() => {
         setCurrentFlyingCardIndex(prev => prev + 1);
-      }, 400); // Délai entre chaque carte
+      }, 1200); // Délai entre chaque carte (ralenti de 400ms à 1200ms)
       return () => clearTimeout(timer);
     }
   }, [currentFlyingCardIndex, animationPhase, cards]);
@@ -185,7 +185,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
             key={`flying-${cards[currentFlyingCardIndex].id}-${currentFlyingCardIndex}`}
             className="absolute cards-fly-out w-[120px] h-[168px] sm:w-[150px] sm:h-[210px] md:w-[180px] md:h-[252px]"
             style={{
-              animationDuration: '1.5s',
+              animationDuration: '2.5s', // Ralenti de 1.5s à 2.5s
               animationFillMode: 'forwards',
               zIndex: 30,
             }}
@@ -238,7 +238,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
 
       {/* Phase IDLE - Coffre fermé */}
       {(animationPhase === 'idle' || animationPhase === 'opening') && (
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className={`absolute inset-0 flex items-center justify-center ${isOpening ? 'camera-zoom' : ''}`}>
           <div
             className={`chest-container cursor-pointer transition-transform duration-300 hover:scale-105 ${
               isOpening ? 'opening' : ''
@@ -451,28 +451,6 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
                             style={{ opacity: i * 0.15 }}
                           />
                         )}
-
-                        {/* Info carte en overlay pour la carte du dessus */}
-                        {isTop && (
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/90 to-transparent p-3">
-                            <p className="text-white font-bold text-sm truncate">{card.name}</p>
-                            <div className="flex justify-end items-center mt-1">
-                              <span
-                                className="text-xs font-semibold px-2 py-0.5 rounded"
-                                style={{
-                                  backgroundColor: getRarityColor(card.rarity),
-                                  color: 'white'
-                                }}
-                              >
-                                {card.rarity === 'secret_rare' ? 'Secret' :
-                                 card.rarity === 'super_rare' ? 'Super' :
-                                 card.rarity === 'rare' ? 'Rare' :
-                                 card.rarity === 'uncommon' ? 'Peu Com.' :
-                                 'Commune'}
-                              </span>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </div>
 
@@ -511,55 +489,6 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Cartes révélées - En dessous sur mobile, à droite sur desktop */}
-          <div className="relative sm:absolute w-full sm:w-44 md:w-56 sm:right-2 sm:top-20 sm:bottom-4 flex flex-wrap justify-center sm:flex-col gap-2 sm:gap-3 overflow-visible sm:overflow-y-auto z-10 px-2 sm:pr-2 pb-2 sm:pb-0 custom-scrollbar">
-            {cards.slice(0, revealedCount).map((card, i) => (
-              <div
-                key={`revealed-${card.id}-${i}`}
-                className={`bg-gradient-to-br ${getRarityGradient(card.rarity)} rounded-lg p-1.5 sm:p-2 shadow-2xl transform transition-all duration-500 hover:scale-105 shrink-0 w-[100px] sm:w-auto`}
-                style={{
-                  animation: `slideInRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.15}s both`,
-                }}
-              >
-                <div className="bg-gray-900 rounded-md overflow-hidden relative">
-                  {/* Badge de rareté */}
-                  <div
-                    className="absolute top-1 right-1 sm:top-2 sm:right-2 z-10 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-bold shadow-lg"
-                    style={{
-                      backgroundColor: getRarityColor(card.rarity),
-                      color: 'white'
-                    }}
-                  >
-                    {card.rarity === 'secret_rare' ? '★' :
-                     card.rarity === 'super_rare' ? '◆' :
-                     card.rarity === 'rare' ? '●' :
-                     card.rarity === 'uncommon' ? '▲' :
-                     '○'}
-                  </div>
-
-                  {card.image_url ? (
-                    <img
-                      src={card.image_url}
-                      alt={card.name}
-                      className="w-full h-auto object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          'https://via.placeholder.com/300x420?text=No+Image';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-24 sm:h-32 md:h-40 flex items-center justify-center bg-gray-800">
-                      <span className="text-gray-500 text-xs">No Image</span>
-                    </div>
-                  )}
-                </div>
-                <div className="mt-1 sm:mt-2 text-center">
-                  <p className="text-white text-[10px] sm:text-xs font-semibold truncate">{card.name}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       )}
@@ -700,6 +629,21 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
 
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: rgba(59, 130, 246, 0.7);
+        }
+
+        /* Animation de caméra zoom vers le coffre avec vue en plongée */
+        @keyframes camera-zoom-in {
+          0% {
+            transform: scale(1) perspective(1200px) rotateX(0deg) translateZ(0px);
+          }
+          100% {
+            transform: scale(1.8) perspective(1200px) rotateX(15deg) translateZ(100px);
+          }
+        }
+
+        .camera-zoom {
+          animation: camera-zoom-in 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+          transform-style: preserve-3d;
         }
       `}</style>
     </div>
