@@ -159,7 +159,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
   };
 
   return (
-    <div className="relative w-full h-[600px] bg-gradient-to-b from-sky-400 via-sky-500 to-blue-400 rounded-2xl overflow-hidden shadow-2xl">
+    <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] bg-gradient-to-b from-sky-400 via-sky-500 to-blue-400 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl">
       {/* Canvas pour les particules */}
       <canvas
         ref={canvasRef}
@@ -168,22 +168,21 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
         className="absolute inset-0 w-full h-full pointer-events-none z-10"
       />
 
-      {/* Cartes qui sortent du coffre pendant l'ouverture */}
+      {/* Cartes qui sortent du coffre pendant l'ouverture - FACE CACHÉE */}
       {animationPhase === 'opening' && showCardsFromChest && cards && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           {cards.slice(0, 5).map((card, i) => (
             <div
               key={`flying-${card.id}-${i}`}
-              className="absolute cards-fly-out"
+              className="absolute cards-fly-out w-[120px] h-[168px] sm:w-[150px] sm:h-[210px] md:w-[180px] md:h-[252px]"
               style={{
-                width: '180px',
-                height: '252px',
                 animationDelay: `${i * 0.15}s`,
                 animationDuration: '1.5s',
                 animationFillMode: 'forwards',
                 zIndex: 30 + i,
               }}
             >
+              {/* Bordure de rareté */}
               <div
                 className="absolute inset-0 rounded-xl p-1"
                 style={{
@@ -191,22 +190,38 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
                   boxShadow: `0 0 30px ${getRarityColor(card.rarity)}`,
                 }}
               >
-                <div className="w-full h-full bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-lg overflow-hidden">
-                  {card.image_url ? (
-                    <img
-                      src={card.image_url}
-                      alt={card.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          'https://via.placeholder.com/180x252?text=No+Image';
+                {/* DOS DE CARTE */}
+                <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg flex items-center justify-center relative overflow-hidden">
+                  {/* Pattern de fond */}
+                  <div className="absolute inset-0 opacity-20">
+                    <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black" />
+                    {[...Array(8)].map((_, idx) => (
+                      <div
+                        key={idx}
+                        className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-gray-600 to-transparent"
+                        style={{ top: `${(idx + 1) * 12.5}%` }}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Logo central */}
+                  <div className="relative z-10">
+                    <div
+                      className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full animate-pulse"
+                      style={{
+                        background: `radial-gradient(circle, ${getRarityColor(card.rarity)}, transparent)`,
                       }}
                     />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-800">
-                      <span className="text-gray-500 text-xs">🃏</span>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div
+                        className="w-8 h-8 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full border-2 sm:border-3 md:border-4 animate-spin-slow"
+                        style={{ borderColor: `${getRarityColor(card.rarity)} transparent ${getRarityColor(card.rarity)} transparent` }}
+                      />
                     </div>
-                  )}
+                    <div className="absolute inset-0 flex items-center justify-center text-xl sm:text-2xl md:text-3xl">
+                      🃏
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -225,7 +240,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
             style={{ perspective: '1000px' }}
           >
             {/* Coffre */}
-            <div className="chest relative w-64 h-48">
+            <div className="chest relative w-48 h-36 sm:w-56 sm:h-42 md:w-64 md:h-48">
               {/* Corps du coffre */}
               <div className="chest-body absolute bottom-0 w-full h-32 bg-gradient-to-b from-amber-800 to-amber-900 rounded-lg border-4 border-yellow-600 shadow-2xl">
                 {/* Détails du coffre - planches */}
@@ -321,12 +336,12 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
       {animationPhase === 'deck' && cards && (
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           {/* Instructions */}
-          <div className="absolute top-8 left-0 right-0 text-center z-20 px-4">
-            <div className="inline-block backdrop-blur-sm bg-black/40 py-3 px-6 rounded-lg">
-              <p className="text-white font-semibold text-lg mb-1">
+          <div className="absolute top-4 sm:top-8 left-0 right-0 text-center z-20 px-2 sm:px-4">
+            <div className="inline-block backdrop-blur-sm bg-black/40 py-2 px-4 sm:py-3 sm:px-6 rounded-lg">
+              <p className="text-white font-semibold text-sm sm:text-base md:text-lg mb-1">
                 🎴 Cliquez sur la pile pour découvrir vos cartes !
               </p>
-              <p className="text-blue-300 text-sm">
+              <p className="text-blue-300 text-xs sm:text-sm">
                 {revealedCount} / {cards.length} cartes révélées
               </p>
             </div>
@@ -336,9 +351,9 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
           <div
             className={`relative cursor-pointer transition-transform hover:scale-105 ${
               animating ? 'animate-bounce' : ''
-            }`}
+            } w-[180px] h-[252px] sm:w-[220px] sm:h-[308px] md:w-[250px] md:h-[350px]`}
             onClick={handleStackClick}
-            style={{ width: '250px', height: '350px', perspective: '1000px' }}
+            style={{ perspective: '1000px' }}
           >
             {cards
               .slice(revealedCount, Math.min(revealedCount + 5, cards.length))
@@ -350,12 +365,10 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
                 return (
                   <div
                     key={`stack-${cardIndex}`}
-                    className={`absolute card-3d transition-all duration-500 ${
+                    className={`absolute card-3d transition-all duration-500 w-full h-full ${
                       isTop ? 'hover:translate-y-[-12px]' : ''
                     }`}
                     style={{
-                      width: '250px',
-                      height: '350px',
                       transform: `translateY(${offset}px) translateX(${i * 2}px) rotateY(${i * 2}deg)`,
                       zIndex: 10 - i,
                       transformStyle: 'preserve-3d',
@@ -404,8 +417,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
                         {isTop && (
                           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/90 to-transparent p-3">
                             <p className="text-white font-bold text-sm truncate">{card.name}</p>
-                            <div className="flex justify-between items-center mt-1">
-                              <span className="text-xs text-blue-300">{card.cost} 💎</span>
+                            <div className="flex justify-end items-center mt-1">
                               <span
                                 className="text-xs font-semibold px-2 py-0.5 rounded"
                                 style={{
@@ -453,21 +465,21 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
             {/* Message quand toutes les cartes sont révélées */}
             {revealedCount >= cards.length && (
               <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 20 }}>
-                <div className="text-center backdrop-blur-md bg-gradient-to-br from-green-500/90 to-blue-500/90 p-8 rounded-2xl shadow-2xl">
-                  <div className="text-5xl mb-3 animate-bounce">✨</div>
-                  <p className="text-white font-bold text-2xl mb-2">Toutes révélées !</p>
-                  <p className="text-white/80 text-sm">Cliquez sur "Voir le résumé" ci-dessous</p>
+                <div className="text-center backdrop-blur-md bg-gradient-to-br from-green-500/90 to-blue-500/90 p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-2xl mx-4">
+                  <div className="text-3xl sm:text-4xl md:text-5xl mb-2 sm:mb-3 animate-bounce">✨</div>
+                  <p className="text-white font-bold text-lg sm:text-xl md:text-2xl mb-1 sm:mb-2">Toutes révélées !</p>
+                  <p className="text-white/80 text-xs sm:text-sm">Cliquez sur "Voir le résumé" ci-dessous</p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Cartes révélées sur le côté droit avec animations améliorées */}
-          <div className="absolute right-4 top-24 bottom-4 w-56 overflow-y-auto space-y-3 z-10 pr-2 custom-scrollbar">
+          {/* Cartes révélées sur le côté - En bas sur mobile, à droite sur desktop */}
+          <div className="absolute bottom-2 left-2 right-2 sm:right-2 sm:top-20 sm:bottom-4 sm:left-auto w-auto sm:w-44 md:w-56 flex sm:flex-col gap-2 sm:gap-3 overflow-x-auto sm:overflow-y-auto sm:overflow-x-visible z-10 p-1 sm:pr-2 custom-scrollbar">
             {cards.slice(0, revealedCount).map((card, i) => (
               <div
                 key={`revealed-${card.id}-${i}`}
-                className={`bg-gradient-to-br ${getRarityGradient(card.rarity)} rounded-lg p-2 shadow-2xl transform transition-all duration-500 hover:scale-105 hover:rotate-1`}
+                className={`bg-gradient-to-br ${getRarityGradient(card.rarity)} rounded-lg p-1.5 sm:p-2 shadow-2xl transform transition-all duration-500 hover:scale-105 shrink-0 w-[100px] sm:w-auto`}
                 style={{
                   animation: `slideInRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.15}s both`,
                 }}
@@ -475,7 +487,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
                 <div className="bg-gray-900 rounded-md overflow-hidden relative">
                   {/* Badge de rareté */}
                   <div
-                    className="absolute top-2 right-2 z-10 px-2 py-1 rounded-full text-xs font-bold shadow-lg"
+                    className="absolute top-1 right-1 sm:top-2 sm:right-2 z-10 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-bold shadow-lg"
                     style={{
                       backgroundColor: getRarityColor(card.rarity),
                       color: 'white'
@@ -499,14 +511,13 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
                       }}
                     />
                   ) : (
-                    <div className="w-full h-40 flex items-center justify-center bg-gray-800">
+                    <div className="w-full h-24 sm:h-32 md:h-40 flex items-center justify-center bg-gray-800">
                       <span className="text-gray-500 text-xs">No Image</span>
                     </div>
                   )}
                 </div>
-                <div className="mt-2 text-center">
-                  <p className="text-white text-xs font-semibold truncate">{card.name}</p>
-                  <p className="text-white/70 text-xs">{card.cost} 💎</p>
+                <div className="mt-1 sm:mt-2 text-center">
+                  <p className="text-white text-[10px] sm:text-xs font-semibold truncate">{card.name}</p>
                 </div>
               </div>
             ))}
@@ -516,8 +527,8 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
 
       {/* Instructions en bas pour la phase idle */}
       {animationPhase === 'idle' && (
-        <div className="absolute bottom-4 left-0 right-0 text-center px-4">
-          <p className="text-white/90 text-sm backdrop-blur-sm bg-black/30 py-2 px-4 rounded-lg inline-block shadow-lg">
+        <div className="absolute bottom-2 sm:bottom-4 left-0 right-0 text-center px-2 sm:px-4">
+          <p className="text-white/90 text-xs sm:text-sm backdrop-blur-sm bg-black/30 py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg inline-block shadow-lg">
             🖱️ Cliquez sur le coffre pour l'ouvrir
           </p>
         </div>
@@ -526,8 +537,8 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
       {/* Message d'ouverture */}
       {animationPhase === 'opening' && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-          <div className="backdrop-blur-sm bg-black/40 py-4 px-8 rounded-xl">
-            <p className="text-white font-bold text-2xl animate-pulse">
+          <div className="backdrop-blur-sm bg-black/40 py-3 px-6 sm:py-4 sm:px-8 rounded-xl mx-4">
+            <p className="text-white font-bold text-lg sm:text-xl md:text-2xl animate-pulse">
               ✨ Ouverture du coffre... ✨
             </p>
           </div>
@@ -583,23 +594,48 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
         /* Animation des cartes qui sortent du coffre */
         @keyframes cards-fly-out {
           0% {
-            transform: translate(0, 50px) scale(0.3) rotateY(0deg) rotateZ(0deg);
+            transform: translate(0, 30px) scale(0.3) rotateY(0deg) rotateZ(0deg);
             opacity: 0;
           }
           30% {
             opacity: 1;
           }
           50% {
-            transform: translate(0, -150px) scale(0.8) rotateY(180deg) rotateZ(360deg);
+            transform: translate(0, -100px) scale(0.8) rotateY(180deg) rotateZ(360deg);
             opacity: 1;
           }
           70% {
-            transform: translate(0, -200px) scale(1) rotateY(360deg) rotateZ(720deg);
+            transform: translate(0, -150px) scale(1) rotateY(360deg) rotateZ(720deg);
             opacity: 1;
           }
           100% {
-            transform: translate(0, -250px) scale(1.2) rotateY(360deg) rotateZ(1080deg);
+            transform: translate(0, -200px) scale(1.2) rotateY(360deg) rotateZ(1080deg);
             opacity: 0;
+          }
+        }
+
+        /* Version desktop de l'animation */
+        @media (min-width: 640px) {
+          @keyframes cards-fly-out {
+            0% {
+              transform: translate(0, 50px) scale(0.3) rotateY(0deg) rotateZ(0deg);
+              opacity: 0;
+            }
+            30% {
+              opacity: 1;
+            }
+            50% {
+              transform: translate(0, -150px) scale(0.8) rotateY(180deg) rotateZ(360deg);
+              opacity: 1;
+            }
+            70% {
+              transform: translate(0, -200px) scale(1) rotateY(360deg) rotateZ(720deg);
+              opacity: 1;
+            }
+            100% {
+              transform: translate(0, -250px) scale(1.2) rotateY(360deg) rotateZ(1080deg);
+              opacity: 0;
+            }
           }
         }
 
