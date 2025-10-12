@@ -134,6 +134,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
     if (animating || !cards || revealedCount >= cards.length) return;
 
     setAnimating(true);
+    // Attendre que l'animation de slide-out soit terminée avant d'incrémenter
     setTimeout(() => {
       setRevealedCount(prev => {
         const newCount = prev + 1;
@@ -143,7 +144,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
         return newCount;
       });
       setAnimating(false);
-    }, 600);
+    }, 800); // Augmenté pour correspondre à la durée de l'animation
   };
 
   const getRarityColor = (rarity: string) => {
@@ -185,7 +186,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div
             key={`flying-${cards[currentFlyingCardIndex].id}-${currentFlyingCardIndex}`}
-            className="absolute cards-fly-out w-[120px] h-[168px] sm:w-[150px] sm:h-[210px] md:w-[180px] md:h-[252px]"
+            className="absolute cards-fly-out w-[160px] h-[224px] sm:w-[200px] sm:h-[280px] md:w-[240px] md:h-[336px]"
             style={{
               animationDuration: '2.5s', // Ralenti de 1.5s à 2.5s
               animationFillMode: 'forwards',
@@ -328,34 +329,31 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
                 ))}
               </div>
 
-              {/* Lueur magique quand le coffre s'ouvre - Couleur selon la rareté de la carte */}
+              {/* Lueur magique quand le coffre s'ouvre - Couleur selon la rareté de la carte - Plus subtile avec dégradé */}
               {isOpening && currentFlyingCardIndex >= 0 && cards && cards[currentFlyingCardIndex] && (
                 <div className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 w-24 h-24 sm:w-32 sm:h-32">
                   <div
-                    className="absolute inset-0 rounded-full opacity-60 animate-ping"
+                    className="absolute inset-0 rounded-full opacity-30 animate-ping"
                     style={{
-                      backgroundColor: getRarityColor(cards[currentFlyingCardIndex].rarity),
-                      filter: cards[currentFlyingCardIndex].rarity === 'secret_rare'
-                        ? 'hue-rotate(45deg)'
-                        : 'none'
+                      background: cards[currentFlyingCardIndex].rarity === 'secret_rare'
+                        ? 'radial-gradient(circle, rgba(168, 85, 247, 0.6) 0%, rgba(236, 72, 153, 0.4) 50%, transparent 100%)'
+                        : `radial-gradient(circle, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}99 0%, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}44 50%, transparent 100%)`
                     }}
                   />
                   <div
-                    className="absolute inset-2 sm:inset-4 rounded-full opacity-80 animate-pulse"
+                    className="absolute inset-2 sm:inset-4 rounded-full opacity-40 animate-pulse"
                     style={{
-                      backgroundColor: getRarityColor(cards[currentFlyingCardIndex].rarity),
-                      filter: cards[currentFlyingCardIndex].rarity === 'secret_rare'
-                        ? 'hue-rotate(90deg)'
-                        : 'brightness(1.2)'
+                      background: cards[currentFlyingCardIndex].rarity === 'secret_rare'
+                        ? 'radial-gradient(circle, rgba(236, 72, 153, 0.7) 0%, rgba(251, 191, 36, 0.5) 50%, transparent 100%)'
+                        : `radial-gradient(circle, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}bb 0%, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}66 50%, transparent 100%)`
                     }}
                   />
                   <div
-                    className="absolute inset-4 sm:inset-8 rounded-full opacity-100"
+                    className="absolute inset-4 sm:inset-8 rounded-full opacity-60"
                     style={{
-                      backgroundColor: getRarityColor(cards[currentFlyingCardIndex].rarity),
-                      filter: cards[currentFlyingCardIndex].rarity === 'secret_rare'
-                        ? 'hue-rotate(135deg)'
-                        : 'brightness(1.5)'
+                      background: cards[currentFlyingCardIndex].rarity === 'secret_rare'
+                        ? 'radial-gradient(circle, rgba(251, 191, 36, 0.8) 0%, rgba(251, 146, 60, 0.6) 50%, transparent 100%)'
+                        : `radial-gradient(circle, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}dd 0%, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}88 50%, transparent 100%)`
                     }}
                   />
                 </div>
@@ -406,9 +404,9 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
                 return (
                   <div
                     key={`stack-${cardIndex}`}
-                    className={`absolute card-3d transition-all duration-500 w-full h-full ${
-                      isTop ? 'hover:translate-y-[-12px]' : ''
-                    }`}
+                    className={`absolute card-3d w-full h-full ${
+                      isTop && animating ? 'card-slide-out-animation' : 'transition-all duration-500'
+                    } ${isTop && !animating ? 'hover:translate-y-[-12px]' : ''}`}
                     style={{
                       transform: `translateY(${offset}px) translateX(${i * 2}px) rotateY(${i * 2}deg)`,
                       zIndex: 10 - i,
@@ -648,6 +646,26 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
         .camera-zoom {
           animation: camera-zoom-in 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
           transform-style: preserve-3d;
+        }
+
+        /* Animation de slide out naturelle pour la carte du dessus */
+        @keyframes card-slide-out-natural {
+          0% {
+            transform: translateY(0) translateX(0) rotateY(0deg) scale(1);
+            opacity: 1;
+          }
+          40% {
+            transform: translateY(10px) translateX(0) rotateY(0deg) scale(1.05);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(0) translateX(-150%) rotateY(-15deg) scale(0.9);
+            opacity: 0;
+          }
+        }
+
+        .card-slide-out-animation {
+          animation: card-slide-out-natural 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
       `}</style>
     </div>

@@ -16,7 +16,7 @@ const UserProfile: React.FC = () => {
   };
 
   return (
-    <div className="bg-white/10 backdrop-blur-lg rounded-lg border border-white/20 p-4">
+    <div className="bg-slate-800/95 backdrop-blur-lg rounded-lg border border-white/30 p-4 shadow-xl">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
           <div className="h-10 w-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
@@ -26,11 +26,11 @@ const UserProfile: React.FC = () => {
           </div>
           <div>
             <h3 className="text-white font-semibold">{user.username}</h3>
-            {user.is_admin && (
+            {user.is_admin ? (
               <span className="inline-block bg-yellow-500 text-black text-xs px-2 py-1 rounded mt-1">
                 Admin
               </span>
-            )}
+            ) : null}
           </div>
         </div>
         <button
