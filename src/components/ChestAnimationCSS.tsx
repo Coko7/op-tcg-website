@@ -186,7 +186,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div
             key={`flying-${cards[currentFlyingCardIndex].id}-${currentFlyingCardIndex}`}
-            className="absolute cards-fly-out w-[160px] h-[224px] sm:w-[200px] sm:h-[280px] md:w-[240px] md:h-[336px]"
+            className="absolute cards-fly-out w-[120px] h-[168px] sm:w-[150px] sm:h-[210px] md:w-[180px] md:h-[252px]"
             style={{
               animationDuration: '2.5s', // Ralenti de 1.5s à 2.5s
               animationFillMode: 'forwards',
@@ -298,72 +298,136 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
                 </div>
               </div>
 
-              {/* Couvercle du coffre */}
+              {/* Couvercle du coffre avec intérieur visible */}
               <div
-                className={`chest-lid absolute top-0 w-full h-24 bg-gradient-to-b from-amber-700 to-amber-900 rounded-t-lg border-4 border-yellow-600 shadow-2xl transition-all duration-1000 origin-bottom ${
+                className={`chest-lid absolute top-0 w-full h-24 transition-all duration-1000 ${
                   isOpening ? 'rotate-x-120' : ''
                 }`}
                 style={{
                   transformStyle: 'preserve-3d',
-                  transform: isOpening ? 'rotateX(-120deg)' : 'rotateX(0deg)',
+                  transformOrigin: 'bottom center',
+                  transform: isOpening ? 'rotateX(-120deg) translateZ(5px)' : 'rotateX(0deg)',
                 }}
               >
-                {/* Planches du couvercle */}
-                <div className="absolute inset-0 flex justify-around p-2">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="w-1 h-full bg-amber-950/50 rounded" />
+                {/* Face extérieure du couvercle */}
+                <div className="absolute inset-0 bg-gradient-to-b from-amber-700 to-amber-900 rounded-t-lg border-4 border-yellow-600 shadow-2xl" style={{ transform: 'translateZ(2px)' }}>
+                  {/* Planches du couvercle */}
+                  <div className="absolute inset-0 flex justify-around p-2">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="w-1 h-full bg-amber-950/50 rounded" />
+                    ))}
+                  </div>
+
+                  {/* Bandes métalliques du couvercle */}
+                  <div className="absolute top-4 left-0 right-0 h-1.5 bg-gradient-to-r from-yellow-700 via-yellow-500 to-yellow-700 shadow-inner" />
+                  <div className="absolute bottom-4 left-0 right-0 h-1.5 bg-gradient-to-r from-yellow-700 via-yellow-500 to-yellow-700 shadow-inner" />
+
+                  {/* Charnières */}
+                  {[-1, 1].map((dir) => (
+                    <div
+                      key={dir}
+                      className="absolute bottom-0 w-4 h-3 bg-gray-700 rounded"
+                      style={{ left: dir === -1 ? '20px' : 'auto', right: dir === 1 ? '20px' : 'auto' }}
+                    />
                   ))}
                 </div>
 
-                {/* Bandes métalliques du couvercle */}
-                <div className="absolute top-4 left-0 right-0 h-1.5 bg-gradient-to-r from-yellow-700 via-yellow-500 to-yellow-700 shadow-inner" />
-                <div className="absolute bottom-4 left-0 right-0 h-1.5 bg-gradient-to-r from-yellow-700 via-yellow-500 to-yellow-700 shadow-inner" />
-
-                {/* Charnières */}
-                {[-1, 1].map((dir) => (
-                  <div
-                    key={dir}
-                    className="absolute bottom-0 w-4 h-3 bg-gray-700 rounded"
-                    style={{ left: dir === -1 ? '20px' : 'auto', right: dir === 1 ? '20px' : 'auto' }}
-                  />
-                ))}
+                {/* Face intérieure du couvercle (visible quand ouvert) */}
+                <div
+                  className="absolute inset-0 bg-gradient-to-b from-amber-950 to-amber-900 rounded-t-lg"
+                  style={{
+                    transform: 'rotateX(180deg) translateZ(-4px)',
+                    backfaceVisibility: 'visible'
+                  }}
+                >
+                  <div className="absolute inset-0 flex justify-around p-2">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="w-1 h-full bg-amber-800/30 rounded" />
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              {/* Lueur magique quand le coffre s'ouvre - Couleur selon la rareté de la carte - Plus subtile avec dégradé */}
+              {/* Halo de lumière sortant du coffre - Effet réaliste */}
               {isOpening && currentFlyingCardIndex >= 0 && cards && cards[currentFlyingCardIndex] && (
-                <div className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 w-24 h-24 sm:w-32 sm:h-32">
+                <div className="absolute top-16 sm:top-20 left-1/2 transform -translate-x-1/2 w-full h-[200px] pointer-events-none">
+                  {/* Faisceau de lumière principal */}
                   <div
-                    className="absolute inset-0 rounded-full opacity-30 animate-ping"
+                    className="absolute left-1/2 transform -translate-x-1/2 bottom-0 light-beam"
                     style={{
+                      width: '80%',
+                      height: '100%',
                       background: cards[currentFlyingCardIndex].rarity === 'secret_rare'
-                        ? 'radial-gradient(circle, rgba(168, 85, 247, 0.6) 0%, rgba(236, 72, 153, 0.4) 50%, transparent 100%)'
-                        : `radial-gradient(circle, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}99 0%, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}44 50%, transparent 100%)`
+                        ? 'linear-gradient(to top, rgba(168, 85, 247, 0.6) 0%, rgba(236, 72, 153, 0.4) 30%, rgba(251, 191, 36, 0.3) 60%, transparent 100%)'
+                        : `linear-gradient(to top, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}99 0%, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}66 30%, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}33 60%, transparent 100%)`,
+                      clipPath: 'polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)',
+                      filter: 'blur(8px)',
+                      animation: 'light-pulse 2s ease-in-out infinite',
                     }}
                   />
+
+                  {/* Couche de lumière secondaire plus large */}
                   <div
-                    className="absolute inset-2 sm:inset-4 rounded-full opacity-40 animate-pulse"
+                    className="absolute left-1/2 transform -translate-x-1/2 bottom-0"
                     style={{
+                      width: '100%',
+                      height: '120%',
                       background: cards[currentFlyingCardIndex].rarity === 'secret_rare'
-                        ? 'radial-gradient(circle, rgba(236, 72, 153, 0.7) 0%, rgba(251, 191, 36, 0.5) 50%, transparent 100%)'
-                        : `radial-gradient(circle, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}bb 0%, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}66 50%, transparent 100%)`
+                        ? 'linear-gradient(to top, rgba(251, 191, 36, 0.4) 0%, rgba(236, 72, 153, 0.2) 40%, transparent 80%)'
+                        : `linear-gradient(to top, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}66 0%, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}33 40%, transparent 80%)`,
+                      clipPath: 'polygon(35% 0%, 65% 0%, 100% 100%, 0% 100%)',
+                      filter: 'blur(15px)',
+                      opacity: 0.6,
+                      animation: 'light-pulse 2.5s ease-in-out infinite',
                     }}
                   />
+
+                  {/* Particules brillantes dans le faisceau */}
+                  {[...Array(8)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute w-2 h-2 rounded-full animate-pulse"
+                      style={{
+                        left: `${40 + Math.random() * 20}%`,
+                        bottom: `${Math.random() * 80}%`,
+                        background: cards[currentFlyingCardIndex].rarity === 'secret_rare'
+                          ? ['#A855F7', '#EC4899', '#FBF59B'][i % 3]
+                          : getRarityColor(cards[currentFlyingCardIndex].rarity),
+                        boxShadow: `0 0 10px ${getRarityColor(cards[currentFlyingCardIndex].rarity)}`,
+                        animationDelay: `${i * 0.2}s`,
+                        animationDuration: `${1.5 + Math.random()}s`,
+                      }}
+                    />
+                  ))}
+
+                  {/* Lueur à la base du coffre */}
                   <div
-                    className="absolute inset-4 sm:inset-8 rounded-full opacity-60"
+                    className="absolute left-1/2 transform -translate-x-1/2 bottom-0 w-[90%] h-12"
                     style={{
                       background: cards[currentFlyingCardIndex].rarity === 'secret_rare'
-                        ? 'radial-gradient(circle, rgba(251, 191, 36, 0.8) 0%, rgba(251, 146, 60, 0.6) 50%, transparent 100%)'
-                        : `radial-gradient(circle, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}dd 0%, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}88 50%, transparent 100%)`
+                        ? 'radial-gradient(ellipse at center, rgba(251, 191, 36, 0.8) 0%, rgba(236, 72, 153, 0.6) 30%, transparent 70%)'
+                        : `radial-gradient(ellipse at center, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}cc 0%, ${getRarityColor(cards[currentFlyingCardIndex].rarity)}66 30%, transparent 70%)`,
+                      filter: 'blur(10px)',
+                      animation: 'glow-pulse 1.5s ease-in-out infinite',
                     }}
                   />
                 </div>
               )}
-              {/* Lueur jaune par défaut quand aucune carte n'est encore sortie */}
+
+              {/* Halo jaune par défaut quand aucune carte n'est encore sortie */}
               {isOpening && currentFlyingCardIndex < 0 && (
-                <div className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 w-24 h-24 sm:w-32 sm:h-32">
-                  <div className="absolute inset-0 bg-yellow-400 rounded-full opacity-60 animate-ping" />
-                  <div className="absolute inset-2 sm:inset-4 bg-yellow-300 rounded-full opacity-80 animate-pulse" />
-                  <div className="absolute inset-4 sm:inset-8 bg-yellow-200 rounded-full opacity-100" />
+                <div className="absolute top-16 sm:top-20 left-1/2 transform -translate-x-1/2 w-full h-[200px] pointer-events-none">
+                  <div
+                    className="absolute left-1/2 transform -translate-x-1/2 bottom-0"
+                    style={{
+                      width: '80%',
+                      height: '100%',
+                      background: 'linear-gradient(to top, rgba(251, 191, 36, 0.7) 0%, rgba(251, 191, 36, 0.4) 30%, transparent 100%)',
+                      clipPath: 'polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)',
+                      filter: 'blur(8px)',
+                      animation: 'light-pulse 2s ease-in-out infinite',
+                    }}
+                  />
                 </div>
               )}
             </div>
@@ -388,9 +452,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
 
           {/* Pile de cartes au centre avec images */}
           <div
-            className={`relative cursor-pointer transition-transform hover:scale-105 ${
-              animating ? 'animate-bounce' : ''
-            } w-[160px] h-[224px] sm:w-[220px] sm:h-[308px] md:w-[250px] md:h-[350px] mb-4 sm:mb-0`}
+            className="relative cursor-pointer hover:scale-105 transition-transform w-[200px] h-[280px] sm:w-[280px] sm:h-[392px] md:w-[320px] md:h-[448px] mb-4 sm:mb-0"
             onClick={handleStackClick}
             style={{ perspective: '1000px' }}
           >
@@ -405,10 +467,10 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
                   <div
                     key={`stack-${cardIndex}`}
                     className={`absolute card-3d w-full h-full ${
-                      isTop && animating ? 'card-slide-out-animation' : 'transition-all duration-500'
-                    } ${isTop && !animating ? 'hover:translate-y-[-12px]' : ''}`}
+                      isTop && animating ? 'card-slide-out-animation' : ''
+                    } ${isTop && !animating ? 'hover:translate-y-[-12px] transition-transform duration-300' : ''}`}
                     style={{
-                      transform: `translateY(${offset}px) translateX(${i * 2}px) rotateY(${i * 2}deg)`,
+                      transform: isTop && animating ? '' : `translateY(${offset}px) translateX(${i * 2}px) rotateY(${i * 2}deg)`,
                       zIndex: 10 - i,
                       transformStyle: 'preserve-3d',
                     }}
@@ -666,6 +728,29 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
 
         .card-slide-out-animation {
           animation: card-slide-out-natural 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Animations pour l'effet de lumière du coffre */
+        @keyframes light-pulse {
+          0%, 100% {
+            opacity: 0.8;
+            transform: scaleY(1) translateX(-50%);
+          }
+          50% {
+            opacity: 1;
+            transform: scaleY(1.1) translateX(-50%);
+          }
+        }
+
+        @keyframes glow-pulse {
+          0%, 100% {
+            opacity: 0.6;
+            transform: translateX(-50%) scale(1);
+          }
+          50% {
+            opacity: 0.9;
+            transform: translateX(-50%) scale(1.1);
+          }
         }
       `}</style>
     </div>
