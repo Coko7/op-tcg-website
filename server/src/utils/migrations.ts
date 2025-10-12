@@ -737,6 +737,51 @@ export class MigrationManager {
       }
     });
 
+    // Migration 16: Créer la table marketplace_listings
+    this.migrations.push({
+      version: 16,
+      name: 'create_marketplace_listings',
+      up: async () => {
+        console.log('📦 Migration 16: Création de la table marketplace_listings...');
+
+        await Database.run(`
+          CREATE TABLE IF NOT EXISTS marketplace_listings (
+            id TEXT PRIMARY KEY,
+            seller_id TEXT NOT NULL,
+            card_id TEXT NOT NULL,
+            price INTEGER NOT NULL CHECK(price > 0),
+            status TEXT NOT NULL CHECK(status IN ('active', 'sold', 'cancelled')) DEFAULT 'active',
+            buyer_id TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            sold_at DATETIME,
+            FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE SET NULL,
+            FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE
+          )
+        `);
+        console.log('  ✅ Table marketplace_listings créée');
+
+        // Index pour optimiser les recherches
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_marketplace_seller_id ON marketplace_listings(seller_id)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_marketplace_buyer_id ON marketplace_listings(buyer_id)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_marketplace_card_id ON marketplace_listings(card_id)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_marketplace_status ON marketplace_listings(status)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_marketplace_created_at ON marketplace_listings(created_at)');
+        console.log('  ✅ Index créés sur marketplace_listings');
+
+        console.log('✅ Système de marketplace créé');
+      },
+      down: async () => {
+        console.log('🔄 Rollback Migration 16...');
+        await Database.run('DROP INDEX IF EXISTS idx_marketplace_created_at');
+        await Database.run('DROP INDEX IF EXISTS idx_marketplace_status');
+        await Database.run('DROP INDEX IF EXISTS idx_marketplace_card_id');
+        await Database.run('DROP INDEX IF EXISTS idx_marketplace_buyer_id');
+        await Database.run('DROP INDEX IF EXISTS idx_marketplace_seller_id');
+        await Database.run('DROP TABLE IF EXISTS marketplace_listings');
+      }
+    });
+
     // Trier les migrations par version
     this.migrations.sort((a, b) => a.version - b.version);
   }

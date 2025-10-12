@@ -30,6 +30,11 @@ export enum AuditAction {
   ADMIN_ACTION = 'admin_action',
   DATA_RESET = 'data_reset',
   
+  // Marketplace
+  MARKETPLACE_LISTING_CREATED = 'marketplace_listing_created',
+  MARKETPLACE_LISTING_CANCELLED = 'marketplace_listing_cancelled',
+  MARKETPLACE_PURCHASE = 'marketplace_purchase',
+
   // Sécurité
   FAILED_LOGIN_ATTEMPT = 'failed_login_attempt',
   UNAUTHORIZED_ACCESS = 'unauthorized_access',

@@ -13,6 +13,7 @@ import ProfileSettings from './pages/ProfileSettings';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Admin from './pages/Admin';
+import Marketplace from './pages/Marketplace';
 
 function App() {
   return (
@@ -72,6 +73,7 @@ function App() {
             <Route path="collection" element={<Collection />} />
             <Route path="achievements" element={<Achievements />} />
             <Route path="leaderboard" element={<Leaderboard />} />
+            <Route path="marketplace" element={<Marketplace />} />
           </Route>
         </Routes>
         </Router>
