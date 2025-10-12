@@ -101,7 +101,7 @@ const Leaderboard: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-4">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-purple-600">
           🏆 Leaderboard - Top 3
         </h1>
@@ -112,64 +112,61 @@ const Leaderboard: React.FC = () => {
               key={entry.user_id}
               className={`rounded-lg p-4 shadow-xl transform transition-all duration-300 hover:scale-[1.02] ${getRankStyle(entry.rank)}`}
             >
-              <div className="flex items-center gap-4 mb-3">
-                <span className="text-3xl flex-shrink-0">{getRankIcon(entry.rank)}</span>
+              {/* Layout principal : grille avec 2 colonnes sur desktop */}
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4">
+                {/* Colonne gauche : infos utilisateur et stats */}
+                <div className="space-y-3">
+                  {/* Header avec rang et nom */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl flex-shrink-0">{getRankIcon(entry.rank)}</span>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-xl font-bold truncate">{entry.username}</h2>
+                      <p className="text-xs opacity-80">Rang #{entry.rank}</p>
+                    </div>
+                  </div>
 
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-xl font-bold truncate">{entry.username}</h2>
-                  <p className="text-xs opacity-80">Rang #{entry.rank}</p>
+                  {/* Statistiques condensées en badges horizontaux */}
+                  <div className="bg-black/30 rounded-lg p-3">
+                    <h3 className="text-xs font-semibold mb-2 opacity-80">Collection</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(RARITY_LABELS).map(([key, label]) => {
+                        const count = entry[key as keyof Omit<LeaderboardEntry, 'rank' | 'username' | 'user_id' | 'favorite_card_id' | 'favorite_card_name' | 'favorite_card_image' | 'favorite_card_rarity'>];
+                        return (
+                          <div
+                            key={key}
+                            className="flex items-center gap-1.5 bg-black/40 rounded px-2 py-1"
+                          >
+                            <span className={`text-xs font-medium ${RARITY_COLORS[key as keyof typeof RARITY_COLORS]}`}>
+                              {label}
+                            </span>
+                            <span className="text-sm font-bold text-white">{count}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-white/20">
+                      <span className="text-xs opacity-80">Total : </span>
+                      <span className="text-lg font-bold">
+                        {entry.secret_rare + entry.super_rare + entry.rare + entry.uncommon + entry.common}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Afficher la carte favorite si elle existe */}
+                {/* Colonne droite : carte favorite en grand */}
                 {entry.favorite_card_image && (
-                  <div className="flex items-center gap-2 bg-black/30 rounded-lg p-2 flex-shrink-0">
+                  <div className="flex flex-col items-center justify-center bg-black/30 rounded-lg p-4 lg:min-w-[200px]">
+                    <p className="text-xs opacity-80 mb-2">⭐ Carte favorite</p>
                     <img
                       src={entry.favorite_card_image}
                       alt={entry.favorite_card_name || 'Carte favorite'}
-                      className="w-12 h-16 object-cover rounded shadow-lg"
+                      className="w-40 h-56 object-cover rounded-lg shadow-2xl mb-2"
                       title={entry.favorite_card_name || undefined}
                     />
-                    <div className="text-left hidden sm:block">
-                      <p className="text-xs opacity-80">Carte favorite</p>
-                      <p className="font-semibold text-sm">{entry.favorite_card_name}</p>
-                      <p className="text-xs opacity-70">{entry.favorite_card_rarity}</p>
-                    </div>
+                    <p className="font-semibold text-sm text-center">{entry.favorite_card_name}</p>
+                    <p className="text-xs opacity-70">{entry.favorite_card_rarity}</p>
                   </div>
                 )}
-              </div>
-
-              <div className="bg-black bg-opacity-30 rounded-lg p-3">
-                <h3 className="text-sm font-semibold mb-2">Collection de Cartes</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-white border-opacity-20">
-                        <th className="text-left py-1 px-2">Rareté</th>
-                        <th className="text-right py-1 px-2">Nombre</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(RARITY_LABELS).map(([key, label]) => (
-                        <tr key={key} className="border-b border-white border-opacity-10">
-                          <td className={`py-1 px-2 font-medium ${RARITY_COLORS[key as keyof typeof RARITY_COLORS]}`}>
-                            {label}
-                          </td>
-                          <td className="text-right py-1 px-2 font-bold">
-                            {entry[key as keyof Omit<LeaderboardEntry, 'rank' | 'username' | 'user_id' | 'favorite_card_id' | 'favorite_card_name' | 'favorite_card_image' | 'favorite_card_rarity'>]}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr className="border-t-2 border-white border-opacity-30">
-                        <td className="py-1 px-2 font-bold text-sm">Total</td>
-                        <td className="text-right py-1 px-2 font-bold text-lg">
-                          {entry.secret_rare + entry.super_rare + entry.rare + entry.uncommon + entry.common}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
               </div>
             </div>
           ))}
