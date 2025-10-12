@@ -666,6 +666,46 @@ export class MigrationManager {
       }
     });
 
+    // Migration 14: Ajouter index unique sur vegapull_id et nettoyer les doublons
+    this.migrations.push({
+      version: 14,
+      name: 'add_unique_vegapull_id_index',
+      up: async () => {
+        console.log('📦 Migration 14: Ajout d\'index unique sur vegapull_id...');
+
+        // Nettoyer les doublons potentiels en gardant le plus récent
+        await Database.run(`
+          DELETE FROM cards
+          WHERE id NOT IN (
+            SELECT MAX(id)
+            FROM cards
+            WHERE vegapull_id IS NOT NULL
+            GROUP BY vegapull_id
+          )
+          AND vegapull_id IS NOT NULL
+        `);
+
+        console.log('  ✅ Doublons nettoyés');
+
+        // Créer un index unique sur vegapull_id
+        try {
+          await Database.run(`
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_cards_vegapull_id_unique
+            ON cards(vegapull_id)
+            WHERE vegapull_id IS NOT NULL
+          `);
+          console.log('  ✅ Index unique sur vegapull_id créé');
+        } catch (error) {
+          console.log('  ℹ️ Index unique déjà présent ou erreur:', error);
+        }
+
+        console.log('✅ Index unique sur vegapull_id ajouté');
+      },
+      down: async () => {
+        await Database.run('DROP INDEX IF EXISTS idx_cards_vegapull_id_unique');
+      }
+    });
+
     // Trier les migrations par version
     this.migrations.sort((a, b) => a.version - b.version);
   }

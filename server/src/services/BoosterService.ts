@@ -22,54 +22,17 @@ export class BoosterService {
    */
   static async generateBoosterCards(boosterId?: string): Promise<Card[]> {
     const cards: Card[] = [];
-    const fallbackRarities: (keyof typeof BoosterService.RARITY_WEIGHTS)[] = [
-      'common', 'uncommon', 'rare', 'leader', 'super_rare', 'secret_rare'
-    ];
 
     for (let i = 0; i < this.CARDS_PER_BOOSTER; i++) {
       const rarity = this.selectRandomRarity();
-      let card = await this.getRandomCardByRarity(rarity, boosterId);
-
-      // Si aucune carte trouvée pour cette rareté, essayer les raretés alternatives
-      if (!card) {
-        console.warn(`Impossible de trouver une carte ${rarity}, essai avec d'autres raretés`);
-
-        for (const fallbackRarity of fallbackRarities) {
-          if (fallbackRarity !== rarity) {
-            card = await this.getRandomCardByRarity(fallbackRarity, boosterId);
-            if (card) {
-              console.log(`Carte ${fallbackRarity} utilisée en remplacement de ${rarity}`);
-              break;
-            }
-          }
-        }
-      }
+      const card = await this.getRandomCardByRarity(rarity, boosterId);
 
       if (card) {
         cards.push(card);
+      } else {
+        // Si aucune carte n'est trouvée, lever une erreur explicite
+        throw new Error(`Impossible de générer une carte de rareté ${rarity} pour le booster ${boosterId || 'aléatoire'}. Vérifiez que la base de données contient des cartes pour cette combinaison.`);
       }
-    }
-
-    // S'assurer qu'on a bien le bon nombre de cartes
-    // Essayer toutes les raretés si nécessaire
-    let attemptCount = 0;
-    const maxAttempts = 50; // Éviter une boucle infinie
-
-    while (cards.length < this.CARDS_PER_BOOSTER && attemptCount < maxAttempts) {
-      attemptCount++;
-
-      for (const rarity of fallbackRarities) {
-        if (cards.length >= this.CARDS_PER_BOOSTER) break;
-
-        const fallbackCard = await this.getRandomCardByRarity(rarity, boosterId);
-        if (fallbackCard) {
-          cards.push(fallbackCard);
-        }
-      }
-    }
-
-    if (cards.length < this.CARDS_PER_BOOSTER) {
-      console.error(`ATTENTION: Impossible de générer ${this.CARDS_PER_BOOSTER} cartes. Seulement ${cards.length} cartes générées.`);
     }
 
     return cards;
@@ -146,13 +109,12 @@ export class BoosterService {
           return this.getRandomCardByRarity(rarity, boosterId, true); // Retry avec forceNonAlternate
         }
 
-        // Si aucune carte trouvée même pour carte normale, essayer sans restriction de booster
-        if (boosterId) {
-          console.warn(`Aucune carte ${rarity} trouvée dans le booster ${boosterId}, essai sans restriction de booster`);
-          return this.getRandomCardByRarity(rarity, undefined, forceNonAlternate);
-        }
-
-        console.warn(`Aucune carte trouvée pour la rareté: ${rarity}`);
+        // Si aucune carte trouvée, cela indique un problème de données
+        console.error(`ERREUR: Aucune carte ${rarity} trouvée dans le booster ${boosterId || 'non spécifié'}`);
+        console.error(`Ceci indique un problème de synchronisation des données. Vérifiez que:`);
+        console.error(`1. Le booster ${boosterId} existe et contient des cartes ${rarity}`);
+        console.error(`2. Les cartes ont is_active = 1`);
+        console.error(`3. Le vegapull_id est correctement renseigné`);
         return null;
       }
 

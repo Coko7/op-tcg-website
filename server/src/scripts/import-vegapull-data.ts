@@ -180,38 +180,88 @@ class VegapullImporter {
     const imageUrl = vegapullCard.img_full_url;
     const fallbackImageUrl = null;
 
-    // Générer un ID unique pour notre base
-    const cardId = uuidv4();
+    // Vérifier si une carte avec ce vegapull_id existe déjà
+    const existingCard = await Database.get<{ id: string }>(`
+      SELECT id FROM cards WHERE vegapull_id = ?
+    `, [vegapullCard.id]);
 
-    // Insérer ou mettre à jour la carte
-    await Database.run(`
-      INSERT OR REPLACE INTO cards (
-        id, name, character, rarity, attack, defense,
-        cost, power, counter, color, type, description,
-        special_ability, image_url, fallback_image_url,
-        booster_id, vegapull_id, is_active,
-        created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-    `, [
-      cardId,
-      vegapullCard.name,
-      vegapullCard.name, // character = name pour simplifier
-      rarity,
-      null, // attack - pas dans les données Vegapull
-      null, // defense - pas dans les données Vegapull
-      vegapullCard.cost,
-      vegapullCard.power,
-      vegapullCard.counter,
-      JSON.stringify(vegapullCard.colors), // couleurs au format JSON
-      cardType,
-      vegapullCard.effect || '',
-      vegapullCard.trigger || '',
-      imageUrl,
-      fallbackImageUrl,
-      boosterId,
-      vegapullCard.id, // Sauvegarder l'ID Vegapull original
-      1
-    ]);
+    let cardId: string;
+    if (existingCard) {
+      // Mettre à jour la carte existante
+      cardId = existingCard.id;
+
+      await Database.run(`
+        UPDATE cards SET
+          name = ?,
+          character = ?,
+          rarity = ?,
+          attack = ?,
+          defense = ?,
+          cost = ?,
+          power = ?,
+          counter = ?,
+          color = ?,
+          type = ?,
+          description = ?,
+          special_ability = ?,
+          image_url = ?,
+          fallback_image_url = ?,
+          booster_id = ?,
+          is_active = ?,
+          updated_at = datetime('now')
+        WHERE id = ?
+      `, [
+        vegapullCard.name,
+        vegapullCard.name, // character = name pour simplifier
+        rarity,
+        null, // attack - pas dans les données Vegapull
+        null, // defense - pas dans les données Vegapull
+        vegapullCard.cost,
+        vegapullCard.power,
+        vegapullCard.counter,
+        JSON.stringify(vegapullCard.colors), // couleurs au format JSON
+        cardType,
+        vegapullCard.effect || '',
+        vegapullCard.trigger || '',
+        imageUrl,
+        fallbackImageUrl,
+        boosterId,
+        1, // is_active
+        cardId
+      ]);
+    } else {
+      // Créer une nouvelle carte
+      cardId = uuidv4();
+
+      await Database.run(`
+        INSERT INTO cards (
+          id, name, character, rarity, attack, defense,
+          cost, power, counter, color, type, description,
+          special_ability, image_url, fallback_image_url,
+          booster_id, vegapull_id, is_active,
+          created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      `, [
+        cardId,
+        vegapullCard.name,
+        vegapullCard.name, // character = name pour simplifier
+        rarity,
+        null, // attack - pas dans les données Vegapull
+        null, // defense - pas dans les données Vegapull
+        vegapullCard.cost,
+        vegapullCard.power,
+        vegapullCard.counter,
+        JSON.stringify(vegapullCard.colors), // couleurs au format JSON
+        cardType,
+        vegapullCard.effect || '',
+        vegapullCard.trigger || '',
+        imageUrl,
+        fallbackImageUrl,
+        boosterId,
+        vegapullCard.id, // Sauvegarder l'ID Vegapull original
+        1 // is_active
+      ]);
+    }
   }
 
   async cleanup(): Promise<void> {
