@@ -202,21 +202,31 @@ const CardModal: React.FC<CardModalProps> = ({
                       <div
                         className="absolute inset-0 pointer-events-none z-10 opacity-0 transition-opacity duration-300"
                         style={{
-                          opacity: isHovering ? 0.65 : 0,
+                          opacity: isHovering ? 0.55 : 0,
                           background: `
                             linear-gradient(
                               ${(glareX - 50) * 3.6}deg,
-                              rgba(255, 0, 0, 0.6) 0%,
-                              rgba(255, 154, 0, 0.6) 10%,
-                              rgba(208, 222, 33, 0.6) 20%,
-                              rgba(79, 220, 74, 0.6) 30%,
-                              rgba(63, 218, 216, 0.6) 40%,
-                              rgba(47, 201, 226, 0.6) 50%,
-                              rgba(28, 127, 238, 0.6) 60%,
-                              rgba(95, 21, 242, 0.6) 70%,
-                              rgba(186, 12, 248, 0.6) 80%,
-                              rgba(251, 7, 217, 0.6) 90%,
-                              rgba(255, 0, 0, 0.6) 100%
+                              rgba(255, 0, 0, 0.5) 0%,
+                              rgba(255, 77, 0, 0.5) 5%,
+                              rgba(255, 154, 0, 0.5) 10%,
+                              rgba(231, 188, 16, 0.5) 15%,
+                              rgba(208, 222, 33, 0.5) 20%,
+                              rgba(143, 221, 53, 0.5) 25%,
+                              rgba(79, 220, 74, 0.5) 30%,
+                              rgba(71, 219, 145, 0.5) 35%,
+                              rgba(63, 218, 216, 0.5) 40%,
+                              rgba(55, 209, 221, 0.5) 45%,
+                              rgba(47, 201, 226, 0.5) 50%,
+                              rgba(37, 164, 232, 0.5) 55%,
+                              rgba(28, 127, 238, 0.5) 60%,
+                              rgba(61, 74, 240, 0.5) 65%,
+                              rgba(95, 21, 242, 0.5) 70%,
+                              rgba(140, 16, 245, 0.5) 75%,
+                              rgba(186, 12, 248, 0.5) 80%,
+                              rgba(218, 9, 232, 0.5) 85%,
+                              rgba(251, 7, 217, 0.5) 90%,
+                              rgba(253, 3, 108, 0.5) 95%,
+                              rgba(255, 0, 0, 0.5) 100%
                             )
                           `,
                           mixBlendMode: 'color-dodge',
@@ -229,15 +239,27 @@ const CardModal: React.FC<CardModalProps> = ({
                       <div
                         className="absolute inset-0 pointer-events-none z-10 opacity-0 transition-opacity duration-300"
                         style={{
-                          opacity: isHovering ? 0.6 : 0,
+                          opacity: isHovering ? 0.5 : 0,
                           background: `
                             linear-gradient(
                               ${(glareX - 50) * 2.5}deg,
-                              rgba(255, 0, 255, 0.5) 0%,
-                              rgba(0, 255, 255, 0.5) 25%,
-                              rgba(255, 255, 0, 0.5) 50%,
-                              rgba(255, 0, 0, 0.5) 75%,
-                              rgba(255, 0, 255, 0.5) 100%
+                              rgba(255, 0, 255, 0.45) 0%,
+                              rgba(212, 0, 255, 0.45) 6.25%,
+                              rgba(170, 0, 255, 0.45) 12.5%,
+                              rgba(85, 85, 255, 0.45) 18.75%,
+                              rgba(0, 170, 255, 0.45) 25%,
+                              rgba(0, 212, 255, 0.45) 31.25%,
+                              rgba(0, 255, 255, 0.45) 37.5%,
+                              rgba(85, 255, 170, 0.45) 43.75%,
+                              rgba(170, 255, 85, 0.45) 50%,
+                              rgba(212, 255, 42, 0.45) 56.25%,
+                              rgba(255, 255, 0, 0.45) 62.5%,
+                              rgba(255, 212, 0, 0.45) 68.75%,
+                              rgba(255, 170, 0, 0.45) 75%,
+                              rgba(255, 127, 0, 0.45) 81.25%,
+                              rgba(255, 85, 0, 0.45) 87.5%,
+                              rgba(255, 42, 127, 0.45) 93.75%,
+                              rgba(255, 0, 255, 0.45) 100%
                             )
                           `,
                           mixBlendMode: 'color-dodge',

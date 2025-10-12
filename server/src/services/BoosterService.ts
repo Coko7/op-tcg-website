@@ -22,10 +22,28 @@ export class BoosterService {
    */
   static async generateBoosterCards(boosterId?: string): Promise<Card[]> {
     const cards: Card[] = [];
+    const fallbackRarities: (keyof typeof BoosterService.RARITY_WEIGHTS)[] = [
+      'common', 'uncommon', 'rare', 'leader', 'super_rare', 'secret_rare'
+    ];
 
     for (let i = 0; i < this.CARDS_PER_BOOSTER; i++) {
       const rarity = this.selectRandomRarity();
-      const card = await this.getRandomCardByRarity(rarity, boosterId);
+      let card = await this.getRandomCardByRarity(rarity, boosterId);
+
+      // Si aucune carte trouvée pour cette rareté, essayer les raretés alternatives
+      if (!card) {
+        console.warn(`Impossible de trouver une carte ${rarity}, essai avec d'autres raretés`);
+
+        for (const fallbackRarity of fallbackRarities) {
+          if (fallbackRarity !== rarity) {
+            card = await this.getRandomCardByRarity(fallbackRarity, boosterId);
+            if (card) {
+              console.log(`Carte ${fallbackRarity} utilisée en remplacement de ${rarity}`);
+              break;
+            }
+          }
+        }
+      }
 
       if (card) {
         cards.push(card);
@@ -33,11 +51,25 @@ export class BoosterService {
     }
 
     // S'assurer qu'on a bien le bon nombre de cartes
-    while (cards.length < this.CARDS_PER_BOOSTER) {
-      const fallbackCard = await this.getRandomCardByRarity('common', boosterId);
-      if (fallbackCard) {
-        cards.push(fallbackCard);
+    // Essayer toutes les raretés si nécessaire
+    let attemptCount = 0;
+    const maxAttempts = 50; // Éviter une boucle infinie
+
+    while (cards.length < this.CARDS_PER_BOOSTER && attemptCount < maxAttempts) {
+      attemptCount++;
+
+      for (const rarity of fallbackRarities) {
+        if (cards.length >= this.CARDS_PER_BOOSTER) break;
+
+        const fallbackCard = await this.getRandomCardByRarity(rarity, boosterId);
+        if (fallbackCard) {
+          cards.push(fallbackCard);
+        }
       }
+    }
+
+    if (cards.length < this.CARDS_PER_BOOSTER) {
+      console.error(`ATTENTION: Impossible de générer ${this.CARDS_PER_BOOSTER} cartes. Seulement ${cards.length} cartes générées.`);
     }
 
     return cards;
@@ -79,10 +111,10 @@ export class BoosterService {
    * Récupère une carte aléatoire d'une rareté donnée, optionnellement d'un booster spécifique
    * Gère la logique des cartes alternate (avec suffixe _p1, _p2, etc.)
    */
-  private static async getRandomCardByRarity(rarity: string, boosterId?: string): Promise<Card | null> {
+  private static async getRandomCardByRarity(rarity: string, boosterId?: string, forceNonAlternate: boolean = false): Promise<Card | null> {
     try {
-      // Déterminer si cette carte devrait être alternate
-      const shouldBeAlternate = this.shouldGetAlternate(rarity);
+      // Déterminer si cette carte devrait être alternate (sauf si forceNonAlternate est true)
+      const shouldBeAlternate = !forceNonAlternate && this.shouldGetAlternate(rarity);
 
       let query = `
         SELECT * FROM cards
@@ -111,9 +143,16 @@ export class BoosterService {
         // Si aucune carte alternate trouvée, fallback sur une carte normale
         if (shouldBeAlternate) {
           console.warn(`Aucune carte alternate trouvée pour ${rarity}, fallback sur carte normale`);
-          return this.getRandomCardByRarity(rarity, boosterId); // Retry sans alternate
+          return this.getRandomCardByRarity(rarity, boosterId, true); // Retry avec forceNonAlternate
         }
-        console.warn(`Aucune carte trouvée pour la rareté: ${rarity}${boosterId ? ` dans le booster ${boosterId}` : ''}`);
+
+        // Si aucune carte trouvée même pour carte normale, essayer sans restriction de booster
+        if (boosterId) {
+          console.warn(`Aucune carte ${rarity} trouvée dans le booster ${boosterId}, essai sans restriction de booster`);
+          return this.getRandomCardByRarity(rarity, undefined, forceNonAlternate);
+        }
+
+        console.warn(`Aucune carte trouvée pour la rareté: ${rarity}`);
         return null;
       }
 
