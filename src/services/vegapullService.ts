@@ -211,6 +211,7 @@ export class VegapullService {
       common: 0,
       uncommon: 0,
       rare: 0,
+      leader: 0,
       super_rare: 0,
       secret_rare: 0
     };
