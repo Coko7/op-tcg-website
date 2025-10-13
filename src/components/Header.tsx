@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Package, BookOpen, Trophy, User, LogIn, UserPlus, Medal, Shield, ShoppingCart, Menu, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -69,8 +70,8 @@ const Header: React.FC = () => {
             <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-ocean-300 via-blue-300 to-treasure-300 bg-clip-text text-transparent">One Piece TCG</h1>
           </div>
 
-          {/* Desktop Navigation - Hidden on mobile/tablet */}
-          <nav className="hidden lg:flex items-center space-x-2">
+          {/* Desktop Navigation - Hidden on mobile/tablet, visible à partir de 1024px */}
+          <nav className="hidden xl:flex items-center space-x-2">
             {navLinks.map(({ to, icon: Icon, label }) => (
               <Link
                 key={to}
@@ -159,10 +160,10 @@ const Header: React.FC = () => {
                 </button>
               ) : null}
 
-              {/* Hamburger Menu Button */}
+              {/* Hamburger Menu Button - Visible jusqu'à 1280px (xl) */}
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="lg:hidden p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all duration-300 border border-white/10 hover:border-white/20 backdrop-blur-xl"
+                className="xl:hidden p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all duration-300 border border-white/10 hover:border-white/20 backdrop-blur-xl"
                 aria-label="Toggle menu"
               >
                 {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
@@ -177,44 +178,44 @@ const Header: React.FC = () => {
         <>
           {/* Backdrop - clique pour fermer */}
           <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-md z-[100] lg:hidden animate-in fade-in duration-200"
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-[100] xl:hidden animate-in fade-in duration-200"
             onClick={() => setShowMobileMenu(false)}
           />
 
-          {/* Menu Panel - Simplifié et lisible */}
-          <div className="fixed top-0 right-0 bottom-0 w-[280px] max-w-[85vw] z-[110] lg:hidden animate-in slide-in-from-right duration-300 bg-gradient-to-b from-slate-900/98 to-slate-800/98 backdrop-blur-2xl border-l-2 border-white/20 shadow-2xl flex flex-col">
+          {/* Menu Panel - Visible jusqu'à xl (1280px) */}
+          <div className="fixed top-0 right-0 bottom-0 w-[300px] max-w-[85vw] z-[110] xl:hidden animate-in slide-in-from-right duration-300 bg-gradient-to-b from-slate-900/98 to-slate-800/98 backdrop-blur-2xl border-l-2 border-white/20 shadow-2xl flex flex-col">
 
-            {/* Header avec bouton fermer - TOUJOURS VISIBLE */}
-            <div className="flex items-center justify-between p-5 border-b border-white/20 bg-white/5 flex-shrink-0">
-              <div className="flex items-center space-x-3">
-                <div className="w-9 h-9 bg-gradient-to-br from-ocean-500 to-treasure-500 rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-xl">🏴‍☠️</span>
+            {/* Header avec bouton fermer - COMPACT */}
+            <div className="flex items-center justify-between p-4 border-b border-white/20 bg-white/5 flex-shrink-0">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-ocean-500 to-treasure-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-lg">🏴‍☠️</span>
                 </div>
-                <h2 className="text-base font-bold text-white">Menu</h2>
+                <h2 className="text-sm font-bold text-white">Menu</h2>
               </div>
               <button
                 onClick={() => setShowMobileMenu(false)}
-                className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 transition-all border border-red-500/30"
+                className="p-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 transition-all border border-red-500/30"
                 aria-label="Fermer le menu"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
-            {/* Navigation Links - Scrollable */}
-            <nav className="flex flex-col p-3 space-y-2 overflow-y-auto flex-1">
+            {/* Navigation Links - Pas de scroll, juste ajusté */}
+            <nav className="flex flex-col p-3 space-y-1.5 flex-1">
               {navLinks.map(({ to, icon: Icon, label }) => (
                 <Link
                   key={to}
                   to={to}
                   onClick={() => setShowMobileMenu(false)}
-                  className={`flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-200 font-medium text-sm ${
+                  className={`flex items-center space-x-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium text-sm ${
                     isActive(to)
                       ? 'bg-gradient-to-r from-ocean-500 to-ocean-600 text-white shadow-lg border border-ocean-400/40'
                       : 'text-white/90 hover:text-white hover:bg-white/10 border border-white/10 hover:border-white/20'
                   }`}
                 >
-                  <Icon size={19} />
+                  <Icon size={18} />
                   <span>{label}</span>
                 </Link>
               ))}
@@ -224,46 +225,46 @@ const Header: React.FC = () => {
                 <Link
                   to="/admin"
                   onClick={() => setShowMobileMenu(false)}
-                  className="flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-200 font-medium text-sm bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white shadow-lg border border-purple-400/40 mt-2"
+                  className="flex items-center space-x-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium text-sm bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white shadow-lg border border-purple-400/40"
                 >
-                  <Shield size={19} />
-                  <span>Administration</span>
+                  <Shield size={18} />
+                  <span>Admin</span>
                 </Link>
               ) : null}
 
               {/* Login/Register in Mobile Menu (if not authenticated) */}
               {!isAuthenticated ? (
-                <div className="pt-3 mt-3 space-y-2 border-t border-white/20">
+                <div className="pt-2 mt-2 space-y-1.5 border-t border-white/20">
                   <Link
                     to="/login"
                     onClick={() => setShowMobileMenu(false)}
-                    className="flex items-center space-x-3 px-4 py-3.5 rounded-xl bg-gradient-to-r from-ocean-500 to-ocean-600 hover:from-ocean-600 hover:to-ocean-700 text-white font-medium transition-all duration-200 shadow-lg border border-ocean-400/40 text-sm"
+                    className="flex items-center space-x-2.5 px-3 py-2.5 rounded-lg bg-gradient-to-r from-ocean-500 to-ocean-600 hover:from-ocean-600 hover:to-ocean-700 text-white font-medium transition-all duration-200 shadow-lg border border-ocean-400/40 text-sm"
                   >
-                    <LogIn size={19} />
+                    <LogIn size={18} />
                     <span>Connexion</span>
                   </Link>
 
                   <Link
                     to="/register"
                     onClick={() => setShowMobileMenu(false)}
-                    className="flex items-center space-x-3 px-4 py-3.5 rounded-xl border-2 border-white/30 text-white/90 hover:bg-white/10 hover:border-white/50 hover:text-white transition-all duration-200 font-medium text-sm"
+                    className="flex items-center space-x-2.5 px-3 py-2.5 rounded-lg border-2 border-white/30 text-white/90 hover:bg-white/10 hover:border-white/50 hover:text-white transition-all duration-200 font-medium text-sm"
                   >
-                    <UserPlus size={19} />
+                    <UserPlus size={18} />
                     <span>S'inscrire</span>
                   </Link>
                 </div>
               ) : null}
             </nav>
 
-            {/* User Info Footer - TOUJOURS VISIBLE SI AUTHENTIFIÉ */}
+            {/* User Info Footer - COMPACT */}
             {isAuthenticated && user ? (
-              <div className="p-4 border-t border-white/20 bg-gradient-to-b from-black/30 to-black/50 backdrop-blur-xl flex-shrink-0">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg flex-shrink-0">
+              <div className="p-3 border-t border-white/20 bg-gradient-to-b from-black/30 to-black/50 backdrop-blur-xl flex-shrink-0">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg flex-shrink-0 text-sm">
                     {user.username.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-semibold truncate text-sm">{user.username}</p>
+                    <p className="text-white font-semibold truncate text-xs">{user.username}</p>
                     <p className="text-treasure-400 text-xs font-bold">{user.berrys} ฿</p>
                   </div>
                 </div>
@@ -273,8 +274,8 @@ const Header: React.FC = () => {
         </>
       ) : null}
 
-      {/* Mobile User Profile Modal - Repositionné pour être visible */}
-      {isAuthenticated && showUserMenu && (
+      {/* Mobile User Profile Modal - Avec Portal pour sortir du header */}
+      {isAuthenticated && showUserMenu && createPortal(
         <>
           {/* Backdrop for mobile user menu */}
           <div
@@ -285,7 +286,8 @@ const Header: React.FC = () => {
           <div className="fixed top-[72px] left-4 right-4 z-[110] sm:hidden animate-in slide-in-from-top duration-300">
             <UserProfile />
           </div>
-        </>
+        </>,
+        document.body
       )}
     </header>
   );

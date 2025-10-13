@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Bell } from 'lucide-react';
 import { apiService } from '../services/api';
 import NotificationModal from './NotificationModal';
@@ -73,13 +74,16 @@ const NotificationBell: React.FC = () => {
         )}
       </button>
 
-      <NotificationModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        notifications={notifications}
-        onClaimReward={handleClaimReward}
-        onRefresh={fetchNotifications}
-      />
+      {showModal && createPortal(
+        <NotificationModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          notifications={notifications}
+          onClaimReward={handleClaimReward}
+          onRefresh={fetchNotifications}
+        />,
+        document.body
+      )}
     </>
   );
 };
