@@ -7,39 +7,27 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['strawhat.svg'],
+      includeAssets: ['icon.svg'],
       manifest: {
         name: 'One Piece Booster Game',
         short_name: 'OP Booster',
         description: 'Jeu de collection de cartes One Piece - Ouvrez des boosters, collectionnez des cartes et gérez votre collection',
-        theme_color: '#ff6b35',
-        background_color: '#0f0f23',
+        theme_color: '#D4AF37',
+        background_color: '#D4AF37',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
         start_url: '/',
         icons: [
           {
-            src: 'strawhat.svg',
-            sizes: '192x192',
+            src: 'icon.svg',
+            sizes: 'any',
             type: 'image/svg+xml',
             purpose: 'any'
           },
           {
-            src: 'strawhat.svg',
-            sizes: '192x192',
-            type: 'image/svg+xml',
-            purpose: 'maskable'
-          },
-          {
-            src: 'strawhat.svg',
-            sizes: '512x512',
-            type: 'image/svg+xml',
-            purpose: 'any'
-          },
-          {
-            src: 'strawhat.svg',
-            sizes: '512x512',
+            src: 'icon.svg',
+            sizes: 'any',
             type: 'image/svg+xml',
             purpose: 'maskable'
           }
