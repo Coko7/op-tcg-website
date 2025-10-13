@@ -18,15 +18,18 @@ interface RarityComparison {
   matches: boolean;
 }
 
-// Mapping des raretés Vegapull vers nos raretés
+// Mapping des raretés Vegapull vers nos raretés (DOIT être identique à import-vegapull-data.ts)
 const RARITY_MAPPING: Record<string, string> = {
-  'Leader': 'leader',
-  'SuperRare': 'super_rare',
-  'Rare': 'rare',
-  'Uncommon': 'uncommon',
-  'Common': 'common',
-  'SecretRare': 'secret_rare',
-  'SpecialRare': 'secret_rare'
+  'Leader': 'leader',        // Cartes Leader
+  'SuperRare': 'super_rare', // Super Rares
+  'Rare': 'rare',            // Rares
+  'Uncommon': 'uncommon',    // Peu communes
+  'Common': 'common',        // Communes
+  'SecretRare': 'secret_rare', // Secret Rares
+  'SpecialRare': 'secret_rare', // Special Rares (alias de Secret)
+  'TreasureRare': 'secret_rare', // Treasure Rares (très rares, comme Secret)
+  'Special': 'super_rare',   // Cartes Special (traiter comme Super Rare)
+  'Promo': 'rare'            // Cartes promotionnelles (traiter comme Rare)
 };
 
 async function diagnoseRarityIssues(): Promise<void> {
