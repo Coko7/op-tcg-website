@@ -23,11 +23,9 @@ COPY eslint.config.js ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
 
-# Installer toutes les dépendances avec clean-install pour éviter les conflits
-# Utiliser --ignore-scripts pour éviter ETXTBSY, puis rebuild pour esbuild
-RUN npm ci --no-audit --ignore-scripts && \
-    npm rebuild esbuild && \
-    npm run postinstall || true
+# Installer toutes les dépendances
+# Le problème de rollup sur ARM64 est résolu en utilisant npm install qui gère mieux les dépendances optionnelles
+RUN npm install --no-audit
 
 # Copier le code source
 COPY src ./src
