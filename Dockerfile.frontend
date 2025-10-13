@@ -7,15 +7,8 @@ RUN apk add --no-cache git curl python3 make g++
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Configuration npm pour améliorer la fiabilité
-RUN npm config set fetch-retries 5 && \
-    npm config set fetch-retry-mintimeout 20000 && \
-    npm config set fetch-retry-maxtimeout 120000 && \
-    npm config set fetch-timeout 300000 && \
-    npm config set registry https://registry.npmjs.org/
-
-# Copier les fichiers de dépendances
-COPY package*.json ./
+# Copier les fichiers de configuration npm et dépendances
+COPY .npmrc package.json ./
 COPY tsconfig.json ./
 COPY tsconfig.node.json ./
 COPY vite.config.ts ./
@@ -24,8 +17,12 @@ COPY tailwind.config.js ./
 COPY postcss.config.js ./
 
 # Installer toutes les dépendances
-# Le problème de rollup sur ARM64 est résolu en utilisant npm install qui gère mieux les dépendances optionnelles
-RUN npm install --no-audit
+# Solution pour le problème rollup sur ARM64 :
+# 1. Supprimer package-lock.json pour forcer une installation fraîche
+# 2. Installer sans le cache npm pour éviter les modules corrompus
+# 3. Installer explicitement le module rollup pour ARM64
+RUN npm install --no-audit --prefer-online && \
+    npm install @rollup/rollup-linux-arm64-musl --save-optional --no-audit || true
 
 # Copier le code source
 COPY src ./src
