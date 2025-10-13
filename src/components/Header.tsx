@@ -16,13 +16,17 @@ const Header: React.FC = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
-      if (!target.closest('.user-menu-container')) {
+      // Chercher à la fois desktop (.user-menu-container) et mobile (.user-menu-mobile)
+      if (!target.closest('.user-menu-container') && !target.closest('.user-menu-mobile')) {
         setShowUserMenu(false);
       }
     };
 
     if (showUserMenu) {
-      document.addEventListener('click', handleClickOutside);
+      // Petit délai pour éviter que le clic d'ouverture ne ferme immédiatement
+      setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+      }, 0);
       return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [showUserMenu]);
@@ -148,19 +152,22 @@ const Header: React.FC = () => {
               )}
             </div>
 
-            {/* Mobile: User icon + Hamburger Menu Button */}
-            <div className="flex items-center space-x-2 sm:hidden">
-              {/* Mobile User Icon */}
+            {/* Mobile/Tablet: User icon + Hamburger Menu Button */}
+            <div className="flex items-center space-x-2">
+              {/* Mobile User Icon - Seulement mobile < 640px */}
               {isAuthenticated ? (
                 <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="relative p-2 rounded-xl bg-gradient-to-r from-emerald-500/90 to-emerald-600/90 text-white shadow-lg border border-emerald-400/30 backdrop-blur-xl"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowUserMenu(!showUserMenu);
+                  }}
+                  className="user-menu-mobile sm:hidden relative p-2 rounded-xl bg-gradient-to-r from-emerald-500/90 to-emerald-600/90 text-white shadow-lg border border-emerald-400/30 backdrop-blur-xl"
                 >
                   <User size={18} />
                 </button>
               ) : null}
 
-              {/* Hamburger Menu Button - Visible jusqu'à 1280px (xl) */}
+              {/* Hamburger Menu Button - Visible mobile + tablette jusqu'à 1280px (xl) */}
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
                 className="xl:hidden p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all duration-300 border border-white/10 hover:border-white/20 backdrop-blur-xl"
@@ -202,8 +209,8 @@ const Header: React.FC = () => {
               </button>
             </div>
 
-            {/* Navigation Links - Pas de scroll, juste ajusté */}
-            <nav className="flex flex-col p-3 space-y-1.5 flex-1">
+            {/* Navigation Links - Fond opaque pour lisibilité */}
+            <nav className="flex flex-col p-3 space-y-1.5 flex-1 bg-black/40 backdrop-blur-xl">
               {navLinks.map(({ to, icon: Icon, label }) => (
                 <Link
                   key={to}
@@ -276,7 +283,7 @@ const Header: React.FC = () => {
 
       {/* Mobile User Profile Modal - Avec Portal pour sortir du header */}
       {isAuthenticated && showUserMenu && createPortal(
-        <>
+        <div className="user-menu-mobile">
           {/* Backdrop for mobile user menu */}
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] sm:hidden animate-in fade-in duration-200"
@@ -286,7 +293,7 @@ const Header: React.FC = () => {
           <div className="fixed top-[72px] left-4 right-4 z-[110] sm:hidden animate-in slide-in-from-top duration-300">
             <UserProfile />
           </div>
-        </>,
+        </div>,
         document.body
       )}
     </header>
