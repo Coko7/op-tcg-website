@@ -87,7 +87,7 @@ const Header: React.FC = () => {
             ))}
 
             {/* Lien Admin visible uniquement pour les admins */}
-            {isAuthenticated && user?.is_admin && (
+            {isAuthenticated && user?.is_admin ? (
               <Link
                 to="/admin"
                 className="flex items-center space-x-2 px-3 py-2 rounded-xl transition-all duration-300 font-medium bg-gradient-to-r from-purple-500/90 to-fuchsia-500/90 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 border border-purple-400/30 backdrop-blur-xl"
@@ -96,7 +96,7 @@ const Header: React.FC = () => {
                 <Shield size={18} />
                 <span className="text-sm">Admin</span>
               </Link>
-            )}
+            ) : null}
           </nav>
 
           {/* Right side: Notifications, User menu, Mobile menu button */}
@@ -181,8 +181,16 @@ const Header: React.FC = () => {
             onClick={() => setShowMobileMenu(false)}
           />
 
-          {/* Menu Panel */}
-          <div className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] bg-slate-900/98 backdrop-blur-3xl border-l-2 border-white/20 shadow-2xl z-50 lg:hidden animate-in slide-in-from-right duration-300">
+          {/* Menu Panel - Glassmorphism avec fond solide pour lisibilité */}
+          <div
+            className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] shadow-2xl z-50 lg:hidden animate-in slide-in-from-right duration-300"
+            style={{
+              background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98))',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              borderLeft: '2px solid rgba(255, 255, 255, 0.2)'
+            }}
+          >
             {/* Menu Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/10 bg-white/5">
               <div className="flex items-center space-x-3">
@@ -217,7 +225,7 @@ const Header: React.FC = () => {
               ))}
 
               {/* Admin Link in Mobile Menu */}
-              {isAuthenticated && user?.is_admin && (
+              {isAuthenticated && user?.is_admin ? (
                 <Link
                   to="/admin"
                   className="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium bg-gradient-to-r from-purple-500/90 to-fuchsia-500/90 text-white shadow-lg border border-purple-400/30"
@@ -225,7 +233,7 @@ const Header: React.FC = () => {
                   <Shield size={20} />
                   <span>Administration</span>
                 </Link>
-              )}
+              ) : null}
 
               {/* Login/Register in Mobile Menu (if not authenticated) */}
               {!isAuthenticated && (
