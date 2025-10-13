@@ -71,11 +71,13 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Initialiser les particules
+    // Initialiser les particules dorées/treasure
     if (particlesRef.current.length === 0) {
       for (let i = 0; i < 100; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = Math.random() * 3 + 1;
+        // Couleurs treasure/dorées
+        const treasureColors = ['#F59E0B', '#FBBF24', '#FCD34D', '#FDE047'];
         particlesRef.current.push({
           x: canvas.width / 2,
           y: canvas.height / 2,
@@ -83,7 +85,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
           vy: Math.sin(angle) * speed - Math.random() * 2,
           alpha: 1,
           size: Math.random() * 4 + 2,
-          color: ['#FFD700', '#FFA500', '#FF6B35', '#FBBF24'][Math.floor(Math.random() * 4)]
+          color: treasureColors[Math.floor(Math.random() * treasureColors.length)]
         });
       }
     }
@@ -172,8 +174,13 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
   };
 
   return (
-    <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] bg-gradient-to-b from-sky-400 via-sky-500 to-blue-400 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl">
-      {/* Canvas pour les particules */}
+    <div className={`relative w-full h-[400px] sm:h-[500px] md:h-[600px] bg-white/5 backdrop-blur-3xl rounded-3xl overflow-hidden border-2 border-white/10 transition-all duration-500 ${
+      isOpening ? 'shadow-[0_0_60px_rgba(251,191,36,0.6)] border-treasure-400/40' : 'shadow-2xl'
+    }`}>
+      {/* Overlay gradient subtil pour profondeur glassmorphism */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-transparent pointer-events-none z-0" />
+
+      {/* Canvas pour les particules dorées */}
       <canvas
         ref={canvasRef}
         width={800}
@@ -444,7 +451,7 @@ const ChestAnimationCSS: React.FC<ChestAnimationCSSProps> = ({
               <p className="text-white font-semibold text-sm sm:text-base md:text-lg mb-1">
                 🎴 Cliquez sur la pile pour découvrir vos cartes !
               </p>
-              <p className="text-blue-300 text-xs sm:text-sm">
+              <p className="text-treasure-300 text-xs sm:text-sm">
                 {revealedCount} / {cards.length} cartes révélées
               </p>
             </div>

@@ -182,9 +182,9 @@ const Header: React.FC = () => {
           />
 
           {/* Menu Panel */}
-          <div className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] bg-gradient-to-b from-slate-900/95 to-slate-800/95 backdrop-blur-2xl border-l-2 border-white/10 shadow-2xl z-50 lg:hidden animate-in slide-in-from-right duration-300">
+          <div className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] bg-slate-900/98 backdrop-blur-3xl border-l-2 border-white/20 shadow-2xl z-50 lg:hidden animate-in slide-in-from-right duration-300">
             {/* Menu Header */}
-            <div className="flex items-center justify-between p-6 border-b border-white/10">
+            <div className="flex items-center justify-between p-6 border-b border-white/10 bg-white/5">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-ocean-500/80 to-treasure-500/80 rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
                   <span className="text-2xl">🏴‍☠️</span>
@@ -251,7 +251,7 @@ const Header: React.FC = () => {
 
             {/* User Info Footer (if authenticated) */}
             {isAuthenticated && user && (
-              <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-slate-900/50 backdrop-blur-xl">
+              <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-black/40 backdrop-blur-xl">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
                     {user.username.charAt(0).toUpperCase()}

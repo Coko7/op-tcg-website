@@ -251,7 +251,7 @@ const Boosters: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
         <Link
           to="/"
-          className="flex items-center space-x-2 text-blue-300 hover:text-white transition-colors text-sm sm:text-base"
+          className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/80 hover:text-white transition-all duration-300 backdrop-blur-xl text-sm sm:text-base"
         >
           <ArrowLeft size={18} />
           <span>Retour à l'accueil</span>
@@ -278,7 +278,7 @@ const Boosters: React.FC = () => {
         <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
           Ouvrir un Booster Pack
         </h1>
-        <p className="text-blue-200 text-sm sm:text-base mb-4 sm:mb-6">
+        <p className="text-slate-300 text-sm sm:text-base mb-4 sm:mb-6">
           Chaque booster contient 5 cartes avec au moins 1 carte rare !
         </p>
 
@@ -287,7 +287,7 @@ const Boosters: React.FC = () => {
           <div className="flex items-center justify-between gap-2">
             <button
               onClick={prevBooster}
-              className="p-1 sm:p-2 text-blue-300 hover:text-white transition-colors shrink-0"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/80 hover:text-white transition-all duration-300 backdrop-blur-md shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
               disabled={animationPhase !== 'idle'}
             >
               <ChevronLeft size={20} />
@@ -304,11 +304,11 @@ const Boosters: React.FC = () => {
               ) : selectedBooster ? (
                 <>
                   <h3 className="text-base sm:text-xl font-bold text-white mb-1 sm:mb-2 truncate px-2">{selectedBooster.name}</h3>
-                  <div className="text-xs sm:text-sm text-blue-200 mb-1 sm:mb-2">
+                  <div className="text-xs sm:text-sm text-slate-300 mb-1 sm:mb-2">
                     <span className="font-semibold">{selectedBooster.code}</span> • {selectedBooster.series}
                   </div>
-                  <p className="text-xs sm:text-sm text-blue-300 mb-2 sm:mb-3 line-clamp-2 px-2">{selectedBooster.description}</p>
-                  <div className="text-xs text-blue-400">
+                  <p className="text-xs sm:text-sm text-slate-400 mb-2 sm:mb-3 line-clamp-2 px-2">{selectedBooster.description}</p>
+                  <div className="text-xs text-slate-500">
                     {selectedBooster.cardCount} cartes • {new Date(selectedBooster.releaseDate).toLocaleDateString('fr-FR')}
                   </div>
                 </>
@@ -319,19 +319,19 @@ const Boosters: React.FC = () => {
 
             <button
               onClick={nextBooster}
-              className="p-1 sm:p-2 text-blue-300 hover:text-white transition-colors shrink-0"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/80 hover:text-white transition-all duration-300 backdrop-blur-md shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
               disabled={animationPhase !== 'idle'}
             >
               <ChevronRight size={20} />
             </button>
           </div>
 
-          <div className="flex justify-center mt-3 sm:mt-4 space-x-1">
+          <div className="flex justify-center mt-3 sm:mt-4 space-x-2">
             {availableBoosters.map((_, index) => (
               <div
                 key={index}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === boosterIndex ? 'bg-blue-400' : 'bg-blue-700'
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === boosterIndex ? 'bg-ocean-400 scale-125 shadow-lg shadow-ocean-500/50' : 'bg-white/20'
                 }`}
               />
             ))}
@@ -353,10 +353,10 @@ const Boosters: React.FC = () => {
             <button
               onClick={handleOpenBooster}
               disabled={!canOpen}
-              className={`text-sm sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold transition-all w-full sm:w-auto ${
+              className={`text-sm sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-bold transition-all duration-300 w-full sm:w-auto shadow-2xl backdrop-blur-xl border-2 ${
                 canOpen
-                  ? 'btn-primary hover:scale-105'
-                  : 'btn-disabled cursor-not-allowed'
+                  ? 'bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 hover:from-ocean-600 hover:to-ocean-700 text-white hover:scale-105 border-ocean-400/30 shadow-ocean-500/40'
+                  : 'bg-white/5 text-white/30 cursor-not-allowed border-white/10'
               }`}
             >
               {canOpen ? (
@@ -372,14 +372,14 @@ const Boosters: React.FC = () => {
 
             {!canOpen && (
               <div className="text-center">
-                <div className="text-blue-300 mb-2 text-sm sm:text-base">ou</div>
+                <div className="text-slate-300 mb-2 text-sm sm:text-base">ou</div>
                 <button
                   onClick={handleBuyWithBerrys}
                   disabled={berrysBalance < BOOSTER_BERRY_PRICE}
-                  className={`text-sm sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold transition-all flex items-center justify-center gap-2 w-full sm:w-auto sm:mx-auto ${
+                  className={`text-sm sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-bold transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto sm:mx-auto shadow-2xl backdrop-blur-xl border-2 ${
                     berrysBalance >= BOOSTER_BERRY_PRICE
-                      ? 'bg-yellow-600 hover:bg-yellow-700 text-white hover:scale-105'
-                      : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      ? 'bg-gradient-to-r from-treasure-500/90 to-treasure-600/90 hover:from-treasure-600 hover:to-treasure-700 text-white hover:scale-105 border-treasure-400/30 shadow-treasure-500/40'
+                      : 'bg-white/5 text-white/30 cursor-not-allowed border-white/10'
                   }`}
                 >
                   <Coins size={18} />
@@ -394,7 +394,7 @@ const Boosters: React.FC = () => {
             )}
 
             {!canOpen && timeUntilNext > 0 && boosterStatus && (
-              <p className="text-blue-300 text-xs sm:text-sm">
+              <p className="text-slate-300 text-xs sm:text-sm">
                 Prochain booster gratuit dans{' '}
                 <Timer targetTime={boosterStatus.next_booster_time || null} />
               </p>
@@ -427,7 +427,7 @@ const Boosters: React.FC = () => {
           <div className="text-center mt-6">
             <button
               onClick={handleDeckComplete}
-              className="btn-primary text-sm sm:text-base px-6 py-3"
+              className="px-6 sm:px-8 py-3 sm:py-4 rounded-2xl bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 hover:from-ocean-600 hover:to-ocean-700 text-white font-bold transition-all duration-300 shadow-2xl hover:scale-105 border-2 border-ocean-400/30 backdrop-blur-xl text-sm sm:text-base"
             >
               Voir le résumé →
             </button>
