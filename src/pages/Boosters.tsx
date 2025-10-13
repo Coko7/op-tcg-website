@@ -8,6 +8,8 @@ import Card from '../components/Card';
 import CardModal from '../components/CardModal';
 import Timer from '../components/Timer';
 import ChestAnimationCSS from '../components/ChestAnimationCSS';
+import Dialog from '../components/ui/Dialog';
+import { useDialog } from '../hooks/useDialog';
 
 type AnimationPhase = 'idle' | 'opening' | 'deck' | 'revealing' | 'complete';
 
@@ -25,6 +27,7 @@ const Boosters: React.FC = () => {
   const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [berrysBalance, setBerrysBalance] = useState<number>(0);
+  const { dialogState, showDialog, handleClose, handleConfirm } = useDialog();
 
   useEffect(() => {
     const loadData = async () => {
@@ -177,40 +180,58 @@ const Boosters: React.FC = () => {
   const handleBuyWithBerrys = async () => {
     if (animationPhase !== 'idle' || !selectedBooster || berrysBalance < BOOSTER_BERRY_PRICE) return;
 
-    if (!confirm(`Voulez-vous acheter un booster pour ${BOOSTER_BERRY_PRICE} Berrys ?`)) return;
+    showDialog({
+      title: 'Acheter un booster',
+      message: `Voulez-vous acheter un booster pour ${BOOSTER_BERRY_PRICE} Berrys ?`,
+      type: 'confirm',
+      confirmText: 'Acheter',
+      cancelText: 'Annuler',
+      showCancel: true,
+      onConfirm: async () => {
+        handleClose();
+        setAnimationPhase('opening');
 
-    setAnimationPhase('opening');
+        try {
+          const result = await GameService.buyBoosterWithBerrys(selectedBooster.id);
+          if (result) {
+            setBoosterResult(result);
 
-    try {
-      const result = await GameService.buyBoosterWithBerrys(selectedBooster.id);
-      if (result) {
-        setBoosterResult(result);
+            // Attendre la fin de l'animation du coffre + toutes les cartes qui sortent une par une
+            // 1000ms (ouverture coffre) + 1200ms * 5 cartes + 2500ms (animation vol dernière carte) = 9500ms
+            setTimeout(() => {
+              setAnimationPhase('deck');
+              setRevealedCards(0);
+            }, 9500);
 
-        // Attendre la fin de l'animation du coffre + toutes les cartes qui sortent une par une
-        // 1000ms (ouverture coffre) + 1200ms * 5 cartes + 2500ms (animation vol dernière carte) = 9500ms
-        setTimeout(() => {
-          setAnimationPhase('deck');
-          setRevealedCards(0);
-        }, 9500);
+            // Mettre à jour le solde de Berrys
+            const newBalance = await GameService.getBerrysBalance();
+            setBerrysBalance(newBalance);
 
-        // Mettre à jour le solde de Berrys
-        const newBalance = await GameService.getBerrysBalance();
-        setBerrysBalance(newBalance);
-
-        // Mettre à jour le statut des boosters
-        if (result.available_boosters !== undefined) {
-          setBoosterStatus((prev: any) => prev ? {
-            ...prev,
-            available_boosters: result.available_boosters!,
-            next_booster_time: result.next_booster_time ? new Date(result.next_booster_time) : undefined
-          } : null);
-          setCanOpen(result.available_boosters > 0);
+            // Mettre à jour le statut des boosters
+            if (result.available_boosters !== undefined) {
+              setBoosterStatus((prev: any) => prev ? {
+                ...prev,
+                available_boosters: result.available_boosters!,
+                next_booster_time: result.next_booster_time ? new Date(result.next_booster_time) : undefined
+              } : null);
+              setCanOpen(result.available_boosters > 0);
+            }
+          }
+        } catch (error: any) {
+          showDialog({
+            title: 'Erreur',
+            message: error.message || 'Erreur lors de l\'achat du booster',
+            type: 'error',
+            confirmText: 'OK',
+            showCancel: false,
+            onConfirm: () => {
+              handleClose();
+              setAnimationPhase('idle');
+            }
+          });
         }
       }
-    } catch (error: any) {
-      alert(error.message || 'Erreur lors de l\'achat du booster');
-      setAnimationPhase('idle');
-    }
+    });
   };
 
 
@@ -519,6 +540,18 @@ const Boosters: React.FC = () => {
           onClose={closeModal}
         />
       )}
+
+      <Dialog
+        isOpen={dialogState.isOpen}
+        onClose={handleClose}
+        onConfirm={handleConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        type={dialogState.type}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        showCancel={dialogState.showCancel}
+      />
     </div>
   );
 };

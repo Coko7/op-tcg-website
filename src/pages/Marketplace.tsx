@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { apiService } from '../services/api';
+import { useDialog } from '../hooks/useDialog';
+import { Dialog } from '../components/ui';
 
 interface MarketplaceListing {
   id: string;
@@ -36,6 +38,7 @@ interface UserCard {
 const Marketplace: React.FC = () => {
   const { user, refreshUser } = useAuth();
   const { showToast } = useToast();
+  const { dialogState, showDialog, hideDialog, handleConfirm, handleClose } = useDialog();
 
   const [activeTab, setActiveTab] = useState<'browse' | 'myListings' | 'sell'>('browse');
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
@@ -143,28 +146,35 @@ const Marketplace: React.FC = () => {
       return;
     }
 
-    if (!confirm('Confirmer l\'achat de cette carte ?')) {
-      return;
-    }
+    showDialog({
+      title: 'Confirmer l\'achat',
+      message: `Êtes-vous sûr de vouloir acheter cette carte pour ${price} ฿ ?`,
+      type: 'confirm',
+      confirmText: 'Acheter',
+      cancelText: 'Annuler',
+      showCancel: true,
+      onConfirm: async () => {
+        hideDialog();
+        try {
+          setLoading(true);
+          const response = await apiService.purchaseMarketplaceListing(listingId);
 
-    try {
-      setLoading(true);
-      const response = await apiService.purchaseMarketplaceListing(listingId);
-
-      if (response.success) {
-        showToast('success', `Carte achetée avec succès! Nouveau solde: ${response.data.new_balance} ฿`);
-        setBerrysBalance(response.data.new_balance);
-        loadListings();
-        refreshUser();
-      } else {
-        showToast('error', response.error || 'Erreur lors de l\'achat');
+          if (response.success) {
+            showToast('success', `Carte achetée avec succès! Nouveau solde: ${response.data.new_balance} ฿`);
+            setBerrysBalance(response.data.new_balance);
+            loadListings();
+            refreshUser();
+          } else {
+            showToast('error', response.error || 'Erreur lors de l\'achat');
+          }
+        } catch (error: any) {
+          console.error('Erreur achat:', error);
+          showToast('error', error.message || 'Erreur lors de l\'achat');
+        } finally {
+          setLoading(false);
+        }
       }
-    } catch (error: any) {
-      console.error('Erreur achat:', error);
-      showToast('error', error.message || 'Erreur lors de l\'achat');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   // Créer une annonce
@@ -204,26 +214,33 @@ const Marketplace: React.FC = () => {
 
   // Annuler une annonce
   const handleCancelListing = async (listingId: string) => {
-    if (!confirm('Confirmer l\'annulation de cette annonce ?')) {
-      return;
-    }
+    showDialog({
+      title: 'Annuler l\'annonce',
+      message: 'Êtes-vous sûr de vouloir annuler cette annonce ? La carte sera retournée dans votre collection.',
+      type: 'warning',
+      confirmText: 'Annuler l\'annonce',
+      cancelText: 'Garder l\'annonce',
+      showCancel: true,
+      onConfirm: async () => {
+        hideDialog();
+        try {
+          setLoading(true);
+          const response = await apiService.cancelMarketplaceListing(listingId);
 
-    try {
-      setLoading(true);
-      const response = await apiService.cancelMarketplaceListing(listingId);
-
-      if (response.success) {
-        showToast('success', 'Annonce annulée avec succès');
-        loadMyListings();
-      } else {
-        showToast('error', response.error || 'Erreur lors de l\'annulation');
+          if (response.success) {
+            showToast('success', 'Annonce annulée avec succès');
+            loadMyListings();
+          } else {
+            showToast('error', response.error || 'Erreur lors de l\'annulation');
+          }
+        } catch (error: any) {
+          console.error('Erreur annulation:', error);
+          showToast('error', error.message || 'Erreur lors de l\'annulation');
+        } finally {
+          setLoading(false);
+        }
       }
-    } catch (error: any) {
-      console.error('Erreur annulation:', error);
-      showToast('error', error.message || 'Erreur lors de l\'annulation');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   // Charger les données selon l'onglet actif
@@ -251,8 +268,21 @@ const Marketplace: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-6">
-      <div className="max-w-7xl mx-auto">
+    <>
+      <Dialog
+        isOpen={dialogState.isOpen}
+        onClose={handleClose}
+        onConfirm={handleConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        type={dialogState.type}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        showCancel={dialogState.showCancel}
+      />
+
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-6">
+        <div className="max-w-7xl mx-auto">
         {/* En-tête */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4">Marketplace</h1>
@@ -577,6 +607,7 @@ const Marketplace: React.FC = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

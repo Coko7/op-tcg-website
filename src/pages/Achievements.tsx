@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import { Trophy, Award, Gift, CheckCircle, Circle } from 'lucide-react';
 import { apiService } from '../services/api';
 import { AchievementWithProgress, AchievementStats } from '../types';
+import { useDialog } from '../hooks/useDialog';
+import Dialog from '../components/ui/Dialog';
 
 export default function Achievements() {
+  const { dialogState, showAlert, handleClose, handleConfirm } = useDialog();
   const [achievements, setAchievements] = useState<AchievementWithProgress[]>([]);
   const [stats, setStats] = useState<AchievementStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,11 +46,11 @@ export default function Achievements() {
 
       if (response.success) {
         await loadAchievements();
-        alert(`Vous avez gagné ${response.data.berrys_earned} Berrys !`);
+        await showAlert('Félicitations !', `Vous avez gagné ${response.data.berrys_earned} Berrys !`, 'success');
       }
     } catch (error: any) {
       console.error('Erreur lors de la récupération de l\'achievement:', error);
-      alert(error.message || 'Erreur lors de la récupération de l\'achievement');
+      await showAlert('Erreur', error.message || 'Erreur lors de la récupération de l\'achievement', 'error');
     } finally {
       setClaimingId(null);
     }
@@ -76,6 +79,18 @@ export default function Achievements() {
 
   return (
     <>
+      <Dialog
+        isOpen={dialogState.isOpen}
+        onClose={handleClose}
+        onConfirm={handleConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        type={dialogState.type}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        showCancel={dialogState.showCancel}
+      />
+
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">

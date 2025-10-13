@@ -6,9 +6,11 @@ import { BoosterStatus, User } from '../types';
 import Timer from '../components/Timer';
 import DailyRewardModal from '../components/DailyRewardModal';
 import { apiService } from '../services/api';
-import { Button, GameCard, ProgressBar, StatDisplay } from '../components/ui';
+import { Button, GameCard, ProgressBar, StatDisplay, Dialog } from '../components/ui';
+import { useDialog } from '../hooks/useDialog';
 
 const Home: React.FC = () => {
+  const { dialogState, showAlert, showConfirm, handleClose, handleConfirm } = useDialog();
   const [user, setUser] = useState<User | null>(null);
   const [boosterStatus, setBoosterStatus] = useState<BoosterStatus | null>(null);
   const [stats, setStats] = useState<any>({
@@ -131,15 +133,32 @@ const Home: React.FC = () => {
     ? Math.max(0, new Date(boosterStatus.next_booster_time).getTime() - new Date().getTime())
     : 0;
 
-  const handleReset = () => {
-    if (confirm('Êtes-vous sûr de vouloir réinitialiser complètement le jeu ? Toutes vos cartes seront perdues !')) {
+  const handleReset = async () => {
+    const confirmed = await showConfirm(
+      'Réinitialiser le jeu',
+      'Êtes-vous sûr de vouloir réinitialiser complètement le jeu ? Toutes vos cartes seront perdues !'
+    );
+
+    if (confirmed) {
       // TODO: Implémenter une API pour reset le compte
-      alert('Fonctionnalité de reset à implémenter côté serveur');
+      await showAlert('Information', 'Fonctionnalité de reset à implémenter côté serveur', 'info');
     }
   };
 
   return (
     <div className="space-y-6 sm:space-y-8">
+      <Dialog
+        isOpen={dialogState.isOpen}
+        onClose={handleClose}
+        onConfirm={handleConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        type={dialogState.type}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        showCancel={dialogState.showCancel}
+      />
+
       <DailyRewardModal
         isOpen={showDailyReward}
         onClose={() => setShowDailyReward(false)}

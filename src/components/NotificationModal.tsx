@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { X, Gift, Coins, Zap, Clock, CheckCircle } from 'lucide-react';
+import { useDialog } from '../hooks/useDialog';
+import Dialog from './ui/Dialog';
 
 interface Notification {
   id: string;
@@ -26,6 +28,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
   onClaimReward,
   onRefresh
 }) => {
+  const { dialogState, showAlert, handleClose, handleConfirm } = useDialog();
   const [claiming, setClaiming] = useState<string | null>(null);
   const [claimedIds, setClaimedIds] = useState<Set<string>>(new Set());
 
@@ -38,7 +41,8 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
         setClaimedIds(prev => new Set(prev).add(notification.id));
 
         // Afficher un message de succès
-        alert(`Récompense réclamée !\n\n${result.berrys_earned > 0 ? `+ ${result.berrys_earned} Berrys\n` : ''}${result.boosters_earned > 0 ? `+ ${result.boosters_earned} Booster(s)\n` : ''}\nNouveau solde: ${result.new_balance} Berrys`);
+        const rewardText = `${result.berrys_earned > 0 ? `+ ${result.berrys_earned} Berrys\n` : ''}${result.boosters_earned > 0 ? `+ ${result.boosters_earned} Booster(s)\n` : ''}Nouveau solde: ${result.new_balance} Berrys`;
+        await showAlert('Récompense réclamée !', rewardText, 'success');
 
         // Rafraîchir les notifications
         setTimeout(() => {
@@ -47,7 +51,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
       }
     } catch (error: any) {
       console.error('Erreur lors de la réclamation:', error);
-      alert(error.message || 'Erreur lors de la réclamation de la récompense');
+      await showAlert('Erreur', error.message || 'Erreur lors de la réclamation de la récompense', 'error');
     } finally {
       setClaiming(null);
     }
@@ -72,7 +76,20 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <>
+      <Dialog
+        isOpen={dialogState.isOpen}
+        onClose={handleClose}
+        onConfirm={handleConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        type={dialogState.type}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        showCancel={dialogState.showCancel}
+      />
+
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="bg-gradient-to-br from-blue-900 to-purple-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col border-2 border-blue-500/50">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-blue-500/30">
@@ -204,6 +221,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
         </div>
       </div>
     </div>
+    </>
   );
 };
 

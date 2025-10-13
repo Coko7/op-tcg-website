@@ -19,14 +19,14 @@ const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900';
+  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent backdrop-blur-xl';
 
   const variantStyles = {
-    primary: 'bg-gradient-to-r from-ocean-500 to-ocean-600 hover:from-ocean-600 hover:to-ocean-700 text-white shadow-lg hover:shadow-glow-lg focus:ring-ocean-500 active:scale-95',
-    secondary: 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white shadow-lg hover:shadow-xl focus:ring-slate-500 active:scale-95',
-    danger: 'bg-gradient-to-r from-danger-500 to-danger-600 hover:from-danger-600 hover:to-danger-700 text-white shadow-lg hover:shadow-xl focus:ring-danger-500 active:scale-95',
-    treasure: 'bg-gradient-to-r from-treasure-500 to-treasure-600 hover:from-treasure-600 hover:to-treasure-700 text-white shadow-lg shadow-treasure hover:shadow-treasure focus:ring-treasure-500 active:scale-95',
-    ghost: 'bg-transparent hover:bg-white/10 text-white border-2 border-white/20 hover:border-white/40 active:scale-95',
+    primary: 'bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 hover:from-ocean-600 hover:to-ocean-700 text-white shadow-lg hover:shadow-ocean-500/50 border border-ocean-400/30 hover:border-ocean-400/60 focus:ring-ocean-500 active:scale-95 hover:-translate-y-0.5',
+    secondary: 'bg-white/5 hover:bg-white/10 text-white/90 hover:text-white shadow-lg hover:shadow-xl border-2 border-white/10 hover:border-white/20 focus:ring-white/50 active:scale-95 hover:-translate-y-0.5',
+    danger: 'bg-gradient-to-r from-danger-500/90 to-danger-600/90 hover:from-danger-600 hover:to-danger-700 text-white shadow-lg hover:shadow-danger-500/50 border border-danger-400/30 hover:border-danger-400/60 focus:ring-danger-500 active:scale-95 hover:-translate-y-0.5',
+    treasure: 'bg-gradient-to-r from-treasure-500/90 to-treasure-600/90 hover:from-treasure-600 hover:to-treasure-700 text-white shadow-lg hover:shadow-treasure-500/50 border border-treasure-400/30 hover:border-treasure-400/60 focus:ring-treasure-500 active:scale-95 hover:-translate-y-0.5',
+    ghost: 'bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border-2 border-white/20 hover:border-white/40 active:scale-95 hover:-translate-y-0.5',
   };
 
   const sizeStyles = {

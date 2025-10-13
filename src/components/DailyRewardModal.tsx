@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { X, Coins } from 'lucide-react';
 import { Gem } from 'lucide-react';
 import { apiService } from '../services/api';
+import { useDialog } from '../hooks/useDialog';
+import Dialog from './ui/Dialog';
 
 interface DailyRewardModalProps {
   isOpen: boolean;
@@ -10,6 +12,7 @@ interface DailyRewardModalProps {
 }
 
 export default function DailyRewardModal({ isOpen, onClose, onClaim }: DailyRewardModalProps) {
+  const { dialogState, showAlert, handleClose, handleConfirm } = useDialog();
   const [claiming, setClaiming] = useState(false);
   const [claimed, setClaimed] = useState(false);
   const [berrysEarned, setBerrysEarned] = useState(0);
@@ -43,7 +46,7 @@ export default function DailyRewardModal({ isOpen, onClose, onClaim }: DailyRewa
       }
     } catch (error: any) {
       console.error('Erreur lors de la réclamation de la récompense quotidienne:', error);
-      alert(error.message || 'Erreur lors de la réclamation de la récompense');
+      await showAlert('Erreur', error.message || 'Erreur lors de la réclamation de la récompense', 'error');
       // Fermer le modal en cas d'erreur
       onClose();
     } finally {
@@ -54,7 +57,20 @@ export default function DailyRewardModal({ isOpen, onClose, onClaim }: DailyRewa
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <>
+      <Dialog
+        isOpen={dialogState.isOpen}
+        onClose={handleClose}
+        onConfirm={handleConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        type={dialogState.type}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        showCancel={dialogState.showCancel}
+      />
+
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 border-4 border-yellow-500 relative animate-bounce-slow">
         <button
           onClick={onClose}
@@ -110,5 +126,6 @@ export default function DailyRewardModal({ isOpen, onClose, onClaim }: DailyRewa
         </div>
       </div>
     </div>
+    </>
   );
 }

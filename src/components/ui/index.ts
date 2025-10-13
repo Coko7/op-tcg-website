@@ -9,3 +9,6 @@ export type { StatDisplayProps } from './StatDisplay';
 
 export { default as ProgressBar } from './ProgressBar';
 export type { ProgressBarProps } from './ProgressBar';
+
+export { default as Dialog } from './Dialog';
+export type { DialogType } from './Dialog';

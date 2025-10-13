@@ -3,6 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { Users, Activity, Bell, TrendingUp, Coins, Package, Shield, Calendar } from 'lucide-react';
+import { useDialog } from '../hooks/useDialog';
+import Dialog from '../components/ui/Dialog';
 
 interface DashboardStats {
   users: {
@@ -55,6 +57,7 @@ interface Notification {
 }
 
 const Admin: React.FC = () => {
+  const { dialogState, showAlert, showConfirm, handleClose, handleConfirm } = useDialog();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'stats' | 'notifications' | 'activity'>('stats');
@@ -124,15 +127,16 @@ const Admin: React.FC = () => {
       });
       setNotifForm({ message: '', berry_reward: '', booster_reward: '' });
       await loadData();
-      alert('Notification envoyée avec succès !');
+      await showAlert('Succès', 'Notification envoyée avec succès !', 'success');
     } catch (error) {
       console.error('Erreur envoi notification:', error);
-      alert('Erreur lors de l\'envoi de la notification');
+      await showAlert('Erreur', 'Erreur lors de l\'envoi de la notification', 'error');
     }
   };
 
   const handleDeleteNotification = async (id: number) => {
-    if (!confirm('Désactiver cette notification ?')) return;
+    const confirmed = await showConfirm('Désactiver la notification', 'Désactiver cette notification ?');
+    if (!confirmed) return;
     try {
       await fetch(`${import.meta.env.VITE_API_URL || '/api'}/admin/notifications/${id}`, {
         method: 'DELETE',
@@ -144,6 +148,7 @@ const Admin: React.FC = () => {
       await loadData();
     } catch (error) {
       console.error('Erreur suppression notification:', error);
+      await showAlert('Erreur', 'Erreur lors de la suppression de la notification', 'error');
     }
   };
 
@@ -157,6 +162,18 @@ const Admin: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white p-6">
+      <Dialog
+        isOpen={dialogState.isOpen}
+        onClose={handleClose}
+        onConfirm={handleConfirm}
+        title={dialogState.title}
+        message={dialogState.message}
+        type={dialogState.type}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        showCancel={dialogState.showCancel}
+      />
+
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
