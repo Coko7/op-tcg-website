@@ -1,8 +1,8 @@
 # Multi-stage build pour optimiser la taille finale
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Installer les dépendances système nécessaires
-RUN apk add --no-cache git curl
+RUN apk add --no-cache git curl python3 make g++
 
 # Définir le répertoire de travail
 WORKDIR /app
@@ -15,7 +15,7 @@ RUN npm config set fetch-retries 5 && \
     npm config set registry https://registry.npmjs.org/
 
 # Copier les fichiers de dépendances
-COPY package.json ./
+COPY package*.json ./
 COPY tsconfig.json ./
 COPY tsconfig.node.json ./
 COPY vite.config.ts ./
@@ -23,8 +23,11 @@ COPY eslint.config.js ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
 
-# Installer toutes les dépendances
-RUN npm install --no-audit
+# Installer toutes les dépendances avec clean-install pour éviter les conflits
+# Utiliser --ignore-scripts pour éviter ETXTBSY, puis rebuild pour esbuild
+RUN npm ci --no-audit --ignore-scripts && \
+    npm rebuild esbuild && \
+    npm run postinstall || true
 
 # Copier le code source
 COPY src ./src
