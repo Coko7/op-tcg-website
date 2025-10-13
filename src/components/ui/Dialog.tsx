@@ -88,7 +88,7 @@ const Dialog: React.FC<DialogProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 animate-in fade-in duration-200">
       {/* Backdrop with glassmorphism */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"

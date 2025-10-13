@@ -55,7 +55,7 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <header className="bg-white/5 backdrop-blur-2xl border-b-2 border-white/10 sticky top-0 z-50 shadow-2xl">
+    <header className="bg-white/5 backdrop-blur-2xl border-b-2 border-white/10 sticky top-0 z-40 shadow-2xl">
       {/* Glassmorphism top shine effect */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
@@ -103,7 +103,7 @@ const Header: React.FC = () => {
           <div className="flex items-center space-x-2 sm:space-x-3">
             {/* Notifications - Visible on all sizes */}
             {isAuthenticated && (
-              <div className="relative z-50">
+              <div className="relative">
                 <NotificationBell />
               </div>
             )}
@@ -177,13 +177,13 @@ const Header: React.FC = () => {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-200"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] lg:hidden animate-in fade-in duration-200"
             onClick={() => setShowMobileMenu(false)}
           />
 
           {/* Menu Panel - Glassmorphism avec fond solide pour lisibilité */}
           <div
-            className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] shadow-2xl z-50 lg:hidden animate-in slide-in-from-right duration-300"
+            className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] shadow-2xl z-[110] lg:hidden animate-in slide-in-from-right duration-300"
             style={{
               background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98))',
               backdropFilter: 'blur(40px)',
@@ -280,11 +280,11 @@ const Header: React.FC = () => {
         <>
           {/* Backdrop for mobile user menu */}
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 sm:hidden"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] sm:hidden"
             onClick={() => setShowUserMenu(false)}
           />
           {/* User Profile positioned for mobile */}
-          <div className="fixed top-20 left-4 right-4 z-50 sm:hidden">
+          <div className="fixed top-20 left-4 right-4 z-[110] sm:hidden">
             <UserProfile />
           </div>
         </>
