@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon-192x192.png', 'icon-512x512.png', 'apple-touch-icon.png', 'strawhat.png'],
+      includeAssets: ['strawhat.svg'],
       manifest: {
         name: 'One Piece Booster Game',
         short_name: 'OP Booster',
@@ -20,27 +20,27 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'icon-192x192.png',
+            src: 'strawhat.svg',
             sizes: '192x192',
-            type: 'image/png',
+            type: 'image/svg+xml',
             purpose: 'any'
           },
           {
-            src: 'icon-192x192.png',
+            src: 'strawhat.svg',
             sizes: '192x192',
-            type: 'image/png',
+            type: 'image/svg+xml',
             purpose: 'maskable'
           },
           {
-            src: 'icon-512x512.png',
+            src: 'strawhat.svg',
             sizes: '512x512',
-            type: 'image/png',
+            type: 'image/svg+xml',
             purpose: 'any'
           },
           {
-            src: 'icon-512x512.png',
+            src: 'strawhat.svg',
             sizes: '512x512',
-            type: 'image/png',
+            type: 'image/svg+xml',
             purpose: 'maskable'
           }
         ],
