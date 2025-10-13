@@ -172,54 +172,49 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay - Glassmorphism */}
-      {showMobileMenu && (
+      {/* Mobile Menu Overlay - REFAIT COMPLÈTEMENT */}
+      {showMobileMenu ? (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - clique pour fermer */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] lg:hidden animate-in fade-in duration-200"
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-[100] lg:hidden animate-in fade-in duration-200"
             onClick={() => setShowMobileMenu(false)}
           />
 
-          {/* Menu Panel - Glassmorphism avec fond solide pour lisibilité */}
-          <div
-            className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] shadow-2xl z-[110] lg:hidden animate-in slide-in-from-right duration-300"
-            style={{
-              background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98))',
-              backdropFilter: 'blur(40px)',
-              WebkitBackdropFilter: 'blur(40px)',
-              borderLeft: '2px solid rgba(255, 255, 255, 0.2)'
-            }}
-          >
-            {/* Menu Header */}
-            <div className="flex items-center justify-between p-6 border-b border-white/10 bg-white/5">
+          {/* Menu Panel - Simplifié et lisible */}
+          <div className="fixed top-0 right-0 bottom-0 w-[280px] max-w-[85vw] z-[110] lg:hidden animate-in slide-in-from-right duration-300 bg-gradient-to-b from-slate-900/98 to-slate-800/98 backdrop-blur-2xl border-l-2 border-white/20 shadow-2xl flex flex-col">
+
+            {/* Header avec bouton fermer - TOUJOURS VISIBLE */}
+            <div className="flex items-center justify-between p-5 border-b border-white/20 bg-white/5 flex-shrink-0">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-ocean-500/80 to-treasure-500/80 rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
-                  <span className="text-2xl">🏴‍☠️</span>
+                <div className="w-9 h-9 bg-gradient-to-br from-ocean-500 to-treasure-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-xl">🏴‍☠️</span>
                 </div>
-                <h2 className="text-lg font-bold text-white">Menu</h2>
+                <h2 className="text-base font-bold text-white">Menu</h2>
               </div>
               <button
                 onClick={() => setShowMobileMenu(false)}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all"
+                className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 transition-all border border-red-500/30"
+                aria-label="Fermer le menu"
               >
                 <X size={20} />
               </button>
             </div>
 
-            {/* Navigation Links */}
-            <nav className="flex flex-col p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-180px)]">
+            {/* Navigation Links - Scrollable */}
+            <nav className="flex flex-col p-3 space-y-2 overflow-y-auto flex-1">
               {navLinks.map(({ to, icon: Icon, label }) => (
                 <Link
                   key={to}
                   to={to}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium ${
+                  onClick={() => setShowMobileMenu(false)}
+                  className={`flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-200 font-medium text-sm ${
                     isActive(to)
-                      ? 'bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 text-white shadow-lg scale-105 border border-ocean-400/30'
-                      : 'text-white/80 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/20'
+                      ? 'bg-gradient-to-r from-ocean-500 to-ocean-600 text-white shadow-lg border border-ocean-400/40'
+                      : 'text-white/90 hover:text-white hover:bg-white/10 border border-white/10 hover:border-white/20'
                   }`}
                 >
-                  <Icon size={20} />
+                  <Icon size={19} />
                   <span>{label}</span>
                 </Link>
               ))}
@@ -228,63 +223,66 @@ const Header: React.FC = () => {
               {isAuthenticated && user?.is_admin ? (
                 <Link
                   to="/admin"
-                  className="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium bg-gradient-to-r from-purple-500/90 to-fuchsia-500/90 text-white shadow-lg border border-purple-400/30"
+                  onClick={() => setShowMobileMenu(false)}
+                  className="flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-200 font-medium text-sm bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white shadow-lg border border-purple-400/40 mt-2"
                 >
-                  <Shield size={20} />
+                  <Shield size={19} />
                   <span>Administration</span>
                 </Link>
               ) : null}
 
               {/* Login/Register in Mobile Menu (if not authenticated) */}
-              {!isAuthenticated && (
-                <div className="pt-4 space-y-2 border-t border-white/10">
+              {!isAuthenticated ? (
+                <div className="pt-3 mt-3 space-y-2 border-t border-white/20">
                   <Link
                     to="/login"
-                    className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 hover:from-ocean-600 hover:to-ocean-700 text-white font-medium transition-all duration-300 shadow-lg border border-ocean-400/30"
+                    onClick={() => setShowMobileMenu(false)}
+                    className="flex items-center space-x-3 px-4 py-3.5 rounded-xl bg-gradient-to-r from-ocean-500 to-ocean-600 hover:from-ocean-600 hover:to-ocean-700 text-white font-medium transition-all duration-200 shadow-lg border border-ocean-400/40 text-sm"
                   >
-                    <LogIn size={20} />
+                    <LogIn size={19} />
                     <span>Connexion</span>
                   </Link>
 
                   <Link
                     to="/register"
-                    className="flex items-center space-x-3 px-4 py-3 rounded-xl border-2 border-white/20 text-white/80 hover:bg-white/10 hover:border-white/40 hover:text-white transition-all duration-300 font-medium"
+                    onClick={() => setShowMobileMenu(false)}
+                    className="flex items-center space-x-3 px-4 py-3.5 rounded-xl border-2 border-white/30 text-white/90 hover:bg-white/10 hover:border-white/50 hover:text-white transition-all duration-200 font-medium text-sm"
                   >
-                    <UserPlus size={20} />
+                    <UserPlus size={19} />
                     <span>S'inscrire</span>
                   </Link>
                 </div>
-              )}
+              ) : null}
             </nav>
 
-            {/* User Info Footer (if authenticated) */}
-            {isAuthenticated && user && (
-              <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-black/40 backdrop-blur-xl">
+            {/* User Info Footer - TOUJOURS VISIBLE SI AUTHENTIFIÉ */}
+            {isAuthenticated && user ? (
+              <div className="p-4 border-t border-white/20 bg-gradient-to-b from-black/30 to-black/50 backdrop-blur-xl flex-shrink-0">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg flex-shrink-0">
                     {user.username.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-semibold truncate">{user.username}</p>
-                    <p className="text-treasure-300 text-sm font-bold">{user.berrys} ฿</p>
+                    <p className="text-white font-semibold truncate text-sm">{user.username}</p>
+                    <p className="text-treasure-400 text-xs font-bold">{user.berrys} ฿</p>
                   </div>
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </>
-      )}
+      ) : null}
 
-      {/* Mobile User Profile Modal */}
+      {/* Mobile User Profile Modal - Repositionné pour être visible */}
       {isAuthenticated && showUserMenu && (
         <>
           {/* Backdrop for mobile user menu */}
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] sm:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] sm:hidden animate-in fade-in duration-200"
             onClick={() => setShowUserMenu(false)}
           />
-          {/* User Profile positioned for mobile */}
-          <div className="fixed top-20 left-4 right-4 z-[110] sm:hidden">
+          {/* User Profile positioned for mobile - Ajusté pour h-16 mobile */}
+          <div className="fixed top-[72px] left-4 right-4 z-[110] sm:hidden animate-in slide-in-from-top duration-300">
             <UserProfile />
           </div>
         </>

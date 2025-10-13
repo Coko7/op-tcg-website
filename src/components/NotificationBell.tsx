@@ -62,12 +62,12 @@ const NotificationBell: React.FC = () => {
     <>
       <button
         onClick={() => setShowModal(true)}
-        className="relative p-2 text-white hover:text-yellow-300 transition-colors"
+        className="relative p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white hover:text-treasure-300 transition-all duration-300 border border-white/10 hover:border-white/20 backdrop-blur-xl hover:scale-105"
         aria-label="Notifications"
       >
-        <Bell size={24} />
+        <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+          <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse shadow-lg border border-red-400/30">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}

@@ -210,7 +210,7 @@ const ProfileSettings: React.FC = () => {
                 </p>
                 <button
                   onClick={() => setShowPasswordForm(true)}
-                  className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 hover:from-ocean-600 hover:to-ocean-700 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-ocean-500/40 hover:scale-105 border border-ocean-400/30 backdrop-blur-xl"
                 >
                   <Lock size={18} />
                   Changer mon mot de passe
@@ -296,14 +296,14 @@ const ProfileSettings: React.FC = () => {
                       setShowPasswordForm(false);
                       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
                     }}
-                    className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-colors"
+                    className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl transition-all duration-300 border border-white/20 hover:border-white/30 backdrop-blur-xl"
                     disabled={saving}
                   >
                     Annuler
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="flex-1 py-3 bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 hover:from-ocean-600 hover:to-ocean-700 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg hover:shadow-ocean-500/40 hover:scale-105 border border-ocean-400/30 backdrop-blur-xl"
                     disabled={saving}
                   >
                     {saving ? (

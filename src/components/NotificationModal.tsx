@@ -89,8 +89,9 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
         showCancel={dialogState.showCancel}
       />
 
-      <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-slate-900/95 backdrop-blur-2xl rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col border-2 border-white/10">
+      <div className="fixed inset-0 z-[200] flex items-start justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:pt-6 animate-in fade-in duration-200 overflow-y-auto">
+      <div className="bg-slate-900/95 backdrop-blur-2xl rounded-3xl shadow-2xl max-w-2xl w-full my-auto flex flex-col border-2 border-white/10" style={{maxHeight: 'calc(100vh - 100px)'}}>
+
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-white/10 bg-white/5">
           <div className="flex items-center space-x-3">

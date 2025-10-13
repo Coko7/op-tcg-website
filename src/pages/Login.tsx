@@ -99,7 +99,7 @@ const Login: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="group relative w-full flex justify-center py-2 sm:py-3 px-4 border border-transparent text-sm sm:text-base font-medium rounded-lg text-white bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="group relative w-full flex justify-center py-2 sm:py-3 px-4 text-sm sm:text-base font-bold rounded-xl text-white bg-gradient-to-r from-treasure-500/90 to-treasure-600/90 hover:from-treasure-600 hover:to-treasure-700 focus:outline-none focus:ring-2 focus:ring-treasure-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-treasure-500/40 hover:scale-105 border border-treasure-400/30 backdrop-blur-xl"
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">

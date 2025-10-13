@@ -17,18 +17,18 @@ const UserProfile: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-800/95 backdrop-blur-lg rounded-lg border border-white/30 p-4 shadow-xl">
+    <div className="bg-slate-900/95 backdrop-blur-2xl rounded-2xl border-2 border-white/20 p-5 shadow-2xl">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div className="h-10 w-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+          <div className="h-11 w-11 bg-gradient-to-br from-treasure-400 to-treasure-600 rounded-full flex items-center justify-center shadow-lg border-2 border-treasure-300/30">
             <span className="text-white font-bold text-lg">
               {user.username.charAt(0).toUpperCase()}
             </span>
           </div>
           <div>
-            <h3 className="text-white font-semibold">{user.username}</h3>
+            <h3 className="text-white font-semibold text-base">{user.username}</h3>
             {user.is_admin ? (
-              <span className="inline-block bg-yellow-500 text-black text-xs px-2 py-1 rounded mt-1">
+              <span className="inline-block bg-gradient-to-r from-purple-500/90 to-fuchsia-500/90 text-white text-xs px-2.5 py-1 rounded-lg mt-1 border border-purple-400/30 shadow-lg font-medium backdrop-blur-xl">
                 Admin
               </span>
             ) : null}
@@ -36,7 +36,7 @@ const UserProfile: React.FC = () => {
         </div>
         <button
           onClick={handleLogout}
-          className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm transition-colors"
+          className="px-4 py-2 bg-gradient-to-r from-red-500/90 to-red-600/90 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm transition-all duration-300 shadow-lg hover:shadow-red-500/40 hover:scale-105 border border-red-400/30 backdrop-blur-xl font-medium"
         >
           Déconnexion
         </button>
@@ -64,12 +64,12 @@ const UserProfile: React.FC = () => {
             </div>
           </div>
           <div className="mt-4 pt-4 border-t border-white/20">
-            <div className="flex items-center justify-between bg-yellow-500/20 rounded-lg p-3">
+            <div className="flex items-center justify-between bg-gradient-to-r from-treasure-500/20 to-treasure-600/20 rounded-xl p-4 border border-treasure-400/30 backdrop-blur-xl shadow-lg">
               <div className="flex items-center gap-2">
-                <Coins className="text-yellow-400" size={24} />
-                <span className="text-white font-medium">Berrys</span>
+                <Coins className="text-treasure-300" size={24} />
+                <span className="text-white font-semibold">Berrys</span>
               </div>
-              <div className="text-yellow-400 font-bold text-xl">{user.berrys || 0}</div>
+              <div className="text-treasure-300 font-bold text-xl">{user.berrys || 0} ฿</div>
             </div>
           </div>
 
@@ -77,10 +77,10 @@ const UserProfile: React.FC = () => {
           <div className="mt-4 pt-4 border-t border-white/20">
             <Link
               to="/profile"
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 rounded-lg transition-colors border border-blue-500/30"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 hover:from-ocean-600 hover:to-ocean-700 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-ocean-500/40 hover:scale-105 border border-ocean-400/30 backdrop-blur-xl font-medium"
             >
               <Settings size={18} />
-              <span className="font-medium">Paramètres du profil</span>
+              <span>Paramètres du profil</span>
             </Link>
           </div>
         </div>
