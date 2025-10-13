@@ -33,7 +33,7 @@ interface VegapullCard {
 
 // Mapping des raretés Vegapull vers nos raretés
 const RARITY_MAPPING: Record<string, string> = {
-  'Leader': 'leader',
+  'Leader': 'leader',  // Les cartes Leader ont rarity="Leader" dans Vegapull
   'SuperRare': 'super_rare',
   'Rare': 'rare',
   'Uncommon': 'uncommon',
@@ -170,7 +170,7 @@ class VegapullImporter {
 
     const boosterId = boosterMapping?.booster_id || null;
 
-    // Mapper la rareté
+    // Mapper la rareté directement depuis les données Vegapull
     const rarity = RARITY_MAPPING[vegapullCard.rarity] || 'common';
 
     // Mapper le type de carte

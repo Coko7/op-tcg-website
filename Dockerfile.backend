@@ -69,6 +69,9 @@ COPY --chown=nodejs:nodejs server/scripts/make-admin.js ./scripts/
 COPY --chown=nodejs:nodejs server/scripts/setup-cron-backup.sh ./scripts/
 COPY --chown=nodejs:nodejs server/scripts/setup-cron-cleanup.sh ./scripts/
 
+# Copier les scripts de correction de données
+COPY --from=builder --chown=nodejs:nodejs /app/dist/scripts/fix-leader-rarity.js ./dist/scripts/
+
 # Copier les scripts d'entrypoint
 COPY --chown=nodejs:nodejs server/scripts/docker-entrypoint.sh ./scripts/
 COPY --chown=nodejs:nodejs server/docker-init.sh ./
