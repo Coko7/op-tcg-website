@@ -28,9 +28,9 @@ else
   echo "🔄 Vérification et exécution des migrations..."
   node scripts/run-migrations.js || echo "⚠️ Erreur lors des migrations (peut être normale si déjà à jour)"
 
-  # Correction des raretés des cartes Leader
-  echo "🎴 Vérification et correction des raretés Leader..."
-  node dist/scripts/fix-leader-rarity.js || echo "⚠️ Erreur correction raretés (non bloquant)"
+  # Correction de TOUTES les raretés des cartes
+  echo "🎴 Vérification et correction de toutes les raretés..."
+  node dist/scripts/fix-all-rarities.js || echo "⚠️ Erreur correction raretés (non bloquant)"
 
   # Vérifier si les achievements existent
   ACHIEVEMENT_COUNT=$(sqlite3 /app/data/database.sqlite "SELECT COUNT(*) FROM achievements;" 2>/dev/null || echo "0")

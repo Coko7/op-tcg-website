@@ -8,10 +8,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuditLogger, AuditAction } from '../utils/auditLogger.js';
 
 // Prix de vente des cartes en Berrys selon la rareté
+// Leader est plus rare que Rare mais moins rare que Super Rare
 const CARD_SELL_PRICES: Record<string, number> = {
   common: 10,
   uncommon: 25,
   rare: 50,
+  leader: 100,
   super_rare: 150,
   secret_rare: 500,
 };

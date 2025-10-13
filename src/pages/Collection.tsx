@@ -97,8 +97,9 @@ const Collection: React.FC = () => {
       if (userCardA && !userCardB) return -1;
       if (!userCardA && userCardB) return 1;
 
-      // Ensuite trier par rareté
-      const rarityOrder = ['secret_rare', 'super_rare', 'rare', 'uncommon', 'common'];
+      // Ensuite trier par rareté (du plus rare au plus commun)
+      // Leader est plus rare que Rare mais moins rare que SuperRare
+      const rarityOrder = ['secret_rare', 'super_rare', 'leader', 'rare', 'uncommon', 'common'];
       return rarityOrder.indexOf(a.rarity) - rarityOrder.indexOf(b.rarity);
     });
   }, [allCards, userCards, searchQuery, selectedFilter]);
@@ -181,13 +182,14 @@ const Collection: React.FC = () => {
   const filterOptions: { value: FilterType; label: string; count: number; category?: string }[] = [
     { value: 'all', label: 'Toutes', count: allCards.length, category: 'général' },
     { value: 'favorites', label: 'Favoris', count: userCards.filter(uc => uc.is_favorite).length, category: 'général' },
-    // Raretés
-    { value: 'common', label: RARITY_LABELS.common, count: stats?.rarity_breakdown?.common || 0, category: 'rareté' },
-    { value: 'uncommon', label: RARITY_LABELS.uncommon, count: stats?.rarity_breakdown?.uncommon || 0, category: 'rareté' },
-    { value: 'rare', label: RARITY_LABELS.rare, count: stats?.rarity_breakdown?.rare || 0, category: 'rareté' },
-    { value: 'leader', label: RARITY_LABELS.leader, count: stats?.rarity_breakdown?.leader || 0, category: 'rareté' },
-    { value: 'super_rare', label: RARITY_LABELS.super_rare, count: stats?.rarity_breakdown?.super_rare || 0, category: 'rareté' },
+    // Raretés (du plus rare au plus commun, cohérent avec l'ordre de tri)
+    // Leader est plus rare que Rare mais moins rare que SuperRare
     { value: 'secret_rare', label: RARITY_LABELS.secret_rare, count: stats?.rarity_breakdown?.secret_rare || 0, category: 'rareté' },
+    { value: 'super_rare', label: RARITY_LABELS.super_rare, count: stats?.rarity_breakdown?.super_rare || 0, category: 'rareté' },
+    { value: 'leader', label: RARITY_LABELS.leader, count: stats?.rarity_breakdown?.leader || 0, category: 'rareté' },
+    { value: 'rare', label: RARITY_LABELS.rare, count: stats?.rarity_breakdown?.rare || 0, category: 'rareté' },
+    { value: 'uncommon', label: RARITY_LABELS.uncommon, count: stats?.rarity_breakdown?.uncommon || 0, category: 'rareté' },
+    { value: 'common', label: RARITY_LABELS.common, count: stats?.rarity_breakdown?.common || 0, category: 'rareté' },
     // Boosters (ajoutés dynamiquement)
     ...availableBoosters.map(booster => ({
       value: booster.id,

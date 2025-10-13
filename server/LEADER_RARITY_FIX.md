@@ -1,8 +1,11 @@
-# Fix: Rareté des Cartes Leader
+# Fix: Rareté des Cartes (Leader, SuperRare, etc.)
 
 ## 🐛 Problème Identifié
 
-Les cartes de type "Leader" ont été importées avec une rareté incorrecte (généralement "common") au lieu de "leader".
+**TOUTES les raretés** ont potentiellement été importées incorrectement, pas seulement les Leaders :
+- Les cartes de type "Leader" importées comme "common" au lieu de "leader"
+- Les cartes "SuperRare" importées comme "common" au lieu de "super_rare"
+- Et potentiellement d'autres raretés affectées
 
 ### Cause Racine
 
@@ -30,30 +33,54 @@ const cardType = CATEGORY_MAPPING[vegapullCard.category] || 'Character';
 
 ## ✅ Solution Implémentée
 
-### 1. Script de Correction de la Base de Données
+### 1. Script de Diagnostic
 
-**Fichier**: `server/src/scripts/fix-leader-rarity.ts`
+**Fichier**: `server/src/scripts/diagnose-rarity-issues.ts`
 
-Ce script :
-- ✅ Identifie toutes les cartes avec `type="Leader"` et `rarity != "leader"`
-- ✅ Les met à jour avec `rarity="leader"`
-- ✅ Affiche des statistiques avant/après
+Ce script analyse TOUTES les cartes et compare avec les données Vegapull :
+- 🔍 Compare chaque carte DB avec sa source Vegapull
+- 📊 Génère des statistiques détaillées
+- 📋 Liste les cartes avec raretés incorrectes
+- 🎯 Identifie les patterns d'erreurs
+
+**Utilisation** :
+```bash
+cd server
+npx tsx src/scripts/diagnose-rarity-issues.ts
+```
+
+### 2. Script de Correction Universel
+
+**Fichier**: `server/src/scripts/fix-all-rarities.ts`
+
+Ce script corrige **TOUTES** les raretés incorrectes :
+- ✅ Charge toutes les cartes Vegapull (source de vérité)
+- ✅ Compare avec chaque carte en DB
+- ✅ Corrige automatiquement toutes les différences
+- ✅ Utilise une transaction pour la sécurité
+- ✅ Affiche des statistiques détaillées avant/après
 - ✅ Vérifie que la correction a bien fonctionné
 
 **Utilisation** (sur votre environnement de production) :
 ```bash
 cd server
 npm run build
-node dist/scripts/fix-leader-rarity.js
+node dist/scripts/fix-all-rarities.js
 ```
 
 Ou avec ts-node en développement :
 ```bash
 cd server
-npx tsx src/scripts/fix-leader-rarity.ts
+npx tsx src/scripts/fix-all-rarities.ts
 ```
 
-### 2. Correction du Script d'Importation
+### 3. Script Legacy (Leaders uniquement)
+
+**Fichier**: `server/src/scripts/fix-leader-rarity.ts`
+
+Script original qui corrige uniquement les Leaders. Conservé pour compatibilité mais **utilisez fix-all-rarities.ts à la place**.
+
+### 4. Correction du Script d'Importation
 
 **Fichier**: `server/src/scripts/import-vegapull-data.ts:35-43`
 
@@ -102,11 +129,35 @@ leader  | [nombre de cartes Leader]
 
 Si d'autres raretés apparaissent (common, rare, etc.), c'est qu'il y a encore des cartes Leader mal configurées.
 
+## 🚀 Exécution Automatique au Démarrage Docker
+
+Le script `fix-all-rarities.js` est **automatiquement exécuté** au démarrage du container Docker backend :
+
+1. **Dans `Dockerfile.backend`** : Le script compilé est copié dans l'image
+2. **Dans `docker-entrypoint.sh`** : Le script s'exécute après les migrations
+3. **Mode non-bloquant** : Si le script échoue, le serveur démarre quand même
+4. **Idempotent** : Peut être exécuté plusieurs fois sans problème
+
+Lors du prochain démarrage Docker, toutes les raretés seront automatiquement corrigées !
+
+## 🔍 Vérification Manuelle
+
+Pour vérifier manuellement avant un redémarrage Docker :
+
+```bash
+# 1. Diagnostic (identifie les problèmes)
+cd server
+npx tsx src/scripts/diagnose-rarity-issues.ts
+
+# 2. Correction (si des problèmes sont trouvés)
+npx tsx src/scripts/fix-all-rarities.ts
+```
+
 ## 🚀 Prochaines Étapes
 
-1. **Exécuter le script de correction** sur votre base de données de production
-2. **Réimporter les données** (optionnel) pour vérifier que le script d'importation corrigé fonctionne bien
-3. **Vérifier l'interface utilisateur** pour s'assurer que les cartes Leader s'affichent correctement avec leur nouvelle rareté
+1. ✅ **Rebuild et restart Docker** - Les corrections seront appliquées automatiquement
+2. **Vérifier les logs** au démarrage pour voir les statistiques de correction
+3. **Vérifier l'interface utilisateur** pour confirmer que les raretés s'affichent correctement
 
 ## 📝 Notes Techniques
 
