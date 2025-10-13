@@ -4,6 +4,7 @@ import { apiService } from '../services/api';
 import { AchievementWithProgress, AchievementStats } from '../types';
 import { useDialog } from '../hooks/useDialog';
 import Dialog from '../components/ui/Dialog';
+import { GameCard } from '../components/ui';
 
 export default function Achievements() {
   const { dialogState, showAlert, handleClose, handleConfirm } = useDialog();
@@ -72,7 +73,10 @@ export default function Achievements() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-white">Chargement des achievements...</div>
+        <div className="text-center">
+          <div className="text-4xl mb-4">⏳</div>
+          <div className="text-white text-xl">Chargement des achievements...</div>
+        </div>
       </div>
     );
   }
@@ -91,68 +95,60 @@ export default function Achievements() {
         showCancel={dialogState.showCancel}
       />
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Trophy className="w-10 h-10 text-yellow-500" />
-            Achievements
-          </h1>
-          <p className="text-white text-lg">
+      <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8 space-y-6">
+        {/* Header */}
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <Trophy className="w-10 h-10 text-treasure-400" />
+            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-ocean-300 via-treasure-300 to-ocean-300 bg-clip-text text-transparent">
+              Achievements
+            </h1>
+          </div>
+          <p className="text-slate-300 text-base sm:text-lg">
             Débloquez des achievements pour gagner des Berrys !
           </p>
-          {!loading && achievements.length === 0 && (
-            <div className="mt-4 p-4 bg-yellow-500/20 border border-yellow-500 rounded-lg">
-              <p className="text-white font-bold mb-2">
-                ℹ️ Aucun achievement disponible
-              </p>
-              <p className="text-white text-sm">
-                Total d'achievements chargés : {achievements.length}
-              </p>
-              <p className="text-white text-sm mt-2">
-                Vérifiez la console du navigateur (F12) pour plus de détails sur la réponse de l'API.
-              </p>
-            </div>
-          )}
         </div>
 
+        {/* Stats Cards - Glassmorphism */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-3xl font-bold text-blue-600">{stats.total}</div>
-              <div className="text-sm text-gray-600">Total</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-3xl font-bold text-green-600">{stats.completed}</div>
-              <div className="text-sm text-gray-600">Complétés</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-3xl font-bold text-purple-600">{stats.claimed}</div>
-              <div className="text-sm text-gray-600">Réclamés</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-3xl font-bold text-orange-600">{stats.unclaimed}</div>
-              <div className="text-sm text-gray-600">À réclamer</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-3xl font-bold text-yellow-600">{stats.total_berrys_earned}</div>
-              <div className="text-sm text-gray-600">Berrys gagnés</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="text-3xl font-bold text-red-600">{stats.total_berrys_available}</div>
-              <div className="text-sm text-gray-600">Berrys disponibles</div>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <GameCard variant="ocean" className="p-3 sm:p-4">
+              <div className="text-2xl sm:text-3xl font-bold text-white">{stats.total}</div>
+              <div className="text-xs sm:text-sm text-slate-300">Total</div>
+            </GameCard>
+            <GameCard variant="success" className="p-3 sm:p-4">
+              <div className="text-2xl sm:text-3xl font-bold text-white">{stats.completed}</div>
+              <div className="text-xs sm:text-sm text-slate-300">Complétés</div>
+            </GameCard>
+            <GameCard variant="default" className="p-3 sm:p-4">
+              <div className="text-2xl sm:text-3xl font-bold text-white">{stats.claimed}</div>
+              <div className="text-xs sm:text-sm text-slate-300">Réclamés</div>
+            </GameCard>
+            <GameCard variant="treasure" className="p-3 sm:p-4">
+              <div className="text-2xl sm:text-3xl font-bold text-white">{stats.unclaimed}</div>
+              <div className="text-xs sm:text-sm text-slate-300">À réclamer</div>
+            </GameCard>
+            <GameCard variant="treasure" className="p-3 sm:p-4">
+              <div className="text-2xl sm:text-3xl font-bold text-white">{stats.total_berrys_earned}</div>
+              <div className="text-xs sm:text-sm text-slate-300">฿ gagnés</div>
+            </GameCard>
+            <GameCard variant="treasure" className="p-3 sm:p-4 border-2 border-treasure-400/40">
+              <div className="text-2xl sm:text-3xl font-bold text-treasure-300">{stats.total_berrys_available}</div>
+              <div className="text-xs sm:text-sm text-slate-300">฿ disponibles</div>
+            </GameCard>
           </div>
         )}
 
-        <div className="mb-6 flex flex-wrap gap-2">
+        {/* Category Filters - Glassmorphism */}
+        <div className="flex flex-wrap gap-2 mb-6">
           {categories.map(category => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+              className={`px-3 sm:px-4 py-2 rounded-xl font-semibold transition-all duration-300 backdrop-blur-xl text-sm sm:text-base ${
                 selectedCategory === category
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
+                  ? 'bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 text-white shadow-lg shadow-ocean-500/30 scale-105 border border-ocean-400/30'
+                  : 'bg-white/5 text-white/80 hover:bg-white/10 hover:text-white border border-white/10 hover:border-white/20 hover:scale-105'
               }`}
             >
               {category === 'all' ? 'Tous' : category}
@@ -160,71 +156,89 @@ export default function Achievements() {
           ))}
         </div>
 
-        <div className="space-y-8">
+        {/* Warning if no achievements */}
+        {!loading && achievements.length === 0 && (
+          <GameCard variant="treasure" className="p-4 sm:p-6">
+            <div className="text-center">
+              <p className="text-white font-bold mb-2 text-base sm:text-lg">
+                ℹ️ Aucun achievement disponible
+              </p>
+              <p className="text-slate-300 text-sm">
+                Total d'achievements chargés : {achievements.length}
+              </p>
+              <p className="text-slate-400 text-xs sm:text-sm mt-2">
+                Vérifiez la console du navigateur (F12) pour plus de détails sur la réponse de l'API.
+              </p>
+            </div>
+          </GameCard>
+        )}
+
+        {/* Achievements by Category */}
+        <div className="space-y-6 sm:space-y-8">
           {Object.entries(groupedAchievements).map(([category, categoryAchievements]) => (
             <div key={category}>
-              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-white">
-                <Award className="w-6 h-6 text-yellow-400" />
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 flex items-center gap-2 text-white">
+                <Award className="w-5 h-5 sm:w-6 sm:h-6 text-treasure-400" />
                 {category}
               </h2>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {categoryAchievements.map(achievement => {
                   const isCompleted = achievement.progress >= achievement.threshold;
                   const isClaimed = achievement.is_claimed;
 
                   return (
-                    <div
+                    <GameCard
                       key={achievement.id}
-                      className={`bg-white rounded-lg shadow-md p-6 border-2 transition-all ${
-                        isClaimed
-                          ? 'border-purple-500 opacity-75'
-                          : isCompleted
-                          ? 'border-green-500'
-                          : 'border-gray-200'
+                      variant={isClaimed ? 'default' : isCompleted ? 'success' : 'ocean'}
+                      className={`p-4 sm:p-6 transition-all ${
+                        isClaimed ? 'opacity-75' : isCompleted ? 'border-2 border-emerald-400/40 shadow-lg shadow-emerald-500/20' : ''
                       }`}
                     >
                       <div className="mb-4">
                         <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="text-3xl">{achievement.icon || '🏆'}</div>
-                            <h3 className="font-bold text-lg text-gray-900">{achievement.name}</h3>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <div className="text-2xl sm:text-3xl flex-shrink-0">{achievement.icon || '🏆'}</div>
+                            <h3 className="font-bold text-base sm:text-lg text-white break-words">{achievement.name}</h3>
                           </div>
-                          <div className="flex-shrink-0">
+                          <div className="flex-shrink-0 ml-2">
                             {isClaimed ? (
-                              <CheckCircle className="w-6 h-6 text-purple-600" />
+                              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
                             ) : isCompleted ? (
-                              <CheckCircle className="w-6 h-6 text-green-600" />
+                              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
                             ) : (
-                              <Circle className="w-6 h-6 text-gray-300" />
+                              <Circle className="w-5 h-5 sm:w-6 sm:h-6 text-slate-500" />
                             )}
                           </div>
                         </div>
-                        <p className="text-sm text-gray-600 ml-11">{achievement.description}</p>
+                        <p className="text-xs sm:text-sm text-slate-300 ml-9 sm:ml-11">{achievement.description}</p>
                       </div>
 
+                      {/* Progress Bar */}
                       <div className="mb-3">
-                        <div className="flex justify-between items-center text-sm mb-2">
-                          <span className="text-gray-600">Progression</span>
-                          <div className="flex items-center gap-3">
-                            <span className="font-semibold text-gray-700">
+                        <div className="flex justify-between items-center text-xs sm:text-sm mb-2">
+                          <span className="text-slate-300">Progression</span>
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <span className="font-semibold text-white">
                               {achievement.progress} / {achievement.threshold}
                             </span>
-                            <span className={`font-bold text-lg ${
-                              isCompleted ? 'text-green-600' : 'text-blue-600'
+                            <span className={`font-bold text-base sm:text-lg ${
+                              isCompleted ? 'text-emerald-400' : 'text-ocean-400'
                             }`}>
                               {achievement.completion_percentage}%
                             </span>
                           </div>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div className="w-full bg-slate-800/50 rounded-full h-2.5 sm:h-3 overflow-hidden backdrop-blur-sm border border-white/10">
                           <div
-                            className={`h-3 rounded-full transition-all flex items-center justify-center ${
-                              isCompleted ? 'bg-green-500' : 'bg-blue-500'
+                            className={`h-full rounded-full transition-all flex items-center justify-center ${
+                              isCompleted
+                                ? 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                                : 'bg-gradient-to-r from-ocean-400 to-ocean-500'
                             }`}
                             style={{ width: `${achievement.completion_percentage}%` }}
                           >
                             {achievement.completion_percentage > 15 && (
-                              <span className="text-xs font-bold text-white">
+                              <span className="text-xs font-bold text-white drop-shadow">
                                 {achievement.completion_percentage}%
                               </span>
                             )}
@@ -232,11 +246,12 @@ export default function Achievements() {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between">
+                      {/* Reward and Action */}
+                      <div className="flex items-center justify-between pt-3 border-t border-white/10">
                         <div className="flex items-center gap-2">
-                          <Gift className="w-5 h-5 text-yellow-600" />
-                          <span className="font-bold text-yellow-600">
-                            {achievement.reward_berrys} Berrys
+                          <Gift className="w-4 h-4 sm:w-5 sm:h-5 text-treasure-400" />
+                          <span className="font-bold text-treasure-300 text-sm sm:text-base">
+                            {achievement.reward_berrys} ฿
                           </span>
                         </div>
 
@@ -244,25 +259,26 @@ export default function Achievements() {
                           <button
                             onClick={() => handleClaim(achievement.id)}
                             disabled={claimingId === achievement.id}
-                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 font-semibold"
+                            className="px-3 sm:px-4 py-2 bg-gradient-to-r from-emerald-500/90 to-emerald-600/90 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-emerald-500/40 hover:scale-105 border border-emerald-400/30 backdrop-blur-xl text-xs sm:text-sm"
                           >
                             {claimingId === achievement.id ? 'Réclamation...' : 'Réclamer'}
                           </button>
                         )}
 
                         {isClaimed && (
-                          <span className="text-sm text-purple-600 font-semibold">
+                          <span className="text-xs sm:text-sm text-purple-400 font-semibold flex items-center gap-1">
+                            <CheckCircle size={14} />
                             Réclamé
                           </span>
                         )}
                       </div>
 
                       {isClaimed && achievement.claimed_at && (
-                        <div className="mt-2 text-xs text-gray-500">
+                        <div className="mt-2 text-xs text-slate-400">
                           Réclamé le {new Date(achievement.claimed_at).toLocaleDateString('fr-FR')}
                         </div>
                       )}
-                    </div>
+                    </GameCard>
                   );
                 })}
               </div>
@@ -270,10 +286,12 @@ export default function Achievements() {
           ))}
         </div>
 
-        {filteredAchievements.length === 0 && (
-          <div className="text-center py-12">
-            <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-600 text-lg">Aucun achievement dans cette catégorie</p>
+        {filteredAchievements.length === 0 && achievements.length > 0 && (
+          <div className="text-center py-8 sm:py-12">
+            <GameCard variant="default" className="p-6 sm:p-8 max-w-md mx-auto">
+              <Trophy className="w-12 h-12 sm:w-16 sm:h-16 text-slate-500 mx-auto mb-4" />
+              <p className="text-slate-300 text-base sm:text-lg">Aucun achievement dans cette catégorie</p>
+            </GameCard>
           </div>
         )}
       </div>

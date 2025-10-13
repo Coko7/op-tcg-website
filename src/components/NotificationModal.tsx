@@ -89,30 +89,30 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
         showCancel={dialogState.showCancel}
       />
 
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-gradient-to-br from-blue-900 to-purple-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col border-2 border-blue-500/50">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="bg-slate-900/95 backdrop-blur-2xl rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col border-2 border-white/10">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-blue-500/30">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-white/10 bg-white/5">
           <div className="flex items-center space-x-3">
-            <Gift className="text-yellow-300" size={28} />
-            <h2 className="text-2xl font-bold text-white">Notifications</h2>
+            <Gift className="text-treasure-400" size={24} />
+            <h2 className="text-xl sm:text-2xl font-bold text-white">Notifications</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-300 hover:text-white transition-colors"
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all duration-300 border border-white/10"
             aria-label="Fermer"
           >
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {notifications.length === 0 ? (
             <div className="text-center py-12">
-              <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4 opacity-50" />
-              <p className="text-gray-300 text-lg">Aucune notification pour le moment</p>
-              <p className="text-gray-400 text-sm mt-2">Les nouvelles notifications apparaîtront ici</p>
+              <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto mb-4 opacity-50" />
+              <p className="text-slate-300 text-base sm:text-lg">Aucune notification pour le moment</p>
+              <p className="text-slate-400 text-xs sm:text-sm mt-2">Les nouvelles notifications apparaîtront ici</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -124,8 +124,8 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
                 return (
                   <div
                     key={notification.id}
-                    className={`bg-blue-800/40 backdrop-blur-sm rounded-lg p-4 border ${
-                      expired ? 'border-gray-600/30 opacity-60' : 'border-blue-600/30'
+                    className={`bg-white/5 backdrop-blur-xl rounded-2xl p-4 border-2 transition-all duration-300 shadow-lg ${
+                      expired ? 'border-slate-600/30 opacity-60' : 'border-white/10 hover:border-white/20'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-3">
@@ -141,19 +141,19 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
 
                     {/* Rewards */}
                     {hasRewards && (
-                      <div className="flex items-center gap-4 mb-3 flex-wrap">
+                      <div className="flex items-center gap-3 mb-3 flex-wrap">
                         {notification.reward_berrys > 0 && (
-                          <div className="flex items-center gap-2 bg-yellow-600/20 px-3 py-1.5 rounded-lg">
-                            <Coins className="text-yellow-300" size={18} />
-                            <span className="text-yellow-200 font-bold">
-                              +{notification.reward_berrys} Berrys
+                          <div className="flex items-center gap-2 bg-treasure-500/20 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-treasure-400/30">
+                            <Coins className="text-treasure-300" size={16} />
+                            <span className="text-treasure-200 font-bold text-sm">
+                              +{notification.reward_berrys} ฿
                             </span>
                           </div>
                         )}
                         {notification.reward_boosters > 0 && (
-                          <div className="flex items-center gap-2 bg-purple-600/20 px-3 py-1.5 rounded-lg">
-                            <Zap className="text-purple-300" size={18} />
-                            <span className="text-purple-200 font-bold">
+                          <div className="flex items-center gap-2 bg-ocean-500/20 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-ocean-400/30">
+                            <Zap className="text-ocean-300" size={16} />
+                            <span className="text-ocean-200 font-bold text-sm">
                               +{notification.reward_boosters} Booster(s)
                             </span>
                           </div>
@@ -162,9 +162,9 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
                     )}
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-blue-600/20">
-                      <div className="flex items-center gap-2 text-xs text-gray-400">
-                        <Clock size={14} />
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+                      <div className="flex items-center gap-2 text-xs text-slate-400">
+                        <Clock size={12} />
                         <span>{formatDate(notification.created_at)}</span>
                         {notification.expires_at && (
                           <span className="ml-2">
@@ -177,7 +177,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
                         <button
                           onClick={() => handleClaim(notification)}
                           disabled={claiming === notification.id}
-                          className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                          className="px-3 sm:px-4 py-2 bg-gradient-to-r from-treasure-500/90 to-treasure-600/90 hover:from-treasure-600 hover:to-treasure-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-treasure-500/40 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm border border-treasure-400/30 backdrop-blur-xl"
                         >
                           {claiming === notification.id ? (
                             'Réclamation...'
@@ -191,14 +191,14 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
                       )}
 
                       {isClaimed && (
-                        <div className="flex items-center gap-2 text-green-400 text-sm font-bold">
-                          <CheckCircle size={16} />
+                        <div className="flex items-center gap-2 text-emerald-400 text-xs sm:text-sm font-bold">
+                          <CheckCircle size={14} />
                           <span>Réclamé</span>
                         </div>
                       )}
 
                       {expired && !isClaimed && (
-                        <div className="text-red-400 text-sm font-bold">
+                        <div className="text-red-400 text-xs sm:text-sm font-bold">
                           Expiré
                         </div>
                       )}
@@ -211,10 +211,10 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-blue-500/30 bg-blue-900/50">
+        <div className="p-4 border-t border-white/10 bg-white/5">
           <button
             onClick={onClose}
-            className="w-full py-2 px-4 bg-blue-700 hover:bg-blue-600 text-white font-bold rounded-lg transition-all"
+            className="w-full py-2.5 px-4 bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 hover:from-ocean-600 hover:to-ocean-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-ocean-500/40 border border-ocean-400/30 backdrop-blur-xl"
           >
             Fermer
           </button>

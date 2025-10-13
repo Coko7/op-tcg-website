@@ -283,7 +283,7 @@ const Boosters: React.FC = () => {
         </p>
 
         {/* Sélecteur de booster */}
-        <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30 mb-6 sm:mb-8 max-w-2xl mx-auto">
+        <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border-2 border-white/10 hover:border-white/20 mb-6 sm:mb-8 max-w-2xl mx-auto shadow-2xl transition-all duration-300">
           <div className="flex items-center justify-between gap-2">
             <button
               onClick={prevBooster}
@@ -442,18 +442,18 @@ const Boosters: React.FC = () => {
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
               Félicitations !
             </h2>
-            <div className="text-blue-300 text-base sm:text-lg mb-2">
+            <div className="text-slate-300 text-base sm:text-lg mb-2">
               Vous avez révélé toutes vos cartes !
             </div>
             {boosterResult.new_cards.length > 0 && (
-              <div className="text-green-400 font-semibold text-sm sm:text-base">
+              <div className="text-emerald-400 font-semibold text-sm sm:text-base">
                 {boosterResult.new_cards.length} nouvelle(s) carte(s) ajoutée(s) !
               </div>
             )}
           </div>
 
           {/* Affichage des 5 cartes obtenues */}
-          <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30 max-w-4xl mx-auto">
+          <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border-2 border-white/10 max-w-4xl mx-auto shadow-2xl">
             <h3 className="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6 text-center">
               🃏 Vos cartes obtenues
             </h3>
@@ -476,7 +476,7 @@ const Boosters: React.FC = () => {
             </div>
 
             {/* Résumé des raretés */}
-            <div className="mt-6 border-t border-blue-600/30 pt-4">
+            <div className="mt-6 border-t border-white/10 pt-4">
               <h4 className="text-sm sm:text-base font-semibold text-white mb-3 text-center">
                 📊 Résumé des raretés
               </h4>
@@ -487,7 +487,7 @@ const Boosters: React.FC = () => {
                     return acc;
                   }, {} as Record<string, number>)
                 ).map(([rarity, count]) => (
-                  <div key={rarity} className="p-2 bg-blue-700/30 rounded-lg">
+                  <div key={rarity} className="p-2 bg-white/5 backdrop-blur-md rounded-xl border border-white/10">
                     <div className="text-white font-bold">{count}x</div>
                     <div className={`${
                       rarity === 'secret_rare' ? 'text-yellow-300' :

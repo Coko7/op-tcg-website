@@ -218,7 +218,7 @@ const Collection: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-blue-800/40 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-blue-600/30">
+      <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border-2 border-white/10 shadow-2xl">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 text-center">
           <div>
             <div className="text-xl sm:text-2xl font-bold text-white">{stats?.total_cards || 0}</div>
@@ -254,16 +254,16 @@ const Collection: React.FC = () => {
             placeholder="Rechercher..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 sm:py-3 text-sm sm:text-base bg-blue-800/40 border border-blue-600/30 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-9 pr-3 py-2 sm:py-3 text-sm sm:text-base bg-white/5 backdrop-blur-xl border-2 border-white/10 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-ocean-500 focus:border-ocean-400/40 transition-all"
           />
         </div>
 
         <button
           onClick={() => setSellMode(!sellMode)}
-          className={`flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-blue-600/30 rounded-lg transition-colors ${
+          className={`flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 rounded-xl transition-all duration-300 backdrop-blur-xl font-semibold shadow-lg ${
             sellMode
-              ? 'bg-yellow-600 text-white hover:bg-yellow-700'
-              : 'bg-blue-800/40 text-white hover:bg-blue-700/40'
+              ? 'bg-gradient-to-r from-yellow-500/90 to-yellow-600/90 hover:from-yellow-600 hover:to-yellow-700 text-white shadow-yellow-500/30 border-yellow-400/30'
+              : 'bg-white/5 text-white hover:bg-white/10 border-white/10 hover:border-white/20'
           }`}
         >
           <Coins size={18} />
@@ -273,7 +273,7 @@ const Collection: React.FC = () => {
         <div className="relative">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex w-full sm:w-auto items-center justify-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-blue-800/40 border border-blue-600/30 rounded-lg text-white hover:bg-blue-700/40 transition-colors"
+            className="flex w-full sm:w-auto items-center justify-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-white/5 backdrop-blur-xl border-2 border-white/10 rounded-xl text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300 font-semibold shadow-lg"
           >
             <Filter size={18} />
             <span>Filtres</span>
@@ -285,11 +285,11 @@ const Collection: React.FC = () => {
           </button>
 
           {showFilters && (
-            <div className="absolute top-full mt-2 left-0 sm:right-0 sm:left-auto bg-blue-800 border border-blue-600 rounded-lg shadow-xl z-10 w-64 sm:min-w-64 max-h-96 overflow-y-auto">
+            <div className="absolute top-full mt-2 left-0 sm:right-0 sm:left-auto bg-slate-900/95 backdrop-blur-2xl border-2 border-white/10 rounded-2xl shadow-2xl z-10 w-64 sm:min-w-64 max-h-96 overflow-y-auto">
               <div className="p-4 space-y-3">
                 {/* Filtres généraux */}
                 <div>
-                  <div className="text-xs text-blue-300 font-semibold mb-2 uppercase tracking-wide">Général</div>
+                  <div className="text-xs text-slate-400 font-semibold mb-2 uppercase tracking-wide">Général</div>
                   {filterOptions.filter(opt => opt.category === 'général').map((option) => (
                     <button
                       key={option.value}
@@ -297,10 +297,10 @@ const Collection: React.FC = () => {
                         setSelectedFilter(option.value);
                         setShowFilters(false);
                       }}
-                      className={`w-full text-left px-3 py-2 rounded transition-colors flex justify-between items-center ${
+                      className={`w-full text-left px-3 py-2 rounded-xl transition-all duration-300 flex justify-between items-center font-medium ${
                         selectedFilter === option.value
-                          ? 'bg-blue-600 text-white'
-                          : 'text-blue-200 hover:bg-blue-700 hover:text-white'
+                          ? 'bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 text-white shadow-lg'
+                          : 'text-slate-300 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       <span>{option.label}</span>
@@ -311,7 +311,7 @@ const Collection: React.FC = () => {
 
                 {/* Filtres par rareté */}
                 <div>
-                  <div className="text-xs text-blue-300 font-semibold mb-2 uppercase tracking-wide">Rareté</div>
+                  <div className="text-xs text-slate-400 font-semibold mb-2 uppercase tracking-wide">Rareté</div>
                   {filterOptions.filter(opt => opt.category === 'rareté').map((option) => (
                     <button
                       key={option.value}
@@ -319,10 +319,10 @@ const Collection: React.FC = () => {
                         setSelectedFilter(option.value);
                         setShowFilters(false);
                       }}
-                      className={`w-full text-left px-3 py-2 rounded transition-colors flex justify-between items-center ${
+                      className={`w-full text-left px-3 py-2 rounded-xl transition-all duration-300 flex justify-between items-center font-medium ${
                         selectedFilter === option.value
-                          ? 'bg-blue-600 text-white'
-                          : 'text-blue-200 hover:bg-blue-700 hover:text-white'
+                          ? 'bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 text-white shadow-lg'
+                          : 'text-slate-300 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       <span>{option.label}</span>
@@ -333,7 +333,7 @@ const Collection: React.FC = () => {
 
                 {/* Filtres par booster */}
                 <div>
-                  <div className="text-xs text-blue-300 font-semibold mb-2 uppercase tracking-wide">Boosters</div>
+                  <div className="text-xs text-slate-400 font-semibold mb-2 uppercase tracking-wide">Boosters</div>
                   {filterOptions.filter(opt => opt.category === 'booster').map((option) => (
                     <button
                       key={option.value}
@@ -341,10 +341,10 @@ const Collection: React.FC = () => {
                         setSelectedFilter(option.value);
                         setShowFilters(false);
                       }}
-                      className={`w-full text-left px-3 py-2 rounded transition-colors flex justify-between items-center ${
+                      className={`w-full text-left px-3 py-2 rounded-xl transition-all duration-300 flex justify-between items-center font-medium ${
                         selectedFilter === option.value
-                          ? 'bg-blue-600 text-white'
-                          : 'text-blue-200 hover:bg-blue-700 hover:text-white'
+                          ? 'bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 text-white shadow-lg'
+                          : 'text-slate-300 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       <span className="text-sm">{option.label}</span>

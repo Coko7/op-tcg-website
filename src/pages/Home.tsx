@@ -381,34 +381,6 @@ const Home: React.FC = () => {
             </div>
         </GameCard>
       </div>
-
-      <section className="text-center py-12 px-4">
-        <GameCard variant="ocean" className="p-8 max-w-3xl mx-auto" glow>
-          <div className="text-5xl sm:text-6xl mb-4 animate-float">⚓</div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-            Prêt pour l'aventure ?
-          </h2>
-          <p className="text-slate-300 text-base sm:text-lg mb-6 max-w-xl mx-auto">
-            Ouvrez des boosters pour agrandir votre collection de cartes légendaires !
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/boosters">
-              <Button
-                variant={canOpenBooster ? 'treasure' : 'secondary'}
-                disabled={!canOpenBooster}
-                size="lg"
-              >
-                {canOpenBooster ? '🎲 Ouvrir un Booster!' : 'Patience, moussaillon...'}
-              </Button>
-            </Link>
-            <Link to="/collection">
-              <Button variant="primary" size="lg">
-                📚 Voir ma Collection
-              </Button>
-            </Link>
-          </div>
-        </GameCard>
-      </section>
     </div>
   );
 };

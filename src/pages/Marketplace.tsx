@@ -281,17 +281,19 @@ const Marketplace: React.FC = () => {
         showCancel={dialogState.showCancel}
       />
 
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen text-white p-4 sm:p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
         {/* En-tête */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">Marketplace</h1>
-          <div className="bg-gray-800 rounded-lg p-4 flex items-center justify-between">
+        <div className="text-center sm:text-left">
+          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-treasure-300 via-ocean-300 to-treasure-300 bg-clip-text text-transparent mb-4">
+            Marketplace
+          </h1>
+          <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border-2 border-white/10 shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-              <p className="text-gray-400">Votre solde</p>
-              <p className="text-2xl font-bold text-yellow-400">{berrysBalance} ฿</p>
+              <p className="text-slate-300 text-sm">Votre solde</p>
+              <p className="text-2xl sm:text-3xl font-bold text-treasure-300">{berrysBalance} ฿</p>
             </div>
-            <div className="text-sm text-gray-400">
+            <div className="text-xs sm:text-sm text-slate-300 space-y-1">
               <p>• Maximum 3 annonces actives</p>
               <p>• Minimum 2 exemplaires pour vendre</p>
             </div>
@@ -299,33 +301,33 @@ const Marketplace: React.FC = () => {
         </div>
 
         {/* Onglets */}
-        <div className="flex gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
           <button
             onClick={() => setActiveTab('browse')}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+            className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold transition-all duration-300 backdrop-blur-xl ${
               activeTab === 'browse'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 text-white shadow-lg shadow-ocean-500/30 scale-105 border-2 border-ocean-400/30'
+                : 'bg-white/5 text-white/80 hover:bg-white/10 border-2 border-white/10 hover:border-white/20'
             }`}
           >
             Parcourir
           </button>
           <button
             onClick={() => setActiveTab('myListings')}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+            className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold transition-all duration-300 backdrop-blur-xl ${
               activeTab === 'myListings'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 text-white shadow-lg shadow-ocean-500/30 scale-105 border-2 border-ocean-400/30'
+                : 'bg-white/5 text-white/80 hover:bg-white/10 border-2 border-white/10 hover:border-white/20'
             }`}
           >
             Mes annonces
           </button>
           <button
             onClick={() => setActiveTab('sell')}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+            className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold transition-all duration-300 backdrop-blur-xl ${
               activeTab === 'sell'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 text-white shadow-lg shadow-ocean-500/30 scale-105 border-2 border-ocean-400/30'
+                : 'bg-white/5 text-white/80 hover:bg-white/10 border-2 border-white/10 hover:border-white/20'
             }`}
           >
             Vendre
@@ -351,7 +353,7 @@ const Marketplace: React.FC = () => {
               listings.map((listing) => (
                 <div
                   key={listing.id}
-                  className="bg-gray-800 rounded-lg p-4 border-2 border-gray-700 hover:border-blue-500 transition-all"
+                  className="bg-white/5 backdrop-blur-xl rounded-3xl p-4 border-2 border-white/10 hover:border-ocean-400/40 transition-all duration-300 shadow-lg hover:shadow-2xl hover:scale-[1.02]"
                 >
                   <img
                     src={listing.card_image_url || '/placeholder-card.png'}
@@ -405,7 +407,7 @@ const Marketplace: React.FC = () => {
               myListings.map((listing) => (
                 <div
                   key={listing.id}
-                  className="bg-gray-800 rounded-lg p-4 border-2 border-gray-700"
+                  className="bg-white/5 backdrop-blur-xl rounded-3xl p-4 border-2 border-white/10 shadow-lg"
                 >
                   <img
                     src={listing.card_image_url || '/placeholder-card.png'}
@@ -454,7 +456,7 @@ const Marketplace: React.FC = () => {
           <div>
             {/* Formulaire de prix si une carte est sélectionnée */}
             {selectedCard && (
-              <div className="bg-gray-800 rounded-lg p-6 mb-6 max-w-2xl mx-auto border-2 border-blue-500">
+              <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 mb-6 max-w-2xl mx-auto border-2 border-ocean-400/40 shadow-2xl">
                 <h2 className="text-2xl font-bold mb-4">Créer une annonce</h2>
                 <div className="flex items-center gap-4 mb-4">
                   {(() => {
@@ -528,7 +530,7 @@ const Marketplace: React.FC = () => {
 
             {/* Instructions si aucune carte sélectionnée */}
             {!selectedCard && (
-              <div className="bg-gray-800 rounded-lg p-6 mb-6 text-center">
+              <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 mb-6 text-center border-2 border-white/10 shadow-lg">
                 <h2 className="text-2xl font-bold mb-2">Vendre une carte</h2>
                 <p className="text-gray-400 mb-4">
                   Sélectionnez une carte ci-dessous pour la mettre en vente sur le marketplace
@@ -548,7 +550,7 @@ const Marketplace: React.FC = () => {
 
             {/* Grille des cartes vendables */}
             {myCards.length === 0 ? (
-              <div className="text-center py-12 bg-gray-800 rounded-lg">
+              <div className="text-center py-12 bg-white/5 backdrop-blur-xl rounded-3xl border-2 border-white/10 shadow-lg">
                 <p className="text-gray-400 text-lg mb-2">Aucune carte vendable</p>
                 <p className="text-sm text-gray-500">
                   Vous devez posséder au moins 2 exemplaires d'une carte pour la vendre
@@ -563,10 +565,10 @@ const Marketplace: React.FC = () => {
                       setSelectedCard(card.card_id);
                       setSellPrice(10);
                     }}
-                    className={`bg-gray-800 rounded-lg p-4 border-2 transition-all cursor-pointer hover:scale-105 ${
+                    className={`bg-white/5 backdrop-blur-xl rounded-3xl p-4 border-2 transition-all duration-300 cursor-pointer hover:scale-105 shadow-lg ${
                       selectedCard === card.card_id
-                        ? 'border-blue-500 shadow-lg shadow-blue-500/50'
-                        : 'border-gray-700 hover:border-blue-400'
+                        ? 'border-ocean-400/60 shadow-xl shadow-ocean-500/30'
+                        : 'border-white/10 hover:border-ocean-400/40'
                     }`}
                   >
                     <div className="relative">
