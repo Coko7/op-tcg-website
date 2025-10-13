@@ -21,6 +21,14 @@
   * {
     @apply border-gray-600;
   }
+
+  html {
+    background-color: #0f172a;
+    min-height: 100%;
+    /* Empêcher le fond blanc sur iOS lors du bounce scroll */
+    overscroll-behavior: none;
+  }
+
   body {
     @apply text-cloud-white min-h-screen;
     font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
