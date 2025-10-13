@@ -5,6 +5,7 @@ import { Home, Package, BookOpen, Trophy, User, LogIn, UserPlus, Medal, Shield, 
 import { useAuth } from '../contexts/AuthContext';
 import UserProfile from './UserProfile';
 import NotificationBell from './NotificationBell';
+import MobileMenu from './MobileMenu';
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -180,106 +181,23 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay - REFAIT COMPLÈTEMENT */}
-      {showMobileMenu ? (
+      {/* Mobile Menu Modal - Style glassmorphism comme UserProfile */}
+      {showMobileMenu && createPortal(
         <>
-          {/* Backdrop - clique pour fermer */}
+          {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-md z-[100] xl:hidden animate-in fade-in duration-200"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] xl:hidden animate-in fade-in duration-200"
             onClick={() => setShowMobileMenu(false)}
           />
-
-          {/* Menu Panel - Visible jusqu'à xl (1280px) */}
-          <div className="fixed top-0 right-0 bottom-0 w-[300px] max-w-[85vw] z-[110] xl:hidden animate-in slide-in-from-right duration-300 bg-gradient-to-b from-slate-900/98 to-slate-800/98 backdrop-blur-2xl border-l-2 border-white/20 shadow-2xl flex flex-col">
-
-            {/* Header avec bouton fermer - COMPACT */}
-            <div className="flex items-center justify-between p-4 border-b border-white/20 bg-white/5 flex-shrink-0">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-ocean-500 to-treasure-500 rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-lg">🏴‍☠️</span>
-                </div>
-                <h2 className="text-sm font-bold text-white">Menu</h2>
-              </div>
-              <button
-                onClick={() => setShowMobileMenu(false)}
-                className="p-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 transition-all border border-red-500/30"
-                aria-label="Fermer le menu"
-              >
-                <X size={18} />
-              </button>
+          {/* Menu Modal centré */}
+          <div className="fixed inset-0 z-[110] xl:hidden flex items-center justify-center p-4 pointer-events-none">
+            <div className="pointer-events-auto animate-in zoom-in-95 duration-300">
+              <MobileMenu onClose={() => setShowMobileMenu(false)} />
             </div>
-
-            {/* Navigation Links - Fond opaque pour lisibilité */}
-            <nav className="flex flex-col p-3 space-y-1.5 flex-1 bg-black/40 backdrop-blur-xl">
-              {navLinks.map(({ to, icon: Icon, label }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  onClick={() => setShowMobileMenu(false)}
-                  className={`flex items-center space-x-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium text-sm ${
-                    isActive(to)
-                      ? 'bg-gradient-to-r from-ocean-500 to-ocean-600 text-white shadow-lg border border-ocean-400/40'
-                      : 'text-white/90 hover:text-white hover:bg-white/10 border border-white/10 hover:border-white/20'
-                  }`}
-                >
-                  <Icon size={18} />
-                  <span>{label}</span>
-                </Link>
-              ))}
-
-              {/* Admin Link in Mobile Menu */}
-              {isAuthenticated && user?.is_admin ? (
-                <Link
-                  to="/admin"
-                  onClick={() => setShowMobileMenu(false)}
-                  className="flex items-center space-x-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium text-sm bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white shadow-lg border border-purple-400/40"
-                >
-                  <Shield size={18} />
-                  <span>Admin</span>
-                </Link>
-              ) : null}
-
-              {/* Login/Register in Mobile Menu (if not authenticated) */}
-              {!isAuthenticated ? (
-                <div className="pt-2 mt-2 space-y-1.5 border-t border-white/20">
-                  <Link
-                    to="/login"
-                    onClick={() => setShowMobileMenu(false)}
-                    className="flex items-center space-x-2.5 px-3 py-2.5 rounded-lg bg-gradient-to-r from-ocean-500 to-ocean-600 hover:from-ocean-600 hover:to-ocean-700 text-white font-medium transition-all duration-200 shadow-lg border border-ocean-400/40 text-sm"
-                  >
-                    <LogIn size={18} />
-                    <span>Connexion</span>
-                  </Link>
-
-                  <Link
-                    to="/register"
-                    onClick={() => setShowMobileMenu(false)}
-                    className="flex items-center space-x-2.5 px-3 py-2.5 rounded-lg border-2 border-white/30 text-white/90 hover:bg-white/10 hover:border-white/50 hover:text-white transition-all duration-200 font-medium text-sm"
-                  >
-                    <UserPlus size={18} />
-                    <span>S'inscrire</span>
-                  </Link>
-                </div>
-              ) : null}
-            </nav>
-
-            {/* User Info Footer - COMPACT */}
-            {isAuthenticated && user ? (
-              <div className="p-3 border-t border-white/20 bg-gradient-to-b from-black/30 to-black/50 backdrop-blur-xl flex-shrink-0">
-                <div className="flex items-center space-x-2.5">
-                  <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg flex-shrink-0 text-sm">
-                    {user.username.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-semibold truncate text-xs">{user.username}</p>
-                    <p className="text-treasure-400 text-xs font-bold">{user.berrys} ฿</p>
-                  </div>
-                </div>
-              </div>
-            ) : null}
           </div>
-        </>
-      ) : null}
+        </>,
+        document.body
+      )}
 
       {/* Mobile User Profile Modal - Avec Portal pour sortir du header */}
       {isAuthenticated && showUserMenu && createPortal(
