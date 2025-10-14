@@ -30,19 +30,16 @@ server/dist/
 *~
 .DS_Store
 Thumbs.db
+.claude/
 
 # Git
 .git/
 .gitignore
 .gitattributes
 
-# Documentation (sauf README principal)
-TROUBLESHOOTING.md
-INSTALLATION-MANUELLE.md
-GUIDE-DEMARRAGE.md
-NOUVELLES-FONCTIONNALITES.md
-IMAGES-SETUP.md
-DEPLOYMENT.md
+# Documentation (tous les MD sauf README.md principal)
+*.md
+!README.md
 docs/
 
 # Fichiers temporaires
@@ -65,21 +62,48 @@ tests/
 # Base de données de développement
 server/migration_backup_*.sqlite
 server/database.sqlite
+server/database.sqlite-shm
+server/database.sqlite-wal
+server/data/
+server/backups/
+server/logs/
 
-# Scripts de développement
+# Scripts de développement et diagnostic
 diagnostic.bat
 debug.bat
 check-errors.ps1
 deploy.sh
 debug-images.html
+check-docker-achievements.bat
+init-docker-achievements.bat
+init-docker-achievements.sh
+rebuild-backend.bat
+rebuild-backend.sh
+build-docker.sh
+server/diagnose-database.js
+server/verify-migration-state.js
+server/quick-check.js
+server/test-collections.js
+server/fix-schema-version.js
+server/compare-backups.js
+server/emergency-restore.js
+server/restore-from-backup.js
+server/clean-boosters.js
+server/security-check.js
+server/security-penetration-tests.js
+server/test-notification-security.js
+server/update-rewards.cjs
+server/fix-datetime.js
+server/audit-report.json
 
 # Fichiers de configuration spécifiques
 # tsconfig.node.json est nécessaire pour le build
 vite.config.ts.timestamp-*
+audit-report-frontend.json
+test-achievements-api.html
 
-# Cargo/Rust (si présent)
-vegapull/target/
-vegapull/Cargo.lock
+# Cargo/Rust (vegapull pas nécessaire dans les images)
+vegapull/
 
 # Token et fichiers sensibles
 token.json
@@ -94,3 +118,9 @@ token.json
 src/components/ChestAnimation3D.tsx.backup
 dist/assets/three-*.js
 dist/assets/ChestAnimation3D-*.js
+
+# Scripts optionnels
+scripts/download-images-only.cjs
+scripts/download-sample-images.cjs
+scripts/download-zip-images.cjs
+scripts/create-sample-images.js
