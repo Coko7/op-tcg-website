@@ -7,7 +7,6 @@ import { BoosterPack } from '../data/onePieceCards';
 import Card from '../components/Card';
 import CardModal from '../components/CardModal';
 import Timer from '../components/Timer';
-import ChestAnimationCSS from '../components/ChestAnimationCSS';
 import WantedPosterAnimation from '../components/WantedPosterAnimation';
 import Dialog from '../components/ui/Dialog';
 import { useDialog } from '../hooks/useDialog';
@@ -114,12 +113,12 @@ const Boosters: React.FC = () => {
     if (result) {
       setBoosterResult(result);
 
-      // Attendre la fin de l'animation du déroulement du poster
-      // 2500ms (déroulement du poster)
+      // Attendre la fin de l'animation de déchirement du poster
+      // 800ms (déchirement du poster)
       setTimeout(() => {
         setAnimationPhase('deck');
         setRevealedCards(0);
-      }, 2500);
+      }, 800);
 
       // Mettre à jour le statut
       if (result.available_boosters !== undefined) {
@@ -197,12 +196,12 @@ const Boosters: React.FC = () => {
           if (result) {
             setBoosterResult(result);
 
-            // Attendre la fin de l'animation du déroulement du poster
-            // 2500ms (déroulement du poster)
+            // Attendre la fin de l'animation de déchirement du poster
+            // 800ms (déchirement du poster)
             setTimeout(() => {
               setAnimationPhase('deck');
               setRevealedCards(0);
-            }, 2500);
+            }, 800);
 
             // Mettre à jour le solde de Berrys
             const newBalance = await GameService.getBerrysBalance();
