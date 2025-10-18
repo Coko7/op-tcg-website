@@ -114,11 +114,11 @@ const Boosters: React.FC = () => {
       setBoosterResult(result);
 
       // Attendre la fin de l'animation de déchirement du poster
-      // 800ms (déchirement du poster)
+      // 1000ms (déchirement du poster en deux moitiés)
       setTimeout(() => {
         setAnimationPhase('deck');
         setRevealedCards(0);
-      }, 800);
+      }, 1000);
 
       // Mettre à jour le statut
       if (result.available_boosters !== undefined) {
@@ -197,11 +197,11 @@ const Boosters: React.FC = () => {
             setBoosterResult(result);
 
             // Attendre la fin de l'animation de déchirement du poster
-            // 800ms (déchirement du poster)
+            // 1000ms (déchirement du poster en deux moitiés)
             setTimeout(() => {
               setAnimationPhase('deck');
               setRevealedCards(0);
-            }, 800);
+            }, 1000);
 
             // Mettre à jour le solde de Berrys
             const newBalance = await GameService.getBerrysBalance();

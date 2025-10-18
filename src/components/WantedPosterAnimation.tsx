@@ -37,18 +37,18 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       setIsTearing(true);
       // Créer beaucoup de particules de déchirement
       if (canvasRef.current && particlesRef.current.length === 0) {
-        for (let i = 0; i < 80; i++) {
+        for (let i = 0; i < 100; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 4 + 2;
+          const speed = Math.random() * 5 + 2;
           particlesRef.current.push({
             x: canvasRef.current.width / 2,
             y: canvasRef.current.height / 2,
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed - Math.random() * 4,
             rotation: Math.random() * 360,
-            rotationSpeed: (Math.random() - 0.5) * 15,
+            rotationSpeed: (Math.random() - 0.5) * 18,
             alpha: 1,
-            size: Math.random() * 12 + 6,
+            size: Math.random() * 15 + 6,
           });
         }
       }
@@ -76,9 +76,9 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       particlesRef.current.forEach((particle) => {
         particle.x += particle.vx;
         particle.y += particle.vy;
-        particle.vy += 0.2; // Gravité plus forte
+        particle.vy += 0.25; // Gravité plus forte
         particle.rotation += particle.rotationSpeed;
-        particle.alpha -= 0.01;
+        particle.alpha -= 0.012;
 
         if (particle.alpha > 0) {
           ctx.save();
@@ -90,15 +90,15 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
           ctx.fillStyle = '#F5E6D3';
           ctx.beginPath();
           ctx.moveTo(-particle.size / 2, -particle.size / 2);
-          ctx.lineTo(particle.size / 2, -particle.size / 3);
-          ctx.lineTo(particle.size / 3, particle.size / 2);
+          ctx.lineTo(particle.size / 2 + Math.random() * 3, -particle.size / 3);
+          ctx.lineTo(particle.size / 3, particle.size / 2 + Math.random() * 3);
           ctx.lineTo(-particle.size / 3, particle.size / 3);
           ctx.closePath();
           ctx.fill();
 
           // Bordure sombre pour effet de profondeur
           ctx.strokeStyle = '#8B7355';
-          ctx.lineWidth = 1;
+          ctx.lineWidth = 1.5;
           ctx.stroke();
 
           ctx.restore();
@@ -126,12 +126,12 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       setRevealedCount((prev) => {
         const newCount = prev + 1;
         if (newCount >= cards.length) {
-          setTimeout(() => onAnimationComplete?.(), 800);
+          setTimeout(() => onAnimationComplete?.(), 1000);
         }
         return newCount;
       });
       setAnimating(false);
-    }, 600);
+    }, 1000); // Durée de l'animation de déchirement
   };
 
   const getRarityColor = (rarity: string) => {
@@ -181,7 +181,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       {animationPhase === 'idle' && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div
-            className={`relative cursor-pointer transition-all duration-300 hover:scale-105 w-[280px] h-[400px] sm:w-[350px] sm:h-[500px] md:w-[400px] md:h-[580px] ${isTearing ? 'poster-tear-out' : ''}`}
+            className={`relative cursor-pointer transition-all duration-300 hover:scale-105 w-[280px] h-[400px] sm:w-[350px] sm:h-[500px] md:w-[400px] md:h-[580px]`}
             onClick={onClick}
           >
             {/* Poster WANTED vierge - PAPIER OPAQUE */}
@@ -243,12 +243,11 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
                 </div>
               </div>
 
-              {/* Cadre vide pour la photo */}
-              <div className="absolute top-28 sm:top-36 left-1/2 transform -translate-x-1/2 w-40 h-48 sm:w-52 sm:h-60 md:w-60 md:h-72 bg-gradient-to-br from-gray-300 to-gray-400 border-4 border-black shadow-xl flex items-center justify-center">
-                <div className="text-center opacity-30">
-                  <div className="text-6xl sm:text-7xl mb-2">📸</div>
-                  <p className="text-sm sm:text-base text-gray-600 font-bold">NO PHOTO</p>
-                </div>
+              {/* Cadre vide pour la photo - même couleur que le poster */}
+              <div className="absolute top-28 sm:top-36 left-1/2 transform -translate-x-1/2 w-40 h-48 sm:w-52 sm:h-60 md:w-60 md:h-72 border-4 border-black shadow-xl"
+                style={{
+                  background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)'
+                }}>
               </div>
 
               {/* DEAD OR ALIVE */}
@@ -282,7 +281,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
         </div>
       )}
 
-      {/* Phase OPENING - Animation de déchirement */}
+      {/* Phase OPENING - Animation de déchirement vertical au milieu */}
       {animationPhase === 'opening' && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
           {/* Message d'ouverture */}
@@ -313,9 +312,9 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
 
           {/* Pile de posters WANTED */}
           <div
-            className="relative cursor-pointer hover:scale-105 transition-transform w-[220px] h-[320px] sm:w-[280px] sm:h-[400px] md:w-[320px] md:h-[460px] mb-4 sm:mb-0"
+            className="relative cursor-pointer hover:scale-105 transition-transform w-[220px] h-[340px] sm:w-[280px] sm:h-[420px] md:w-[320px] md:h-[480px] mb-4 sm:mb-0"
             onClick={handlePosterClick}
-            style={{ perspective: '1000px' }}
+            style={{ perspective: '1500px' }}
           >
             {cards
               .slice(revealedCount, Math.min(revealedCount + 3, cards.length))
@@ -327,141 +326,231 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
                 return (
                   <div
                     key={`wanted-${cardIndex}`}
-                    className={`absolute w-full h-full ${
-                      isTop && animating ? 'poster-fly-away' : ''
-                    } ${isTop && !animating ? 'hover:translate-y-[-8px] hover:rotate-2 transition-all duration-300' : ''}`}
+                    className={`absolute w-full h-full ${isTop && !animating ? 'hover:translate-y-[-8px] hover:rotate-2 transition-all duration-300' : ''}`}
                     style={{
                       transform: isTop && animating ? '' : `translateY(${offset}px) translateX(${i * 3}px) rotate(${i * 2 - 2}deg)`,
                       zIndex: 10 - i,
                       transformStyle: 'preserve-3d',
+                      opacity: isTop || !animating ? 1 : 1, // Garder opacité à 1 pour éviter le bug visuel
                     }}
                   >
-                    {/* Poster WANTED complet avec la carte - PAPIER OPAQUE ET RÉALISTE */}
-                    <div className="relative w-full h-full">
-                      {/* Papier du poster - OPAQUE */}
-                      <div className="absolute inset-0 rounded-lg shadow-2xl border-8 border-black overflow-hidden"
-                        style={{
-                          background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
-                          boxShadow: isTop
-                            ? `0 25px 60px ${getRarityColor(card.rarity)}99, 0 0 80px ${getRarityColor(card.rarity)}66, inset 0 2px 0 rgba(255,255,255,0.4), inset 0 -2px 10px rgba(0,0,0,0.15)`
-                            : '0 15px 40px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -2px 8px rgba(0,0,0,0.1)',
+                    {/* Animation de déchirement en deux moitiés */}
+                    {isTop && animating && (
+                      <>
+                        {/* Moitié gauche */}
+                        <div className="absolute inset-0 poster-tear-left" style={{
+                          clipPath: 'polygon(0% 0%, 48% 2%, 45% 10%, 49% 20%, 46% 30%, 50% 40%, 47% 50%, 49% 60%, 46% 70%, 48% 80%, 45% 90%, 47% 98%, 48% 100%, 0% 100%)'
                         }}>
-
-                        {/* Texture papier ancien avec taches */}
-                        <div className="absolute inset-0 opacity-15 mix-blend-multiply pointer-events-none">
-                          {[...Array(8)].map((_, idx) => (
-                            <div
-                              key={idx}
-                              className="absolute rounded-full bg-amber-900"
+                          {/* Contenu du poster - moitié gauche */}
+                          <div className="relative w-full h-full">
+                            <div className="absolute inset-0 rounded-lg shadow-2xl border-8 border-black overflow-hidden"
                               style={{
-                                width: `${Math.random() * 25 + 8}px`,
-                                height: `${Math.random() * 25 + 8}px`,
-                                top: `${Math.random() * 100}%`,
-                                left: `${Math.random() * 100}%`,
-                                opacity: Math.random() * 0.4,
-                              }}
-                            />
-                          ))}
-                        </div>
-
-                        {/* Grain du papier */}
-                        <div className="absolute inset-0 opacity-10" style={{
-                          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")',
-                          backgroundSize: '150px 150px'
-                        }} />
-
-                        {/* WANTED titre */}
-                        <div className="absolute top-2 sm:top-4 left-0 right-0 text-center z-10">
-                          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-black tracking-wider select-none"
-                            style={{
-                              fontFamily: 'Impact, Arial Black, sans-serif',
-                              textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
-                              WebkitTextStroke: '1px #2D1810'
-                            }}>
-                            WANTED
-                          </h2>
-                        </div>
-
-                        {/* Image de la carte comme photo du wanted - BIEN CENTRÉE ET VISIBLE */}
-                        <div className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 w-[150px] h-[170px] sm:w-[190px] sm:h-[220px] md:w-[220px] md:h-[250px] bg-white border-4 border-black shadow-lg overflow-hidden">
-                          {card.image_url ? (
-                            <img
-                              src={card.image_url}
-                              alt={card.name}
-                              className="w-full h-full object-contain bg-white"
-                              style={{ imageRendering: 'crisp-edges' }}
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/220x250?text=No+Image';
-                              }}
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                              <span className="text-4xl">🃏</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Nom du personnage */}
-                        <div className="absolute top-[195px] sm:top-[250px] md:top-[280px] left-0 right-0 text-center px-2">
-                          <p className="text-xs sm:text-sm md:text-base font-bold text-black truncate select-none"
-                            style={{
-                              fontFamily: 'Arial Black, sans-serif',
-                              textShadow: '1px 1px 0px rgba(255,255,255,0.5)'
-                            }}>
-                            {card.name}
-                          </p>
-                        </div>
-
-                        {/* DEAD OR ALIVE */}
-                        <div className="absolute top-[212px] sm:top-[268px] md:top-[300px] left-0 right-0 text-center">
-                          <p className="text-xs sm:text-sm md:text-base font-bold text-black tracking-widest select-none"
-                            style={{
-                              fontFamily: 'Impact, sans-serif',
-                              textShadow: '1px 1px 0px rgba(0,0,0,0.2)'
-                            }}>
-                            DEAD OR ALIVE
-                          </p>
-                        </div>
-
-                        {/* Prime (Bounty) - OPAQUE */}
-                        <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 text-center">
-                          <div className="inline-block bg-white px-3 py-1 sm:px-4 sm:py-2 rounded border-3 border-black shadow-lg">
-                            <p className="text-xs sm:text-sm font-semibold text-gray-700">BOUNTY</p>
-                            <p className="text-lg sm:text-xl md:text-2xl font-black select-none"
-                              style={{
-                                fontFamily: 'Impact, Arial Black, sans-serif',
-                                color: getRarityColor(card.rarity),
-                                textShadow: '1px 1px 0px rgba(0,0,0,0.3)'
+                                background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
+                                boxShadow: `0 25px 60px ${getRarityColor(card.rarity)}99, 0 0 80px ${getRarityColor(card.rarity)}66`,
                               }}>
-                              {getBountyAmount(card.rarity)} <span className="text-sm">฿</span>
-                            </p>
+                              {/* Contenu identique au poster complet */}
+                              <div className="absolute inset-0 opacity-15 mix-blend-multiply pointer-events-none">
+                                {[...Array(8)].map((_, idx) => (
+                                  <div key={idx} className="absolute rounded-full bg-amber-900" style={{
+                                    width: `${Math.random() * 25 + 8}px`,
+                                    height: `${Math.random() * 25 + 8}px`,
+                                    top: `${Math.random() * 100}%`,
+                                    left: `${Math.random() * 100}%`,
+                                    opacity: Math.random() * 0.4,
+                                  }} />
+                                ))}
+                              </div>
+                              <div className="absolute top-2 sm:top-4 left-0 right-0 text-center z-10">
+                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-black tracking-wider select-none"
+                                  style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>WANTED</h2>
+                              </div>
+                              <div className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 w-[150px] h-[170px] sm:w-[190px] sm:h-[220px] md:w-[220px] md:h-[250px] border-4 border-black shadow-lg overflow-hidden"
+                                style={{ background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)' }}>
+                                {card.image_url && (
+                                  <img src={card.image_url} alt={card.name} className="w-full h-full object-cover"
+                                    style={{ imageRendering: 'high-quality' }} />
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Logo Marine */}
-                        <div className="absolute top-2 right-2 w-6 h-6 sm:w-8 sm:h-8 opacity-60">
-                          <div className="text-lg sm:text-xl" style={{ filter: 'grayscale(1) brightness(0.3)' }}>🕊️</div>
+                        {/* Moitié droite */}
+                        <div className="absolute inset-0 poster-tear-right" style={{
+                          clipPath: 'polygon(52% 0%, 100% 0%, 100% 100%, 52% 100%, 53% 98%, 51% 90%, 55% 80%, 52% 70%, 54% 60%, 53% 50%, 54% 40%, 51% 30%, 53% 20%, 52% 10%, 55% 2%)'
+                        }}>
+                          {/* Contenu du poster - moitié droite */}
+                          <div className="relative w-full h-full">
+                            <div className="absolute inset-0 rounded-lg shadow-2xl border-8 border-black overflow-hidden"
+                              style={{
+                                background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
+                                boxShadow: `0 25px 60px ${getRarityColor(card.rarity)}99, 0 0 80px ${getRarityColor(card.rarity)}66`,
+                              }}>
+                              <div className="absolute inset-0 opacity-15 mix-blend-multiply pointer-events-none">
+                                {[...Array(8)].map((_, idx) => (
+                                  <div key={idx} className="absolute rounded-full bg-amber-900" style={{
+                                    width: `${Math.random() * 25 + 8}px`,
+                                    height: `${Math.random() * 25 + 8}px`,
+                                    top: `${Math.random() * 100}%`,
+                                    left: `${Math.random() * 100}%`,
+                                    opacity: Math.random() * 0.4,
+                                  }} />
+                                ))}
+                              </div>
+                              <div className="absolute top-2 sm:top-4 left-0 right-0 text-center z-10">
+                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-black tracking-wider select-none"
+                                  style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>WANTED</h2>
+                              </div>
+                              <div className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 w-[150px] h-[170px] sm:w-[190px] sm:h-[220px] md:w-[220px] md:h-[250px] border-4 border-black shadow-lg overflow-hidden"
+                                style={{ background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)' }}>
+                                {card.image_url && (
+                                  <img src={card.image_url} alt={card.name} className="w-full h-full object-cover"
+                                    style={{ imageRendering: 'high-quality' }} />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Poster WANTED complet (visible quand pas en animation) */}
+                    {(!isTop || !animating) && (
+                      <div className="relative w-full h-full">
+                        {/* Papier du poster - OPAQUE */}
+                        <div className="absolute inset-0 rounded-lg shadow-2xl border-8 border-black overflow-hidden"
+                          style={{
+                            background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
+                            boxShadow: isTop
+                              ? `0 25px 60px ${getRarityColor(card.rarity)}99, 0 0 80px ${getRarityColor(card.rarity)}66, inset 0 2px 0 rgba(255,255,255,0.4), inset 0 -2px 10px rgba(0,0,0,0.15)`
+                              : '0 15px 40px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -2px 8px rgba(0,0,0,0.1)',
+                          }}>
+
+                          {/* Texture papier ancien avec taches */}
+                          <div className="absolute inset-0 opacity-15 mix-blend-multiply pointer-events-none">
+                            {[...Array(8)].map((_, idx) => (
+                              <div
+                                key={idx}
+                                className="absolute rounded-full bg-amber-900"
+                                style={{
+                                  width: `${Math.random() * 25 + 8}px`,
+                                  height: `${Math.random() * 25 + 8}px`,
+                                  top: `${Math.random() * 100}%`,
+                                  left: `${Math.random() * 100}%`,
+                                  opacity: Math.random() * 0.4,
+                                }}
+                              />
+                            ))}
+                          </div>
+
+                          {/* Grain du papier */}
+                          <div className="absolute inset-0 opacity-10" style={{
+                            backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")',
+                            backgroundSize: '150px 150px'
+                          }} />
+
+                          {/* WANTED titre */}
+                          <div className="absolute top-2 sm:top-4 left-0 right-0 text-center z-10">
+                            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-black tracking-wider select-none"
+                              style={{
+                                fontFamily: 'Impact, Arial Black, sans-serif',
+                                textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
+                                WebkitTextStroke: '1px #2D1810'
+                              }}>
+                              WANTED
+                            </h2>
+                          </div>
+
+                          {/* Image de la carte - HAUTE QUALITÉ avec fond couleur poster */}
+                          <div className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 w-[150px] h-[170px] sm:w-[190px] sm:h-[220px] md:w-[220px] md:h-[250px] border-4 border-black shadow-lg overflow-hidden"
+                            style={{
+                              background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)'
+                            }}>
+                            {card.image_url ? (
+                              <img
+                                src={card.image_url}
+                                alt={card.name}
+                                className="w-full h-full object-cover"
+                                style={{
+                                  imageRendering: 'high-quality',
+                                  WebkitFontSmoothing: 'antialiased',
+                                }}
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/220x250?text=No+Image';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-4xl opacity-30">🃏</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Nom du personnage - SOUS LE CADRE */}
+                          <div className="absolute top-[195px] sm:top-[250px] md:top-[280px] left-0 right-0 text-center px-2">
+                            <p className="text-xs sm:text-sm md:text-base font-bold text-black truncate select-none"
+                              style={{
+                                fontFamily: 'Arial Black, sans-serif',
+                                textShadow: '1px 1px 0px rgba(255,255,255,0.5)'
+                              }}>
+                              {card.name}
+                            </p>
+                          </div>
+
+                          {/* DEAD OR ALIVE */}
+                          <div className="absolute top-[212px] sm:top-[268px] md:top-[300px] left-0 right-0 text-center">
+                            <p className="text-xs sm:text-sm md:text-base font-bold text-black tracking-widest select-none"
+                              style={{
+                                fontFamily: 'Impact, sans-serif',
+                                textShadow: '1px 1px 0px rgba(0,0,0,0.2)'
+                              }}>
+                              DEAD OR ALIVE
+                            </p>
+                          </div>
+
+                          {/* Prime (Bounty) - SOUS LE CADRE avec fond couleur poster */}
+                          <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 text-center">
+                            <div className="inline-block px-3 py-1 sm:px-4 sm:py-2 rounded border-3 border-black shadow-lg"
+                              style={{
+                                background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)'
+                              }}>
+                              <p className="text-xs sm:text-sm font-semibold text-gray-700">BOUNTY</p>
+                              <p className="text-lg sm:text-xl md:text-2xl font-black select-none"
+                                style={{
+                                  fontFamily: 'Impact, Arial Black, sans-serif',
+                                  color: getRarityColor(card.rarity),
+                                  textShadow: '1px 1px 0px rgba(0,0,0,0.3)'
+                                }}>
+                                {getBountyAmount(card.rarity)} <span className="text-sm">฿</span>
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Logo Marine */}
+                          <div className="absolute top-2 right-2 w-6 h-6 sm:w-8 sm:h-8 opacity-60">
+                            <div className="text-lg sm:text-xl" style={{ filter: 'grayscale(1) brightness(0.3)' }}>🕊️</div>
+                          </div>
+
+                          {/* Bordure déchirée */}
+                          <div className="absolute inset-0 border-2 border-black/50 rounded-lg pointer-events-none" style={{
+                            clipPath: 'polygon(0% 2%, 3% 0%, 7% 2%, 10% 0%, 14% 2%, 17% 0%, 21% 2%, 24% 0%, 28% 2%, 31% 0%, 35% 2%, 38% 0%, 42% 2%, 45% 0%, 49% 2%, 52% 0%, 56% 2%, 59% 0%, 63% 2%, 66% 0%, 70% 2%, 73% 0%, 77% 2%, 80% 0%, 84% 2%, 87% 0%, 91% 2%, 94% 0%, 98% 2%, 100% 0%, 100% 98%, 98% 100%, 94% 98%, 91% 100%, 87% 98%, 84% 100%, 80% 98%, 77% 100%, 73% 98%, 70% 100%, 66% 98%, 63% 100%, 59% 98%, 56% 100%, 52% 98%, 49% 100%, 45% 98%, 42% 100%, 38% 98%, 35% 100%, 31% 98%, 28% 100%, 24% 98%, 21% 100%, 17% 98%, 14% 100%, 10% 98%, 7% 100%, 3% 98%, 0% 100%, 0% 2%)'
+                          }} />
                         </div>
 
-                        {/* Bordure déchirée */}
-                        <div className="absolute inset-0 border-2 border-black/50 rounded-lg pointer-events-none" style={{
-                          clipPath: 'polygon(0% 2%, 3% 0%, 7% 2%, 10% 0%, 14% 2%, 17% 0%, 21% 2%, 24% 0%, 28% 2%, 31% 0%, 35% 2%, 38% 0%, 42% 2%, 45% 0%, 49% 2%, 52% 0%, 56% 2%, 59% 0%, 63% 2%, 66% 0%, 70% 2%, 73% 0%, 77% 2%, 80% 0%, 84% 2%, 87% 0%, 91% 2%, 94% 0%, 98% 2%, 100% 0%, 100% 98%, 98% 100%, 94% 98%, 91% 100%, 87% 98%, 84% 100%, 80% 98%, 77% 100%, 73% 98%, 70% 100%, 66% 98%, 63% 100%, 59% 98%, 56% 100%, 52% 98%, 49% 100%, 45% 98%, 42% 100%, 38% 98%, 35% 100%, 31% 98%, 28% 100%, 24% 98%, 21% 100%, 17% 98%, 14% 100%, 10% 98%, 7% 100%, 3% 98%, 0% 100%, 0% 2%)'
-                        }} />
+                        {/* Effet de brillance sur le poster du dessus */}
+                        {isTop && (
+                          <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-transparent rounded-lg pointer-events-none" />
+                        )}
+
+                        {/* Ombre portée progressive pour donner effet de pile */}
+                        {!isTop && (
+                          <div
+                            className="absolute inset-0 bg-black rounded-lg pointer-events-none"
+                            style={{ opacity: i * 0.15 }}
+                          />
+                        )}
                       </div>
-
-                      {/* Effet de brillance sur le poster du dessus */}
-                      {isTop && (
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-transparent rounded-lg pointer-events-none" />
-                      )}
-
-                      {/* Ombre portée progressive pour donner effet de pile */}
-                      {!isTop && (
-                        <div
-                          className="absolute inset-0 bg-black rounded-lg pointer-events-none"
-                          style={{ opacity: i * 0.15 }}
-                        />
-                      )}
-                    </div>
+                    )}
                   </div>
                 );
               })}
@@ -484,44 +573,44 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       )}
 
       <style>{`
-        /* Animation de déchirement et disparition */
-        @keyframes tear-out {
+        /* Animation de déchirement - moitié gauche */}
+        @keyframes tear-left {
           0% {
-            transform: scale(1) rotate(0deg);
+            transform: translateX(0) rotate(0deg);
             opacity: 1;
           }
           50% {
-            transform: scale(1.1) rotate(5deg);
-            opacity: 0.8;
+            transform: translateX(-30px) rotate(-8deg);
+            opacity: 0.9;
           }
           100% {
-            transform: scale(0.3) rotate(180deg);
+            transform: translateX(-300%) rotate(-25deg);
             opacity: 0;
           }
         }
 
-        .poster-tear-out {
-          animation: tear-out 0.8s cubic-bezier(0.6, 0.04, 0.98, 0.335) forwards;
+        .poster-tear-left {
+          animation: tear-left 1s cubic-bezier(0.6, 0.04, 0.98, 0.335) forwards;
         }
 
-        /* Animation du poster qui s'envole */
-        @keyframes poster-fly {
+        /* Animation de déchirement - moitié droite */}
+        @keyframes tear-right {
           0% {
-            transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+            transform: translateX(0) rotate(0deg);
             opacity: 1;
           }
-          30% {
-            transform: translateY(-20px) translateX(10px) rotate(5deg) scale(1.05);
-            opacity: 1;
+          50% {
+            transform: translateX(30px) rotate(8deg);
+            opacity: 0.9;
           }
           100% {
-            transform: translateY(-100px) translateX(-200%) rotate(-20deg) scale(0.8);
+            transform: translateX(300%) rotate(25deg);
             opacity: 0;
           }
         }
 
-        .poster-fly-away {
-          animation: poster-fly 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        .poster-tear-right {
+          animation: tear-right 1s cubic-bezier(0.6, 0.04, 0.98, 0.335) forwards;
         }
       `}</style>
     </div>
