@@ -8,6 +8,7 @@ import Card from '../components/Card';
 import CardModal from '../components/CardModal';
 import Timer from '../components/Timer';
 import ChestAnimationCSS from '../components/ChestAnimationCSS';
+import WantedPosterAnimation from '../components/WantedPosterAnimation';
 import Dialog from '../components/ui/Dialog';
 import { useDialog } from '../hooks/useDialog';
 
@@ -113,12 +114,12 @@ const Boosters: React.FC = () => {
     if (result) {
       setBoosterResult(result);
 
-      // Attendre la fin de l'animation du coffre + toutes les cartes qui sortent une par une
-      // 1000ms (ouverture coffre) + 1200ms * 5 cartes + 2500ms (animation vol dernière carte) = 9500ms
+      // Attendre la fin de l'animation du déroulement du poster
+      // 2500ms (déroulement du poster)
       setTimeout(() => {
         setAnimationPhase('deck');
         setRevealedCards(0);
-      }, 9500);
+      }, 2500);
 
       // Mettre à jour le statut
       if (result.available_boosters !== undefined) {
@@ -196,12 +197,12 @@ const Boosters: React.FC = () => {
           if (result) {
             setBoosterResult(result);
 
-            // Attendre la fin de l'animation du coffre + toutes les cartes qui sortent une par une
-            // 1000ms (ouverture coffre) + 1200ms * 5 cartes + 2500ms (animation vol dernière carte) = 9500ms
+            // Attendre la fin de l'animation du déroulement du poster
+            // 2500ms (déroulement du poster)
             setTimeout(() => {
               setAnimationPhase('deck');
               setRevealedCards(0);
-            }, 9500);
+            }, 2500);
 
             // Mettre à jour le solde de Berrys
             const newBalance = await GameService.getBerrysBalance();
@@ -342,7 +343,7 @@ const Boosters: React.FC = () => {
       {animationPhase === 'idle' && (
         <div className="text-center space-y-6 sm:space-y-8">
           <div className="mb-8">
-            <ChestAnimationCSS
+            <WantedPosterAnimation
               isOpening={false}
               animationPhase={animationPhase}
               onClick={handleOpenBooster}
@@ -405,7 +406,7 @@ const Boosters: React.FC = () => {
 
       {animationPhase === 'opening' && (
         <div className="text-center space-y-8">
-          <ChestAnimationCSS
+          <WantedPosterAnimation
             isOpening={true}
             animationPhase={animationPhase}
             cards={boosterResult?.cards}
@@ -416,7 +417,7 @@ const Boosters: React.FC = () => {
 
       {animationPhase === 'deck' && boosterResult && (
         <div className="w-full max-w-6xl mx-auto px-2">
-          <ChestAnimationCSS
+          <WantedPosterAnimation
             isOpening={true}
             animationPhase={animationPhase}
             cards={boosterResult.cards}
