@@ -368,7 +368,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
                                 style={{ background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)' }}>
                                 {card.image_url && (
                                   <img src={card.image_url} alt={card.name} className="w-full h-full object-cover"
-                                    style={{ imageRendering: 'high-quality' }} />
+                                    style={{ imageRendering: 'auto' }} />
                                 )}
                               </div>
                             </div>
@@ -405,7 +405,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
                                 style={{ background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)' }}>
                                 {card.image_url && (
                                   <img src={card.image_url} alt={card.name} className="w-full h-full object-cover"
-                                    style={{ imageRendering: 'high-quality' }} />
+                                    style={{ imageRendering: 'auto' }} />
                                 )}
                               </div>
                             </div>
@@ -472,7 +472,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
                                 alt={card.name}
                                 className="w-full h-full object-cover"
                                 style={{
-                                  imageRendering: 'high-quality',
+                                  imageRendering: 'auto',
                                   WebkitFontSmoothing: 'antialiased',
                                 }}
                                 onError={(e) => {
