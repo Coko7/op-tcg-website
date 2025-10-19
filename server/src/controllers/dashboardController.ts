@@ -13,8 +13,7 @@ export class DashboardController {
           COUNT(*) as total_users,
           COUNT(CASE WHEN is_admin = 1 THEN 1 END) as total_admins,
           COUNT(CASE WHEN last_login >= datetime('now', '-24 hours') THEN 1 END) as active_today,
-          COUNT(CASE WHEN last_login >= datetime('now', '-7 days') THEN 1 END) as active_week,
-          COUNT(CASE WHEN created_at >= datetime('now', '-7 days') THEN 1 END) as new_users_week,
+          COUNT(CASE WHEN created_at >= datetime('now', '-1 day', 'start of day') THEN 1 END) as new_today,
           SUM(berrys) as total_berrys,
           AVG(berrys) as avg_berrys
         FROM users
@@ -24,27 +23,36 @@ export class DashboardController {
       // Statistiques cartes et collections
       const cardStats = await Database.get<any>(`
         SELECT
-          COUNT(*) as total_cards,
-          COUNT(CASE WHEN is_active = 1 THEN 1 END) as active_cards
-        FROM cards
+          COUNT(DISTINCT card_id) as unique_cards,
+          SUM(quantity) as total_collected
+        FROM user_collections
       `);
 
-      const collectionStats = await Database.get<any>(`
-        SELECT
-          COUNT(*) as total_collections,
-          SUM(quantity) as total_cards_owned,
-          COUNT(DISTINCT user_id) as users_with_cards,
-          AVG(quantity) as avg_cards_per_user
-        FROM user_collections
+      const avgCardsPerUser = await Database.get<any>(`
+        SELECT AVG(total_cards) as avg_per_user
+        FROM (
+          SELECT COUNT(DISTINCT card_id) as total_cards
+          FROM user_collections
+          GROUP BY user_id
+        )
       `);
 
       // Statistiques boosters
       const boosterStats = await Database.get<any>(`
         SELECT
-          COUNT(*) as total_openings,
-          COUNT(CASE WHEN opened_at >= datetime('now', '-24 hours') THEN 1 END) as opened_today,
-          COUNT(CASE WHEN opened_at >= datetime('now', '-7 days') THEN 1 END) as opened_week
+          COUNT(*) as total_opened,
+          COUNT(CASE WHEN opened_at >= datetime('now', '-7 days') THEN 1 END) as total_purchased
         FROM booster_openings
+      `);
+
+      // Booster le plus populaire
+      const mostPopularBooster = await Database.get<any>(`
+        SELECT b.name, COUNT(*) as count
+        FROM booster_openings bo
+        JOIN boosters b ON bo.booster_id = b.id
+        GROUP BY bo.booster_id
+        ORDER BY count DESC
+        LIMIT 1
       `);
 
       // Top joueurs par Berrys
@@ -52,69 +60,48 @@ export class DashboardController {
         SELECT
           username,
           berrys,
-          (SELECT COUNT(*) FROM user_collections WHERE user_id = users.id) as total_cards,
-          (SELECT SUM(quantity) FROM user_collections WHERE user_id = users.id) as cards_owned
+          (SELECT COUNT(DISTINCT card_id) FROM user_collections WHERE user_id = users.id) as cards_count
         FROM users
         WHERE is_active = 1 AND is_admin = 0
         ORDER BY berrys DESC
         LIMIT 10
       `);
 
-      // Statistiques achievements
-      const achievementStats = await Database.get<any>(`
-        SELECT
-          COUNT(DISTINCT achievement_id) as total_achievements,
-          COUNT(*) as total_completions,
-          COUNT(CASE WHEN is_claimed = 1 THEN 1 END) as total_claimed
-        FROM user_achievements
-      `);
-
       // Statistiques de sécurité (dernières 24h)
       const securityStats = await Database.get<any>(`
         SELECT
           COUNT(CASE WHEN action = 'failed_login_attempt' THEN 1 END) as failed_logins,
-          COUNT(CASE WHEN action = 'suspicious_activity' THEN 1 END) as suspicious_activities,
-          COUNT(CASE WHEN severity = 'critical' THEN 1 END) as critical_events
+          COUNT(CASE WHEN action = 'suspicious_activity' THEN 1 END) as suspicious_activities
         FROM audit_logs
         WHERE created_at >= datetime('now', '-24 hours')
       `);
 
       res.json({
         success: true,
-        data: {
+        stats: {
           users: {
-            total: userStats.total_users,
-            admins: userStats.total_admins,
-            active_today: userStats.active_today,
-            active_week: userStats.active_week,
-            new_week: userStats.new_users_week,
+            total: userStats.total_users || 0,
+            active: userStats.active_today || 0,
+            new_today: userStats.new_today || 0,
+            admins: userStats.total_admins || 0
+          },
+          economy: {
             total_berrys: userStats.total_berrys || 0,
             avg_berrys: Math.round(userStats.avg_berrys || 0)
           },
-          cards: {
-            total: cardStats.total_cards,
-            active: cardStats.active_cards
-          },
-          collections: {
-            total: collectionStats.total_collections || 0,
-            total_cards_owned: collectionStats.total_cards_owned || 0,
-            users_with_cards: collectionStats.users_with_cards || 0,
-            avg_per_user: Math.round(collectionStats.avg_cards_per_user || 0)
-          },
           boosters: {
-            total_openings: boosterStats.total_openings,
-            opened_today: boosterStats.opened_today,
-            opened_week: boosterStats.opened_week
+            total_opened: boosterStats.total_opened || 0,
+            total_purchased: boosterStats.total_purchased || 0,
+            most_popular: mostPopularBooster?.name || 'N/A'
           },
-          achievements: {
-            total: achievementStats.total_achievements || 0,
-            completions: achievementStats.total_completions || 0,
-            claimed: achievementStats.total_claimed || 0
+          cards: {
+            total_collected: cardStats.total_collected || 0,
+            unique_cards: cardStats.unique_cards || 0,
+            avg_per_user: Math.round(avgCardsPerUser?.avg_per_user || 0)
           },
           security: {
             failed_logins_24h: securityStats.failed_logins || 0,
-            suspicious_activities_24h: securityStats.suspicious_activities || 0,
-            critical_events_24h: securityStats.critical_events || 0
+            suspicious_activities: securityStats.suspicious_activities || 0
           },
           top_players: topPlayers
         }
@@ -168,26 +155,64 @@ export class DashboardController {
 
       const activities = await Database.all(`
         SELECT
-          action,
-          user_id,
-          details,
-          severity,
-          created_at
-        FROM audit_logs
-        WHERE action IN (
+          al.id,
+          al.action as type,
+          al.details,
+          al.created_at,
+          u.username
+        FROM audit_logs al
+        LEFT JOIN users u ON al.user_id = u.id
+        WHERE al.action IN (
           'user_login',
           'user_register',
           'booster_opened',
           'booster_purchased',
-          'achievement_claimed'
+          'achievement_claimed',
+          'card_received'
         )
-        ORDER BY created_at DESC
+        ORDER BY al.created_at DESC
         LIMIT ?
       `, [limit]);
 
+      // Formater les activités avec des descriptions lisibles
+      const formattedActivities = activities.map((activity: any) => {
+        let description = '';
+
+        switch (activity.type) {
+          case 'user_login':
+            description = `Connexion au jeu`;
+            break;
+          case 'user_register':
+            description = `Nouvel utilisateur inscrit`;
+            break;
+          case 'booster_opened':
+            description = `Ouverture d'un booster`;
+            break;
+          case 'booster_purchased':
+            description = `Achat d'un booster`;
+            break;
+          case 'achievement_claimed':
+            description = `Succès réclamé`;
+            break;
+          case 'card_received':
+            description = `Nouvelle carte obtenue`;
+            break;
+          default:
+            description = activity.type;
+        }
+
+        return {
+          id: activity.id,
+          type: activity.type,
+          description: description,
+          created_at: activity.created_at,
+          username: activity.username || 'Système'
+        };
+      });
+
       res.json({
         success: true,
-        data: activities
+        activities: formattedActivities
       });
 
     } catch (error) {
