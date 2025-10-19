@@ -184,9 +184,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       <div className="absolute top-2 sm:top-4 left-0 right-0 text-center z-10">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-black tracking-wider select-none"
           style={{
-            fontFamily: 'Impact, Arial Black, sans-serif',
-            textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
-            WebkitTextStroke: '1px #2D1810'
+            fontFamily: 'Impact, Arial Black, sans-serif'
           }}>
           WANTED
         </h2>
@@ -204,8 +202,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       <div className="absolute top-[244px] sm:top-[300px] md:top-[338px] left-0 right-0 text-center z-20">
         <p className="text-xs sm:text-sm md:text-base font-bold text-black tracking-widest select-none"
           style={{
-            fontFamily: 'Impact, sans-serif',
-            textShadow: '1px 1px 0px rgba(0,0,0,0.2)'
+            fontFamily: 'Impact, sans-serif'
           }}>
           DEAD OR ALIVE
         </p>
@@ -254,9 +251,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       <div className="absolute top-2 sm:top-4 left-0 right-0 text-center z-10">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-black tracking-wider select-none"
           style={{
-            fontFamily: 'Impact, Arial Black, sans-serif',
-            textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
-            WebkitTextStroke: '1px #2D1810'
+            fontFamily: 'Impact, Arial Black, sans-serif'
           }}>
           WANTED
         </h2>
@@ -288,7 +283,6 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
           style={{
             fontFamily: 'Helvetica, Arial, sans-serif',
             fontWeight: '600',
-            textShadow: '0 1px 2px rgba(255,255,255,0.9), 1px 1px 1px rgba(0,0,0,0.25)',
             WebkitFontSmoothing: 'antialiased',
             letterSpacing: '0.3px'
           }}>
@@ -300,8 +294,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       <div className="absolute top-[266px] sm:top-[323px] md:top-[363px] left-0 right-0 text-center z-20">
         <p className="text-xs sm:text-sm md:text-base font-bold text-black tracking-widest select-none"
           style={{
-            fontFamily: 'Impact, sans-serif',
-            textShadow: '1px 1px 0px rgba(0,0,0,0.2)'
+            fontFamily: 'Impact, sans-serif'
           }}>
           DEAD OR ALIVE
         </p>
@@ -314,8 +307,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
           <p className="text-base sm:text-lg md:text-xl font-black select-none"
             style={{
               fontFamily: 'Impact, Arial Black, sans-serif',
-              color: getRarityColor(card.rarity),
-              textShadow: '1px 1px 0px rgba(0,0,0,0.3)'
+              color: getRarityColor(card.rarity)
             }}>
             {getBountyAmount(card.rarity)} <span className="text-sm">฿</span>
           </p>
