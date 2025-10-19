@@ -131,13 +131,20 @@ export class WorldMapController {
         quest.duration_hours
       );
 
-      await AuditLogger.log({
-        type: 'quest_started',
-        quest_id: questId,
-        quest_name: quest.name,
-        crew_member_ids: JSON.stringify(crewMemberIds),
-        duration_hours: quest.duration_hours
-      }, req, userId);
+      // Log audit
+      try {
+        await AuditLogger.log({
+          action: 'quest_started',
+          details: JSON.stringify({
+            quest_id: questId,
+            quest_name: quest.name,
+            crew_member_ids: crewMemberIds,
+            duration_hours: quest.duration_hours
+          })
+        }, req, userId);
+      } catch (auditError) {
+        console.error('Audit log error:', auditError);
+      }
 
       res.json({
         success: true,
@@ -226,12 +233,19 @@ export class WorldMapController {
         }
       });
 
-      await AuditLogger.log({
-        type: 'quest_completed',
-        quest_id: quest.id,
-        quest_name: quest.name,
-        reward_berrys: quest.reward_berrys
-      }, req, userId);
+      // Log audit
+      try {
+        await AuditLogger.log({
+          action: 'quest_completed',
+          details: JSON.stringify({
+            quest_id: quest.id,
+            quest_name: quest.name,
+            reward_berrys: quest.reward_berrys
+          })
+        }, req, userId);
+      } catch (auditError) {
+        console.error('Audit log error:', auditError);
+      }
 
       res.json({
         success: true,
@@ -314,13 +328,20 @@ export class WorldMapController {
         }
       });
 
-      await AuditLogger.log({
-        type: 'island_reward_claimed',
-        island_id: islandId,
-        island_name: island.name,
-        reward_type: island.final_reward_type,
-        reward_value: island.final_reward_value || island.final_reward_crew_member_id
-      }, req, userId);
+      // Log audit
+      try {
+        await AuditLogger.log({
+          action: 'island_reward_claimed',
+          details: JSON.stringify({
+            island_id: islandId,
+            island_name: island.name,
+            reward_type: island.final_reward_type,
+            reward_value: island.final_reward_value || island.final_reward_crew_member_id
+          })
+        }, req, userId);
+      } catch (auditError) {
+        console.error('Audit log error:', auditError);
+      }
 
       res.json({
         success: true,

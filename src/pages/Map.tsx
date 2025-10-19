@@ -38,7 +38,7 @@ const Map: React.FC = () => {
       const data = await worldMapService.getMapData();
       setMapData(data);
     } catch (error: any) {
-      showToast(error.response?.data?.error || 'Erreur lors du chargement de la carte', 'error');
+      showToast('error', error.response?.data?.error || 'Erreur lors du chargement de la carte');
     } finally {
       setLoading(false);
     }
@@ -46,7 +46,7 @@ const Map: React.FC = () => {
 
   const handleIslandClick = (island: Island) => {
     if (!island.unlocked) {
-      showToast('Cette île n\'est pas encore débloquée', 'error');
+      showToast('error', 'Cette île n\'est pas encore débloquée');
       return;
     }
     setSelectedIsland(island);
@@ -70,7 +70,7 @@ const Map: React.FC = () => {
       setSelectedCrew(selectedCrew.filter(id => id !== crewId));
     } else {
       if (selectedCrew.length >= selectedQuest.required_crew_count) {
-        showToast(`Cette quête nécessite ${selectedQuest.required_crew_count} membre(s) maximum`, 'error');
+        showToast('error', `Cette quête nécessite ${selectedQuest.required_crew_count} membre(s) maximum`);
         return;
       }
       setSelectedCrew([...selectedCrew, crewId]);
@@ -79,20 +79,20 @@ const Map: React.FC = () => {
 
   const handleStartQuest = async () => {
     if (!selectedQuest || selectedCrew.length !== selectedQuest.required_crew_count) {
-      showToast(`Sélectionnez exactement ${selectedQuest.required_crew_count} membre(s)`, 'error');
+      showToast('error', `Sélectionnez exactement ${selectedQuest?.required_crew_count || 0} membre(s)`);
       return;
     }
 
     setActionLoading(true);
     try {
       await worldMapService.startQuest(selectedQuest.id, selectedCrew);
-      showToast('Quête démarrée avec succès !', 'success');
+      showToast('success', 'Quête démarrée avec succès !');
       setShowQuestModal(false);
       setSelectedQuest(null);
       setSelectedCrew([]);
       await loadMapData();
     } catch (error: any) {
-      showToast(error.response?.data?.error || 'Erreur lors du démarrage de la quête', 'error');
+      showToast('error', error.response?.data?.error || 'Erreur lors du démarrage de la quête');
     } finally {
       setActionLoading(false);
     }
@@ -102,10 +102,10 @@ const Map: React.FC = () => {
     setActionLoading(true);
     try {
       const result = await worldMapService.completeQuest(activeQuestId);
-      showToast(`Quête terminée ! +${result.reward.berrys} Berrys`, 'success');
+      showToast('success', `Quête terminée ! +${result.reward.berrys} Berrys`);
       await loadMapData();
     } catch (error: any) {
-      showToast(error.response?.data?.error || 'Erreur lors de la complétion de la quête', 'error');
+      showToast('error', error.response?.data?.error || 'Erreur lors de la complétion de la quête');
     } finally {
       setActionLoading(false);
     }
@@ -116,15 +116,15 @@ const Map: React.FC = () => {
     try {
       const result = await worldMapService.claimIslandReward(islandId);
       if (result.reward.type === 'berrys') {
-        showToast(`Récompense réclamée ! +${result.reward.value} Berrys`, 'success');
+        showToast('success', `Récompense réclamée ! +${result.reward.value} Berrys`);
       } else if (result.reward.type === 'crew_member') {
         const crew = mapData?.crewMembers.find(c => c.id === result.reward.crewMemberId);
-        showToast(`Nouveau membre d'équipage ! ${crew?.name || 'Inconnu'} a rejoint l'équipage !`, 'success');
+        showToast('success', `Nouveau membre d'équipage ! ${crew?.name || 'Inconnu'} a rejoint l'équipage !`);
       }
       await loadMapData();
       setSelectedIsland(null);
     } catch (error: any) {
-      showToast(error.response?.data?.error || 'Erreur lors de la réclamation de la récompense', 'error');
+      showToast('error', error.response?.data?.error || 'Erreur lors de la réclamation de la récompense');
     } finally {
       setActionLoading(false);
     }
@@ -515,7 +515,7 @@ const Map: React.FC = () => {
                                 <span className="text-sm font-medium">En cours</span>
                               </div>
                             ) : (
-                              <Button size="sm" variant="ocean">
+                              <Button size="sm" variant="primary">
                                 Démarrer
                               </Button>
                             )}
@@ -592,7 +592,7 @@ const Map: React.FC = () => {
 
                 <div className="flex gap-3">
                   <Button
-                    variant="ocean"
+                    variant="primary"
                     className="flex-1"
                     onClick={handleStartQuest}
                     disabled={selectedCrew.length !== selectedQuest.required_crew_count}

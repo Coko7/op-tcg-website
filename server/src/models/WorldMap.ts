@@ -89,7 +89,8 @@ export class WorldMapModel {
   }
 
   static async getIslandById(id: string): Promise<Island | null> {
-    return await Database.get<Island>('SELECT * FROM islands WHERE id = ? AND is_active = 1', [id]);
+    const result = await Database.get<Island>('SELECT * FROM islands WHERE id = ? AND is_active = 1', [id]);
+    return result || null;
   }
 
   static async createIsland(island: Omit<Island, 'id' | 'created_at'>): Promise<Island> {
@@ -122,7 +123,8 @@ export class WorldMapModel {
   }
 
   static async getCrewMemberById(id: string): Promise<CrewMember | null> {
-    return await Database.get<CrewMember>('SELECT * FROM crew_members WHERE id = ? AND is_active = 1', [id]);
+    const result = await Database.get<CrewMember>('SELECT * FROM crew_members WHERE id = ? AND is_active = 1', [id]);
+    return result || null;
   }
 
   static async createCrewMember(member: Omit<CrewMember, 'id' | 'created_at'>): Promise<CrewMember> {
@@ -151,7 +153,8 @@ export class WorldMapModel {
   }
 
   static async getQuestById(id: string): Promise<Quest | null> {
-    return await Database.get<Quest>('SELECT * FROM quests WHERE id = ? AND is_active = 1', [id]);
+    const result = await Database.get<Quest>('SELECT * FROM quests WHERE id = ? AND is_active = 1', [id]);
+    return result || null;
   }
 
   static async createQuest(quest: Omit<Quest, 'id' | 'created_at'>): Promise<Quest> {
@@ -297,7 +300,8 @@ export class WorldMapModel {
   }
 
   static async getActiveQuestById(id: string): Promise<ActiveQuest | null> {
-    return await Database.get<ActiveQuest>('SELECT * FROM active_quests WHERE id = ?', [id]);
+    const result = await Database.get<ActiveQuest>('SELECT * FROM active_quests WHERE id = ?', [id]);
+    return result || null;
   }
 
   // ===== QUEST HISTORY =====
