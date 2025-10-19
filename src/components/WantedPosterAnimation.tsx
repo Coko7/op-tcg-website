@@ -236,13 +236,9 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
         </p>
       </div>
 
-      {/* Bounty - parfaitement intégré au poster */}
+      {/* Bounty - sans bordure ni cadre */}
       <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 text-center z-20">
-        <div className="inline-block px-3 py-1 sm:px-4 sm:py-2 rounded border-[1.5px] border-black/70"
-          style={{
-            background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
-            boxShadow: 'none'
-          }}>
+        <div className="inline-block">
           <p className="text-xs sm:text-sm font-semibold text-gray-700" style={{ fontWeight: '600' }}>BOUNTY</p>
           <p className="text-base sm:text-lg md:text-xl font-black select-none"
             style={{
@@ -326,8 +322,8 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
               {/* Cadre vide */}
               <div className="absolute top-24 sm:top-28 left-1/2 transform -translate-x-1/2 w-[140px] h-[196px] sm:w-[175px] sm:h-[245px] md:w-[200px] md:h-[280px] border-4 border-black shadow-xl"
                 style={{ background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)' }} />
-              {/* DEAD OR ALIVE */}
-              <div className="absolute bottom-16 sm:bottom-20 left-0 right-0 text-center">
+              {/* DEAD OR ALIVE - SOUS le cadre vide */}
+              <div className="absolute top-[228px] sm:top-[282px] md:top-[302px] left-0 right-0 text-center">
                 <p className="text-lg sm:text-xl md:text-2xl font-bold text-black tracking-widest select-none"
                   style={{
                     fontFamily: 'Impact, Arial Black, sans-serif',
@@ -401,6 +397,15 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
             {/* Animation de déchirement (EN COURS) */}
             {animating && cards[revealedCount] && (
               <>
+                {/* Poster suivant visible en arrière-plan */}
+                {cards[revealedCount + 1] && (
+                  <div className="absolute w-full h-full" style={{ zIndex: 50 }}>
+                    <div className="relative w-full h-full">
+                      <PosterContent card={cards[revealedCount + 1]} />
+                    </div>
+                  </div>
+                )}
+
                 {/* Moitié gauche */}
                 <div className="absolute inset-0 poster-tear-left" style={{
                   clipPath: 'polygon(0% 0%, 48% 2%, 45% 10%, 49% 20%, 46% 30%, 50% 40%, 47% 50%, 49% 60%, 46% 70%, 48% 80%, 45% 90%, 47% 98%, 48% 100%, 0% 100%)',
