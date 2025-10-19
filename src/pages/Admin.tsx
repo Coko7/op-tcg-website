@@ -408,7 +408,15 @@ const Admin: React.FC = () => {
                         <div className="flex gap-4 text-sm text-slate-400">
                           <span className="flex items-center gap-1">
                             <Calendar size={14} />
-                            {new Date(notif.created_at).toLocaleString('fr-FR')}
+                            {new Date(notif.created_at).toLocaleString(undefined, {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit',
+                              hour12: false
+                            })}
                           </span>
                           {notif.berry_reward && (
                             <span className="text-yellow-400 flex items-center gap-1">
@@ -462,7 +470,15 @@ const Admin: React.FC = () => {
                       {activity.username && (
                         <span className="text-blue-400">{activity.username}</span>
                       )}
-                      <span>{new Date(activity.created_at).toLocaleString('fr-FR')}</span>
+                      <span>{new Date(activity.created_at).toLocaleString(undefined, {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                      })}</span>
                       <span className="text-slate-500">{activity.type}</span>
                     </div>
                   </div>
