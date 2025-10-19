@@ -11,7 +11,7 @@ import { VegapullImporter } from './scripts/import-vegapull-data.js';
 import { BoosterModel } from './models/Booster.js';
 import { AchievementService } from './services/AchievementService.js';
 import { AchievementModel } from './models/Achievement.js';
-import { seedWorldMapData } from './scripts/seed-world-map-data.js';
+import { seedWorldMapData, updateIslandCoordinates } from './scripts/seed-world-map-data.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -273,7 +273,7 @@ export const initializeApp = async (): Promise<express.Application> => {
     console.log('🗺️  Vérification et initialisation de la carte du monde...');
     try {
       const islandCount = await Database.get<{ count: number }>(`
-        SELECT COUNT(*) as count FROM islands WHERE is_active = 1
+        SELECT COUNT(*) as count FROM islands
       `);
 
       if (!islandCount || islandCount.count === 0) {
@@ -281,7 +281,9 @@ export const initializeApp = async (): Promise<express.Application> => {
         await seedWorldMapData();
         console.log('✅ Carte du monde initialisée avec succès');
       } else {
-        console.log(`✅ ${islandCount.count} îles déjà présentes`);
+        console.log(`✅ ${islandCount.count} îles déjà présentes, mise à jour des coordonnées...`);
+        // Mettre à jour les coordonnées des îles à chaque démarrage
+        await updateIslandCoordinates();
       }
     } catch (worldMapError) {
       console.warn('⚠️ Erreur lors de l\'initialisation de la carte du monde:', worldMapError);

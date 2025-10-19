@@ -41,6 +41,36 @@ interface QuestData {
   is_repeatable: boolean;
 }
 
+// Fonction pour mettre à jour uniquement les coordonnées des îles
+async function updateIslandCoordinates() {
+  console.log('📍 Mise à jour des coordonnées des îles...\n');
+
+  const islandCoordinates = [
+    { id: 'island_windmill_village', latitude: 12, longitude: 8 },
+    { id: 'island_shells_town', latitude: 18, longitude: 15 },
+    { id: 'island_orange_town', latitude: 25, longitude: 12 },
+    { id: 'island_syrup_village', latitude: 32, longitude: 18 },
+    { id: 'island_baratie', latitude: 38, longitude: 25 },
+    { id: 'island_arlong_park', latitude: 45, longitude: 32 },
+    { id: 'island_loguetown', latitude: 48, longitude: 42 },
+    { id: 'island_drum', latitude: 42, longitude: 52 },
+    { id: 'island_alabasta', latitude: 35, longitude: 58 },
+    { id: 'island_water_seven', latitude: 28, longitude: 65 },
+    { id: 'island_thriller_bark', latitude: 22, longitude: 75 },
+    { id: 'island_sabaody', latitude: 15, longitude: 85 }
+  ];
+
+  for (const island of islandCoordinates) {
+    await Database.run(`
+      UPDATE islands
+      SET latitude = ?, longitude = ?
+      WHERE id = ?
+    `, [island.latitude, island.longitude, island.id]);
+  }
+
+  console.log('✅ Coordonnées des îles mises à jour\n');
+}
+
 async function seedWorldMapData() {
   console.log('🏴‍☠️ Début du peuplement des données de la carte du monde...\n');
 
@@ -457,4 +487,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 }
 
-export { seedWorldMapData };
+export { seedWorldMapData, updateIslandCoordinates };
