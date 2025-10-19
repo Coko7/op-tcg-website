@@ -18,7 +18,6 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
 }) => {
   const [revealedCount, setRevealedCount] = useState(0);
   const [animating, setAnimating] = useState(false);
-  const [isTearing, setIsTearing] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Array<{
     x: number;
@@ -34,7 +33,6 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
   // Déclencher l'animation de déchirement
   useEffect(() => {
     if (animationPhase === 'opening') {
-      setIsTearing(true);
       // Créer beaucoup de particules de déchirement
       if (canvasRef.current && particlesRef.current.length === 0) {
         for (let i = 0; i < 100; i++) {
@@ -52,8 +50,6 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
           });
         }
       }
-    } else if (animationPhase === 'deck') {
-      setIsTearing(false);
     }
   }, [animationPhase]);
 
@@ -76,7 +72,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       particlesRef.current.forEach((particle) => {
         particle.x += particle.vx;
         particle.y += particle.vy;
-        particle.vy += 0.25; // Gravité plus forte
+        particle.vy += 0.25;
         particle.rotation += particle.rotationSpeed;
         particle.alpha -= 0.012;
 
@@ -86,7 +82,6 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
           ctx.translate(particle.x, particle.y);
           ctx.rotate((particle.rotation * Math.PI) / 180);
 
-          // Dessiner un morceau de papier déchiré (forme irrégulière)
           ctx.fillStyle = '#F5E6D3';
           ctx.beginPath();
           ctx.moveTo(-particle.size / 2, -particle.size / 2);
@@ -96,7 +91,6 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
           ctx.closePath();
           ctx.fill();
 
-          // Bordure sombre pour effet de profondeur
           ctx.strokeStyle = '#8B7355';
           ctx.lineWidth = 1.5;
           ctx.stroke();
@@ -131,7 +125,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
         return newCount;
       });
       setAnimating(false);
-    }, 1000); // Durée de l'animation de déchirement
+    }, 1100);
   };
 
   const getRarityColor = (rarity: string) => {
@@ -158,6 +152,114 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
     return bounties[rarity] || bounties.common;
   };
 
+  // Créer un poster complet (pour réutilisation)
+  const PosterContent = ({ card, isAnimating = false }: { card: CardType; isAnimating?: boolean }) => (
+    <div className="absolute inset-0 rounded-lg shadow-2xl border-8 border-black overflow-visible"
+      style={{
+        background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
+        boxShadow: `0 25px 60px ${getRarityColor(card.rarity)}99, 0 0 80px ${getRarityColor(card.rarity)}66, inset 0 2px 0 rgba(255,255,255,0.4), inset 0 -2px 10px rgba(0,0,0,0.15)`,
+      }}>
+      {/* Texture papier ancien */}
+      <div className="absolute inset-0 opacity-15 mix-blend-multiply pointer-events-none">
+        {[...Array(8)].map((_, idx) => (
+          <div key={idx} className="absolute rounded-full bg-amber-900" style={{
+            width: `${Math.random() * 25 + 8}px`,
+            height: `${Math.random() * 25 + 8}px`,
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            opacity: Math.random() * 0.4,
+          }} />
+        ))}
+      </div>
+
+      {/* Grain du papier */}
+      <div className="absolute inset-0 opacity-10" style={{
+        backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")',
+        backgroundSize: '150px 150px'
+      }} />
+
+      {/* WANTED titre */}
+      <div className="absolute top-2 sm:top-4 left-0 right-0 text-center z-10">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-black tracking-wider select-none"
+          style={{
+            fontFamily: 'Impact, Arial Black, sans-serif',
+            textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
+            WebkitTextStroke: '1px #2D1810'
+          }}>
+          WANTED
+        </h2>
+      </div>
+
+      {/* Image de la carte - dimensions adaptées aux cartes One Piece */}
+      <div className="absolute top-10 sm:top-12 left-1/2 transform -translate-x-1/2 w-[140px] h-[196px] sm:w-[175px] sm:h-[245px] md:w-[200px] md:h-[280px] border-4 border-black shadow-lg overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)' }}>
+        {card.image_url ? (
+          <img
+            src={card.image_url}
+            alt={card.name}
+            className="w-full h-full object-contain"
+            style={{ imageRendering: 'auto' }}
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200x280?text=No+Image';
+            }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-4xl opacity-30">🃏</span>
+          </div>
+        )}
+      </div>
+
+      {/* Nom du personnage - BIEN SOUS LE CADRE */}
+      <div className="absolute top-[220px] sm:top-[270px] md:top-[305px] left-0 right-0 text-center px-2 z-20">
+        <p className="text-xs sm:text-sm md:text-base font-bold text-black truncate select-none"
+          style={{
+            fontFamily: 'Arial Black, sans-serif',
+            textShadow: '1px 1px 0px rgba(255,255,255,0.5)'
+          }}>
+          {card.name}
+        </p>
+      </div>
+
+      {/* DEAD OR ALIVE - BIEN SOUS LE NOM */}
+      <div className="absolute top-[238px] sm:top-[288px] md:top-[325px] left-0 right-0 text-center z-20">
+        <p className="text-xs sm:text-sm md:text-base font-bold text-black tracking-widest select-none"
+          style={{
+            fontFamily: 'Impact, sans-serif',
+            textShadow: '1px 1px 0px rgba(0,0,0,0.2)'
+          }}>
+          DEAD OR ALIVE
+        </p>
+      </div>
+
+      {/* Prime (Bounty) - EN BAS */}
+      <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 text-center z-20">
+        <div className="inline-block px-3 py-1 sm:px-4 sm:py-2 rounded border-3 border-black shadow-lg"
+          style={{ background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)' }}>
+          <p className="text-xs sm:text-sm font-semibold text-gray-700">BOUNTY</p>
+          <p className="text-base sm:text-lg md:text-xl font-black select-none"
+            style={{
+              fontFamily: 'Impact, Arial Black, sans-serif',
+              color: getRarityColor(card.rarity),
+              textShadow: '1px 1px 0px rgba(0,0,0,0.3)'
+            }}>
+            {getBountyAmount(card.rarity)} <span className="text-sm">฿</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Logo Marine */}
+      <div className="absolute top-2 right-2 w-6 h-6 sm:w-8 sm:h-8 opacity-60 z-10">
+        <div className="text-lg sm:text-xl" style={{ filter: 'grayscale(1) brightness(0.3)' }}>🕊️</div>
+      </div>
+
+      {/* Bordure déchirée */}
+      <div className="absolute inset-0 border-2 border-black/50 rounded-lg pointer-events-none z-10" style={{
+        clipPath: 'polygon(0% 2%, 3% 0%, 7% 2%, 10% 0%, 14% 2%, 17% 0%, 21% 2%, 24% 0%, 28% 2%, 31% 0%, 35% 2%, 38% 0%, 42% 2%, 45% 0%, 49% 2%, 52% 0%, 56% 2%, 59% 0%, 63% 2%, 66% 0%, 70% 2%, 73% 0%, 77% 2%, 80% 0%, 84% 2%, 87% 0%, 91% 2%, 94% 0%, 98% 2%, 100% 0%, 100% 98%, 98% 100%, 94% 98%, 91% 100%, 87% 98%, 84% 100%, 80% 98%, 77% 100%, 73% 98%, 70% 100%, 66% 98%, 63% 100%, 59% 98%, 56% 100%, 52% 98%, 49% 100%, 45% 98%, 42% 100%, 38% 98%, 35% 100%, 31% 98%, 28% 100%, 24% 98%, 21% 100%, 17% 98%, 14% 100%, 10% 98%, 7% 100%, 3% 98%, 0% 100%, 0% 2%)'
+      }} />
+    </div>
+  );
+
   return (
     <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] bg-gradient-to-br from-amber-900/20 via-amber-800/10 to-orange-900/20 backdrop-blur-xl rounded-3xl overflow-hidden border-2 border-white/10 shadow-2xl">
       {/* Fond texture bois */}
@@ -169,7 +271,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
         backgroundSize: '100% 8px, 8px 100%'
       }} />
 
-      {/* Canvas pour les particules de papier déchiré */}
+      {/* Canvas pour les particules */}
       <canvas
         ref={canvasRef}
         width={800}
@@ -177,391 +279,149 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
         className="absolute inset-0 w-full h-full pointer-events-none z-30"
       />
 
-      {/* Phase IDLE - Poster WANTED vierge à plat */}
+      {/* Phase IDLE - Poster WANTED vierge */}
       {animationPhase === 'idle' && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div
-            className={`relative cursor-pointer transition-all duration-300 hover:scale-105 w-[280px] h-[400px] sm:w-[350px] sm:h-[500px] md:w-[400px] md:h-[580px]`}
-            onClick={onClick}
-          >
-            {/* Poster WANTED vierge - PAPIER OPAQUE */}
+          <div className="relative cursor-pointer transition-all duration-300 hover:scale-105 w-[220px] h-[340px] sm:w-[280px] sm:h-[420px] md:w-[320px] md:h-[480px]" onClick={onClick}>
             <div className="relative w-full h-full shadow-2xl" style={{
               background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
               boxShadow: '0 20px 60px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.4), inset 0 -2px 10px rgba(0,0,0,0.15)'
             }}>
-              {/* Texture papier ancien avec taches */}
+              {/* Texture et grain */}
               <div className="absolute inset-0 opacity-20 mix-blend-multiply pointer-events-none">
                 {[...Array(12)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute rounded-full bg-amber-900"
-                    style={{
-                      width: `${Math.random() * 40 + 15}px`,
-                      height: `${Math.random() * 40 + 15}px`,
-                      top: `${Math.random() * 100}%`,
-                      left: `${Math.random() * 100}%`,
-                      opacity: Math.random() * 0.4 + 0.1,
-                    }}
-                  />
+                  <div key={i} className="absolute rounded-full bg-amber-900" style={{
+                    width: `${Math.random() * 40 + 15}px`,
+                    height: `${Math.random() * 40 + 15}px`,
+                    top: `${Math.random() * 100}%`,
+                    left: `${Math.random() * 100}%`,
+                    opacity: Math.random() * 0.4 + 0.1,
+                  }} />
                 ))}
               </div>
-
-              {/* Grain du papier */}
               <div className="absolute inset-0 opacity-10" style={{
                 backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")',
                 backgroundSize: '200px 200px'
               }} />
-
-              {/* Bordure déchirée */}
+              {/* Bordure */}
               <div className="absolute inset-0 border-8 border-black rounded-lg" style={{
                 clipPath: 'polygon(0% 2%, 2% 0%, 5% 2%, 8% 0%, 12% 2%, 15% 0%, 18% 2%, 22% 0%, 25% 1%, 28% 0%, 32% 2%, 35% 0%, 38% 2%, 42% 0%, 45% 1%, 48% 0%, 52% 2%, 55% 0%, 58% 2%, 62% 0%, 65% 1%, 68% 0%, 72% 2%, 75% 0%, 78% 2%, 82% 0%, 85% 1%, 88% 0%, 92% 2%, 95% 0%, 98% 2%, 100% 0%, 100% 98%, 98% 100%, 95% 98%, 92% 100%, 88% 98%, 85% 100%, 82% 98%, 78% 100%, 75% 98%, 72% 100%, 68% 98%, 65% 100%, 62% 98%, 58% 100%, 55% 98%, 52% 100%, 48% 98%, 45% 100%, 42% 98%, 38% 100%, 35% 98%, 32% 100%, 28% 98%, 25% 100%, 22% 98%, 18% 100%, 15% 98%, 12% 100%, 8% 98%, 5% 100%, 2% 98%, 0% 100%, 0% 2%)'
               }} />
-
-              {/* WANTED text - style manga */}
+              {/* WANTED */}
               <div className="absolute top-8 sm:top-12 left-0 right-0 text-center">
-                <div className="relative inline-block">
-                  <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-black tracking-wider select-none"
-                    style={{
-                      fontFamily: 'Impact, Arial Black, sans-serif',
-                      textShadow: `
-                        3px 3px 0px #654321,
-                        4px 4px 0px rgba(0,0,0,0.3),
-                        2px 2px 10px rgba(0,0,0,0.2)
-                      `,
-                      WebkitTextStroke: '2px #2D1810'
-                    }}>
-                    WANTED
-                  </h1>
-                  {/* Effet de relief */}
-                  <div className="absolute inset-0 text-5xl sm:text-6xl md:text-7xl font-black text-red-900 tracking-wider opacity-30 blur-sm pointer-events-none select-none"
-                    style={{
-                      fontFamily: 'Impact, Arial Black, sans-serif',
-                      transform: 'translateY(2px)'
-                    }}>
-                    WANTED
-                  </div>
-                </div>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-black tracking-wider select-none"
+                  style={{
+                    fontFamily: 'Impact, Arial Black, sans-serif',
+                    textShadow: '3px 3px 0px #654321, 4px 4px 0px rgba(0,0,0,0.3)',
+                    WebkitTextStroke: '2px #2D1810'
+                  }}>WANTED</h1>
               </div>
-
-              {/* Cadre vide pour la photo - même couleur que le poster */}
-              <div className="absolute top-28 sm:top-36 left-1/2 transform -translate-x-1/2 w-40 h-48 sm:w-52 sm:h-60 md:w-60 md:h-72 border-4 border-black shadow-xl"
-                style={{
-                  background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)'
-                }}>
-              </div>
-
+              {/* Cadre vide */}
+              <div className="absolute top-24 sm:top-28 left-1/2 transform -translate-x-1/2 w-[140px] h-[196px] sm:w-[175px] sm:h-[245px] md:w-[200px] md:h-[280px] border-4 border-black shadow-xl"
+                style={{ background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)' }} />
               {/* DEAD OR ALIVE */}
-              <div className="absolute top-[290px] sm:top-[360px] md:top-[420px] left-0 right-0 text-center">
-                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-black tracking-widest select-none"
+              <div className="absolute bottom-16 sm:bottom-20 left-0 right-0 text-center">
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-black tracking-widest select-none"
                   style={{
                     fontFamily: 'Impact, Arial Black, sans-serif',
                     textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
                     WebkitTextStroke: '1px #2D1810'
-                  }}>
-                  DEAD OR ALIVE
-                </p>
+                  }}>DEAD OR ALIVE</p>
               </div>
-
-              {/* Logo Marine (mouette stylisée) */}
-              <div className="absolute top-4 right-4 w-12 h-12 sm:w-14 sm:h-14 opacity-70">
-                <div className="text-3xl sm:text-4xl" style={{ filter: 'grayscale(1) brightness(0.3)' }}>🕊️</div>
+              {/* Logo Marine */}
+              <div className="absolute top-4 right-4 w-10 h-10 opacity-70">
+                <div className="text-2xl" style={{ filter: 'grayscale(1) brightness(0.3)' }}>🕊️</div>
               </div>
-
-              {/* Indicateur de clic */}
+              {/* Indicateur */}
               <div className="absolute bottom-4 left-0 right-0 text-center">
                 <p className="text-white/90 text-xs sm:text-sm backdrop-blur-sm bg-black/40 py-2 px-4 rounded-lg inline-block shadow-lg animate-pulse">
                   🖱️ Cliquez pour ouvrir !
                 </p>
               </div>
-
-              {/* Effet de brillance subtil */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent pointer-events-none" />
             </div>
           </div>
         </div>
       )}
 
-      {/* Phase OPENING - Animation de déchirement vertical au milieu */}
+      {/* Phase OPENING */}
       {animationPhase === 'opening' && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-          {/* Message d'ouverture */}
           <div className="absolute top-8 left-0 right-0 text-center z-30">
-            <div className="backdrop-blur-sm bg-black/50 py-3 px-6 sm:py-4 sm:px-8 rounded-xl inline-block mx-4">
-              <p className="text-white font-bold text-lg sm:text-xl md:text-2xl animate-pulse">
-                💥 Déchirement en cours... 💥
-              </p>
+            <div className="backdrop-blur-sm bg-black/50 py-3 px-6 rounded-xl inline-block">
+              <p className="text-white font-bold text-lg sm:text-xl animate-pulse">💥 Déchirement en cours... 💥</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Phase DECK - Pile de posters WANTED avec images - PAPIER OPAQUE */}
+      {/* Phase DECK - Pile de posters */}
       {animationPhase === 'deck' && cards && (
         <div className="absolute inset-0 flex flex-col items-center justify-start sm:justify-center pt-12 sm:pt-0 z-10">
           {/* Instructions */}
-          <div className="absolute top-4 sm:top-8 left-0 right-0 text-center z-30 px-2 sm:px-4">
-            <div className="inline-block backdrop-blur-sm bg-black/40 py-2 px-4 sm:py-3 sm:px-6 rounded-lg">
-              <p className="text-white font-semibold text-sm sm:text-base md:text-lg mb-1">
-                🎴 Cliquez pour révéler les WANTED !
-              </p>
-              <p className="text-amber-300 text-xs sm:text-sm">
-                {revealedCount} / {cards.length} révélés
-              </p>
+          <div className="absolute top-4 sm:top-8 left-0 right-0 text-center z-40 px-2">
+            <div className="inline-block backdrop-blur-sm bg-black/40 py-2 px-4 rounded-lg">
+              <p className="text-white font-semibold text-sm sm:text-base mb-1">🎴 Cliquez pour révéler les WANTED !</p>
+              <p className="text-amber-300 text-xs sm:text-sm">{revealedCount} / {cards.length} révélés</p>
             </div>
           </div>
 
-          {/* Pile de posters WANTED */}
-          <div
-            className="relative cursor-pointer hover:scale-105 transition-transform w-[220px] h-[340px] sm:w-[280px] sm:h-[420px] md:w-[320px] md:h-[480px] mb-4 sm:mb-0"
-            onClick={handlePosterClick}
-            style={{ perspective: '1500px' }}
-          >
-            {cards
-              .slice(revealedCount, Math.min(revealedCount + 3, cards.length))
-              .map((card, i) => {
-                const cardIndex = revealedCount + i;
-                const isTop = i === 0;
-                const offset = i * 8;
+          {/* Pile de posters */}
+          <div className="relative cursor-pointer hover:scale-105 transition-transform w-[220px] h-[340px] sm:w-[280px] sm:h-[420px] md:w-[320px] md:h-[480px]"
+            onClick={handlePosterClick} style={{ perspective: '1500px' }}>
+            {cards.slice(revealedCount, Math.min(revealedCount + 3, cards.length)).map((card, i) => {
+              const isTop = i === 0;
+              const offset = i * 8;
 
-                return (
-                  <div
-                    key={`wanted-${cardIndex}`}
-                    className={`absolute w-full h-full ${isTop && !animating ? 'hover:translate-y-[-8px] hover:rotate-2 transition-all duration-300' : ''}`}
-                    style={{
-                      transform: isTop && animating ? '' : `translateY(${offset}px) translateX(${i * 3}px) rotate(${i * 2 - 2}deg)`,
-                      zIndex: 10 - i,
-                      transformStyle: 'preserve-3d',
-                      opacity: isTop || !animating ? 1 : 1, // Garder opacité à 1 pour éviter le bug visuel
-                    }}
-                  >
-                    {/* Animation de déchirement en deux moitiés */}
-                    {isTop && animating && (
-                      <>
-                        {/* Moitié gauche */}
-                        <div className="absolute inset-0 poster-tear-left" style={{
-                          clipPath: 'polygon(0% 0%, 48% 2%, 45% 10%, 49% 20%, 46% 30%, 50% 40%, 47% 50%, 49% 60%, 46% 70%, 48% 80%, 45% 90%, 47% 98%, 48% 100%, 0% 100%)'
-                        }}>
-                          {/* Contenu du poster - moitié gauche */}
-                          <div className="relative w-full h-full">
-                            <div className="absolute inset-0 rounded-lg shadow-2xl border-8 border-black overflow-hidden"
-                              style={{
-                                background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
-                                boxShadow: `0 25px 60px ${getRarityColor(card.rarity)}99, 0 0 80px ${getRarityColor(card.rarity)}66`,
-                              }}>
-                              {/* Contenu identique au poster complet */}
-                              <div className="absolute inset-0 opacity-15 mix-blend-multiply pointer-events-none">
-                                {[...Array(8)].map((_, idx) => (
-                                  <div key={idx} className="absolute rounded-full bg-amber-900" style={{
-                                    width: `${Math.random() * 25 + 8}px`,
-                                    height: `${Math.random() * 25 + 8}px`,
-                                    top: `${Math.random() * 100}%`,
-                                    left: `${Math.random() * 100}%`,
-                                    opacity: Math.random() * 0.4,
-                                  }} />
-                                ))}
-                              </div>
-                              <div className="absolute top-2 sm:top-4 left-0 right-0 text-center z-10">
-                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-black tracking-wider select-none"
-                                  style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>WANTED</h2>
-                              </div>
-                              <div className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 w-[150px] h-[170px] sm:w-[190px] sm:h-[220px] md:w-[220px] md:h-[250px] border-4 border-black shadow-lg overflow-hidden"
-                                style={{ background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)' }}>
-                                {card.image_url && (
-                                  <img src={card.image_url} alt={card.name} className="w-full h-full object-cover"
-                                    style={{ imageRendering: 'auto' }} />
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Moitié droite */}
-                        <div className="absolute inset-0 poster-tear-right" style={{
-                          clipPath: 'polygon(52% 0%, 100% 0%, 100% 100%, 52% 100%, 53% 98%, 51% 90%, 55% 80%, 52% 70%, 54% 60%, 53% 50%, 54% 40%, 51% 30%, 53% 20%, 52% 10%, 55% 2%)'
-                        }}>
-                          {/* Contenu du poster - moitié droite */}
-                          <div className="relative w-full h-full">
-                            <div className="absolute inset-0 rounded-lg shadow-2xl border-8 border-black overflow-hidden"
-                              style={{
-                                background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
-                                boxShadow: `0 25px 60px ${getRarityColor(card.rarity)}99, 0 0 80px ${getRarityColor(card.rarity)}66`,
-                              }}>
-                              <div className="absolute inset-0 opacity-15 mix-blend-multiply pointer-events-none">
-                                {[...Array(8)].map((_, idx) => (
-                                  <div key={idx} className="absolute rounded-full bg-amber-900" style={{
-                                    width: `${Math.random() * 25 + 8}px`,
-                                    height: `${Math.random() * 25 + 8}px`,
-                                    top: `${Math.random() * 100}%`,
-                                    left: `${Math.random() * 100}%`,
-                                    opacity: Math.random() * 0.4,
-                                  }} />
-                                ))}
-                              </div>
-                              <div className="absolute top-2 sm:top-4 left-0 right-0 text-center z-10">
-                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-black tracking-wider select-none"
-                                  style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>WANTED</h2>
-                              </div>
-                              <div className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 w-[150px] h-[170px] sm:w-[190px] sm:h-[220px] md:w-[220px] md:h-[250px] border-4 border-black shadow-lg overflow-hidden"
-                                style={{ background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)' }}>
-                                {card.image_url && (
-                                  <img src={card.image_url} alt={card.name} className="w-full h-full object-cover"
-                                    style={{ imageRendering: 'auto' }} />
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    {/* Poster WANTED complet (visible quand pas en animation) */}
-                    {(!isTop || !animating) && (
-                      <div className="relative w-full h-full">
-                        {/* Papier du poster - OPAQUE */}
-                        <div className="absolute inset-0 rounded-lg shadow-2xl border-8 border-black overflow-hidden"
-                          style={{
-                            background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
-                            boxShadow: isTop
-                              ? `0 25px 60px ${getRarityColor(card.rarity)}99, 0 0 80px ${getRarityColor(card.rarity)}66, inset 0 2px 0 rgba(255,255,255,0.4), inset 0 -2px 10px rgba(0,0,0,0.15)`
-                              : '0 15px 40px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -2px 8px rgba(0,0,0,0.1)',
-                          }}>
-
-                          {/* Texture papier ancien avec taches */}
-                          <div className="absolute inset-0 opacity-15 mix-blend-multiply pointer-events-none">
-                            {[...Array(8)].map((_, idx) => (
-                              <div
-                                key={idx}
-                                className="absolute rounded-full bg-amber-900"
-                                style={{
-                                  width: `${Math.random() * 25 + 8}px`,
-                                  height: `${Math.random() * 25 + 8}px`,
-                                  top: `${Math.random() * 100}%`,
-                                  left: `${Math.random() * 100}%`,
-                                  opacity: Math.random() * 0.4,
-                                }}
-                              />
-                            ))}
-                          </div>
-
-                          {/* Grain du papier */}
-                          <div className="absolute inset-0 opacity-10" style={{
-                            backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")',
-                            backgroundSize: '150px 150px'
-                          }} />
-
-                          {/* WANTED titre */}
-                          <div className="absolute top-2 sm:top-4 left-0 right-0 text-center z-10">
-                            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-black tracking-wider select-none"
-                              style={{
-                                fontFamily: 'Impact, Arial Black, sans-serif',
-                                textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
-                                WebkitTextStroke: '1px #2D1810'
-                              }}>
-                              WANTED
-                            </h2>
-                          </div>
-
-                          {/* Image de la carte - HAUTE QUALITÉ avec fond couleur poster */}
-                          <div className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 w-[150px] h-[170px] sm:w-[190px] sm:h-[220px] md:w-[220px] md:h-[250px] border-4 border-black shadow-lg overflow-hidden"
-                            style={{
-                              background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)'
-                            }}>
-                            {card.image_url ? (
-                              <img
-                                src={card.image_url}
-                                alt={card.name}
-                                className="w-full h-full object-cover"
-                                style={{
-                                  imageRendering: 'auto',
-                                  WebkitFontSmoothing: 'antialiased',
-                                }}
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/220x250?text=No+Image';
-                                }}
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <span className="text-4xl opacity-30">🃏</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Nom du personnage - SOUS LE CADRE */}
-                          <div className="absolute top-[195px] sm:top-[250px] md:top-[280px] left-0 right-0 text-center px-2">
-                            <p className="text-xs sm:text-sm md:text-base font-bold text-black truncate select-none"
-                              style={{
-                                fontFamily: 'Arial Black, sans-serif',
-                                textShadow: '1px 1px 0px rgba(255,255,255,0.5)'
-                              }}>
-                              {card.name}
-                            </p>
-                          </div>
-
-                          {/* DEAD OR ALIVE */}
-                          <div className="absolute top-[212px] sm:top-[268px] md:top-[300px] left-0 right-0 text-center">
-                            <p className="text-xs sm:text-sm md:text-base font-bold text-black tracking-widest select-none"
-                              style={{
-                                fontFamily: 'Impact, sans-serif',
-                                textShadow: '1px 1px 0px rgba(0,0,0,0.2)'
-                              }}>
-                              DEAD OR ALIVE
-                            </p>
-                          </div>
-
-                          {/* Prime (Bounty) - SOUS LE CADRE avec fond couleur poster */}
-                          <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 text-center">
-                            <div className="inline-block px-3 py-1 sm:px-4 sm:py-2 rounded border-3 border-black shadow-lg"
-                              style={{
-                                background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)'
-                              }}>
-                              <p className="text-xs sm:text-sm font-semibold text-gray-700">BOUNTY</p>
-                              <p className="text-lg sm:text-xl md:text-2xl font-black select-none"
-                                style={{
-                                  fontFamily: 'Impact, Arial Black, sans-serif',
-                                  color: getRarityColor(card.rarity),
-                                  textShadow: '1px 1px 0px rgba(0,0,0,0.3)'
-                                }}>
-                                {getBountyAmount(card.rarity)} <span className="text-sm">฿</span>
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Logo Marine */}
-                          <div className="absolute top-2 right-2 w-6 h-6 sm:w-8 sm:h-8 opacity-60">
-                            <div className="text-lg sm:text-xl" style={{ filter: 'grayscale(1) brightness(0.3)' }}>🕊️</div>
-                          </div>
-
-                          {/* Bordure déchirée */}
-                          <div className="absolute inset-0 border-2 border-black/50 rounded-lg pointer-events-none" style={{
-                            clipPath: 'polygon(0% 2%, 3% 0%, 7% 2%, 10% 0%, 14% 2%, 17% 0%, 21% 2%, 24% 0%, 28% 2%, 31% 0%, 35% 2%, 38% 0%, 42% 2%, 45% 0%, 49% 2%, 52% 0%, 56% 2%, 59% 0%, 63% 2%, 66% 0%, 70% 2%, 73% 0%, 77% 2%, 80% 0%, 84% 2%, 87% 0%, 91% 2%, 94% 0%, 98% 2%, 100% 0%, 100% 98%, 98% 100%, 94% 98%, 91% 100%, 87% 98%, 84% 100%, 80% 98%, 77% 100%, 73% 98%, 70% 100%, 66% 98%, 63% 100%, 59% 98%, 56% 100%, 52% 98%, 49% 100%, 45% 98%, 42% 100%, 38% 98%, 35% 100%, 31% 98%, 28% 100%, 24% 98%, 21% 100%, 17% 98%, 14% 100%, 10% 98%, 7% 100%, 3% 98%, 0% 100%, 0% 2%)'
-                          }} />
-                        </div>
-
-                        {/* Effet de brillance sur le poster du dessus */}
-                        {isTop && (
-                          <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-transparent rounded-lg pointer-events-none" />
-                        )}
-
-                        {/* Ombre portée progressive pour donner effet de pile */}
-                        {!isTop && (
-                          <div
-                            className="absolute inset-0 bg-black rounded-lg pointer-events-none"
-                            style={{ opacity: i * 0.15 }}
-                          />
-                        )}
-                      </div>
+              return (
+                <div key={`wanted-${revealedCount + i}`}
+                  className={`absolute w-full h-full ${isTop && !animating ? 'hover:translate-y-[-8px] hover:rotate-2 transition-all duration-300' : ''}`}
+                  style={{
+                    transform: `translateY(${offset}px) translateX(${i * 3}px) rotate(${i * 2 - 2}deg)`,
+                    zIndex: 10 - i,
+                    transformStyle: 'preserve-3d',
+                    visibility: (isTop && animating) ? 'hidden' : 'visible',
+                  }}>
+                  <div className="relative w-full h-full">
+                    <PosterContent card={card} />
+                    {!isTop && (
+                      <div className="absolute inset-0 bg-black rounded-lg pointer-events-none" style={{ opacity: i * 0.15 }} />
                     )}
                   </div>
-                );
-              })}
+                </div>
+              );
+            })}
 
-            {/* Message quand tous les posters sont révélés */}
+            {/* Animation de déchirement pour la carte du dessus */}
+            {animating && cards[revealedCount] && (
+              <>
+                {/* Moitié gauche */}
+                <div className="absolute inset-0 poster-tear-left" style={{
+                  clipPath: 'polygon(0% 0%, 48% 2%, 45% 10%, 49% 20%, 46% 30%, 50% 40%, 47% 50%, 49% 60%, 46% 70%, 48% 80%, 45% 90%, 47% 98%, 48% 100%, 0% 100%)',
+                  zIndex: 50
+                }}>
+                  <div className="relative w-full h-full">
+                    <PosterContent card={cards[revealedCount]} isAnimating={true} />
+                  </div>
+                </div>
+
+                {/* Moitié droite */}
+                <div className="absolute inset-0 poster-tear-right" style={{
+                  clipPath: 'polygon(52% 0%, 100% 0%, 100% 100%, 52% 100%, 53% 98%, 51% 90%, 55% 80%, 52% 70%, 54% 60%, 53% 50%, 54% 40%, 51% 30%, 53% 20%, 52% 10%, 55% 2%)',
+                  zIndex: 50
+                }}>
+                  <div className="relative w-full h-full">
+                    <PosterContent card={cards[revealedCount]} isAnimating={true} />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Message de fin */}
             {revealedCount >= cards.length && (
-              <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 20 }}>
-                <div className="text-center bg-gradient-to-br from-amber-500 to-orange-500 p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-2xl mx-4 border-4 border-black">
-                  <div className="text-3xl sm:text-4xl md:text-5xl mb-2 sm:mb-3 animate-bounce">🏴‍☠️</div>
-                  <p className="text-white font-black text-lg sm:text-xl md:text-2xl mb-1 sm:mb-2"
-                    style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
+              <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 60 }}>
+                <div className="text-center bg-gradient-to-br from-amber-500 to-orange-500 p-4 sm:p-6 rounded-xl shadow-2xl border-4 border-black">
+                  <div className="text-3xl sm:text-4xl mb-2 animate-bounce">🏴‍☠️</div>
+                  <p className="text-white font-black text-lg sm:text-xl mb-1" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>
                     Tous révélés !
                   </p>
                   <p className="text-white/90 text-xs sm:text-sm">Les primes ont été affichées !</p>
@@ -573,44 +433,66 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       )}
 
       <style>{`
-        /* Animation de déchirement - moitié gauche */}
         @keyframes tear-left {
           0% {
             transform: translateX(0) rotate(0deg);
             opacity: 1;
           }
-          50% {
-            transform: translateX(-30px) rotate(-8deg);
-            opacity: 0.9;
+          20% {
+            transform: translateX(-5px) rotate(-2deg);
+            opacity: 1;
+          }
+          40% {
+            transform: translateX(-15px) rotate(-5deg);
+            opacity: 1;
+          }
+          60% {
+            transform: translateX(-40px) rotate(-10deg);
+            opacity: 0.95;
+          }
+          80% {
+            transform: translateX(-100px) rotate(-18deg);
+            opacity: 0.7;
           }
           100% {
-            transform: translateX(-300%) rotate(-25deg);
+            transform: translateX(-350%) rotate(-30deg);
             opacity: 0;
           }
         }
 
         .poster-tear-left {
-          animation: tear-left 1s cubic-bezier(0.6, 0.04, 0.98, 0.335) forwards;
+          animation: tear-left 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
 
-        /* Animation de déchirement - moitié droite */}
         @keyframes tear-right {
           0% {
             transform: translateX(0) rotate(0deg);
             opacity: 1;
           }
-          50% {
-            transform: translateX(30px) rotate(8deg);
-            opacity: 0.9;
+          20% {
+            transform: translateX(5px) rotate(2deg);
+            opacity: 1;
+          }
+          40% {
+            transform: translateX(15px) rotate(5deg);
+            opacity: 1;
+          }
+          60% {
+            transform: translateX(40px) rotate(10deg);
+            opacity: 0.95;
+          }
+          80% {
+            transform: translateX(100px) rotate(18deg);
+            opacity: 0.7;
           }
           100% {
-            transform: translateX(300%) rotate(25deg);
+            transform: translateX(350%) rotate(30deg);
             opacity: 0;
           }
         }
 
         .poster-tear-right {
-          animation: tear-right 1s cubic-bezier(0.6, 0.04, 0.98, 0.335) forwards;
+          animation: tear-right 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
       `}</style>
     </div>
