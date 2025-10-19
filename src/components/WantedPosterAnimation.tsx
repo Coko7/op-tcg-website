@@ -155,8 +155,78 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
     return bounties[rarity] || bounties.common;
   };
 
+  const BlankPosterContent = () => (
+    <div className="absolute inset-0 rounded-lg shadow-2xl overflow-visible"
+      style={{
+        background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.4), inset 0 -2px 10px rgba(0,0,0,0.15)',
+      }}>
+      {/* Texture */}
+      <div className="absolute inset-0 opacity-15 mix-blend-multiply pointer-events-none">
+        {[...Array(8)].map((_, idx) => (
+          <div key={idx} className="absolute rounded-full bg-amber-900" style={{
+            width: `${Math.random() * 25 + 8}px`,
+            height: `${Math.random() * 25 + 8}px`,
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            opacity: Math.random() * 0.4,
+          }} />
+        ))}
+      </div>
+
+      {/* Grain */}
+      <div className="absolute inset-0 opacity-10" style={{
+        backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")',
+        backgroundSize: '150px 150px'
+      }} />
+
+      {/* WANTED */}
+      <div className="absolute top-2 sm:top-4 left-0 right-0 text-center z-10">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-black tracking-wider select-none"
+          style={{
+            fontFamily: 'Impact, Arial Black, sans-serif',
+            textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
+            WebkitTextStroke: '1px #2D1810'
+          }}>
+          WANTED
+        </h2>
+      </div>
+
+      {/* Image vide - ratio 1:1.4 pour cartes One Piece */}
+      <div className="absolute top-10 sm:top-12 left-1/2 transform -translate-x-1/2 w-[140px] h-[196px] sm:w-[175px] sm:h-[245px] md:w-[200px] md:h-[280px] border-4 border-black shadow-lg overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)' }}>
+        <div className="w-full h-full flex items-center justify-center">
+          <span className="text-4xl opacity-30">🃏</span>
+        </div>
+      </div>
+
+      {/* DEAD OR ALIVE - SOUS le cadre */}
+      <div className="absolute top-[244px] sm:top-[300px] md:top-[338px] left-0 right-0 text-center z-20">
+        <p className="text-xs sm:text-sm md:text-base font-bold text-black tracking-widest select-none"
+          style={{
+            fontFamily: 'Impact, sans-serif',
+            textShadow: '1px 1px 0px rgba(0,0,0,0.2)'
+          }}>
+          DEAD OR ALIVE
+        </p>
+      </div>
+
+      {/* Logo Marine */}
+      <div className="absolute top-2 right-2 w-6 h-6 sm:w-8 sm:h-8 opacity-60 z-10">
+        <div className="text-lg sm:text-xl" style={{ filter: 'grayscale(1) brightness(0.3)' }}>🕊️</div>
+      </div>
+
+      {/* Indicateur de clic */}
+      <div className="absolute bottom-4 left-0 right-0 text-center z-30">
+        <p className="text-white/90 text-xs sm:text-sm backdrop-blur-sm bg-black/40 py-2 px-4 rounded-lg inline-block shadow-lg animate-pulse">
+          🖱️ Cliquez pour ouvrir !
+        </p>
+      </div>
+    </div>
+  );
+
   const PosterContent = ({ card }: { card: CardType }) => (
-    <div className="absolute inset-0 rounded-lg shadow-2xl border-8 border-black overflow-visible"
+    <div className="absolute inset-0 rounded-lg shadow-2xl overflow-visible"
       style={{
         background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
         boxShadow: `0 25px 60px ${getRarityColor(card.rarity)}99, 0 0 80px ${getRarityColor(card.rarity)}66, inset 0 2px 0 rgba(255,255,255,0.4), inset 0 -2px 10px rgba(0,0,0,0.15)`,
@@ -214,12 +284,13 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
 
       {/* Nom - VRAIMENT SOUS le cadre image */}
       <div className="absolute top-[244px] sm:top-[300px] md:top-[338px] left-0 right-0 text-center px-2 z-20">
-        <p className="text-sm sm:text-base md:text-lg font-bold text-black truncate select-none"
+        <p className="text-sm sm:text-base md:text-lg text-black truncate select-none"
           style={{
-            fontFamily: 'Arial, sans-serif',
-            fontWeight: '800',
-            textShadow: '0 1px 2px rgba(255,255,255,0.8), 1px 1px 1px rgba(0,0,0,0.2)',
-            WebkitFontSmoothing: 'antialiased'
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            fontWeight: '600',
+            textShadow: '0 1px 2px rgba(255,255,255,0.9), 1px 1px 1px rgba(0,0,0,0.25)',
+            WebkitFontSmoothing: 'antialiased',
+            letterSpacing: '0.3px'
           }}>
           {card.name}
         </p>
@@ -255,11 +326,6 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       <div className="absolute top-2 right-2 w-6 h-6 sm:w-8 sm:h-8 opacity-60 z-10">
         <div className="text-lg sm:text-xl" style={{ filter: 'grayscale(1) brightness(0.3)' }}>🕊️</div>
       </div>
-
-      {/* Bordure déchirée */}
-      <div className="absolute inset-0 border-2 border-black/50 rounded-lg pointer-events-none z-10" style={{
-        clipPath: 'polygon(0% 2%, 3% 0%, 7% 2%, 10% 0%, 14% 2%, 17% 0%, 21% 2%, 24% 0%, 28% 2%, 31% 0%, 35% 2%, 38% 0%, 42% 2%, 45% 0%, 49% 2%, 52% 0%, 56% 2%, 59% 0%, 63% 2%, 66% 0%, 70% 2%, 73% 0%, 77% 2%, 80% 0%, 84% 2%, 87% 0%, 91% 2%, 94% 0%, 98% 2%, 100% 0%, 100% 98%, 98% 100%, 94% 98%, 91% 100%, 87% 98%, 84% 100%, 80% 98%, 77% 100%, 73% 98%, 70% 100%, 66% 98%, 63% 100%, 59% 98%, 56% 100%, 52% 98%, 49% 100%, 45% 98%, 42% 100%, 38% 98%, 35% 100%, 31% 98%, 28% 100%, 24% 98%, 21% 100%, 17% 98%, 14% 100%, 10% 98%, 7% 100%, 3% 98%, 0% 100%, 0% 2%)'
-      }} />
     </div>
   );
 
@@ -286,62 +352,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       {animationPhase === 'idle' && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="relative cursor-pointer transition-all duration-300 hover:scale-105 w-[220px] h-[340px] sm:w-[280px] sm:h-[420px] md:w-[320px] md:h-[480px]" onClick={onClick}>
-            <div className="relative w-full h-full shadow-2xl" style={{
-              background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.4), inset 0 -2px 10px rgba(0,0,0,0.15)'
-            }}>
-              {/* Texture */}
-              <div className="absolute inset-0 opacity-20 mix-blend-multiply pointer-events-none">
-                {[...Array(12)].map((_, i) => (
-                  <div key={i} className="absolute rounded-full bg-amber-900" style={{
-                    width: `${Math.random() * 40 + 15}px`,
-                    height: `${Math.random() * 40 + 15}px`,
-                    top: `${Math.random() * 100}%`,
-                    left: `${Math.random() * 100}%`,
-                    opacity: Math.random() * 0.4 + 0.1,
-                  }} />
-                ))}
-              </div>
-              <div className="absolute inset-0 opacity-10" style={{
-                backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")',
-                backgroundSize: '200px 200px'
-              }} />
-              {/* Bordure */}
-              <div className="absolute inset-0 border-8 border-black rounded-lg" style={{
-                clipPath: 'polygon(0% 2%, 2% 0%, 5% 2%, 8% 0%, 12% 2%, 15% 0%, 18% 2%, 22% 0%, 25% 1%, 28% 0%, 32% 2%, 35% 0%, 38% 2%, 42% 0%, 45% 1%, 48% 0%, 52% 2%, 55% 0%, 58% 2%, 62% 0%, 65% 1%, 68% 0%, 72% 2%, 75% 0%, 78% 2%, 82% 0%, 85% 1%, 88% 0%, 92% 2%, 95% 0%, 98% 2%, 100% 0%, 100% 98%, 98% 100%, 95% 98%, 92% 100%, 88% 98%, 85% 100%, 82% 98%, 78% 100%, 75% 98%, 72% 100%, 68% 98%, 65% 100%, 62% 98%, 58% 100%, 55% 98%, 52% 100%, 48% 98%, 45% 100%, 42% 98%, 38% 100%, 35% 98%, 32% 100%, 28% 98%, 25% 100%, 22% 98%, 18% 100%, 15% 98%, 12% 100%, 8% 98%, 5% 100%, 2% 98%, 0% 100%, 0% 2%)'
-              }} />
-              {/* WANTED */}
-              <div className="absolute top-8 sm:top-12 left-0 right-0 text-center">
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-black tracking-wider select-none"
-                  style={{
-                    fontFamily: 'Impact, Arial Black, sans-serif',
-                    textShadow: '3px 3px 0px #654321, 4px 4px 0px rgba(0,0,0,0.3)',
-                    WebkitTextStroke: '2px #2D1810'
-                  }}>WANTED</h1>
-              </div>
-              {/* Cadre vide */}
-              <div className="absolute top-24 sm:top-28 left-1/2 transform -translate-x-1/2 w-[140px] h-[196px] sm:w-[175px] sm:h-[245px] md:w-[200px] md:h-[280px] border-4 border-black shadow-xl"
-                style={{ background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)' }} />
-              {/* DEAD OR ALIVE - SOUS le cadre vide */}
-              <div className="absolute top-[228px] sm:top-[282px] md:top-[302px] left-0 right-0 text-center">
-                <p className="text-lg sm:text-xl md:text-2xl font-bold text-black tracking-widest select-none"
-                  style={{
-                    fontFamily: 'Impact, Arial Black, sans-serif',
-                    textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
-                    WebkitTextStroke: '1px #2D1810'
-                  }}>DEAD OR ALIVE</p>
-              </div>
-              {/* Logo */}
-              <div className="absolute top-4 right-4 w-10 h-10 opacity-70">
-                <div className="text-2xl" style={{ filter: 'grayscale(1) brightness(0.3)' }}>🕊️</div>
-              </div>
-              {/* Indicateur */}
-              <div className="absolute bottom-4 left-0 right-0 text-center">
-                <p className="text-white/90 text-xs sm:text-sm backdrop-blur-sm bg-black/40 py-2 px-4 rounded-lg inline-block shadow-lg animate-pulse">
-                  🖱️ Cliquez pour ouvrir !
-                </p>
-              </div>
-            </div>
+            <BlankPosterContent />
           </div>
         </div>
       )}
