@@ -133,15 +133,16 @@ export class WorldMapController {
 
       // Log audit
       try {
-        await AuditLogger.log({
-          action: 'quest_started',
-          details: JSON.stringify({
+        await AuditLogger.log(
+          'quest_started' as any,
+          {
             quest_id: questId,
             quest_name: quest.name,
             crew_member_ids: crewMemberIds,
             duration_hours: quest.duration_hours
-          })
-        }, req, userId);
+          },
+          { userId }
+        );
       } catch (auditError) {
         console.error('Audit log error:', auditError);
       }
@@ -235,14 +236,15 @@ export class WorldMapController {
 
       // Log audit
       try {
-        await AuditLogger.log({
-          action: 'quest_completed',
-          details: JSON.stringify({
+        await AuditLogger.log(
+          'quest_completed' as any,
+          {
             quest_id: quest.id,
             quest_name: quest.name,
             reward_berrys: quest.reward_berrys
-          })
-        }, req, userId);
+          },
+          { userId }
+        );
       } catch (auditError) {
         console.error('Audit log error:', auditError);
       }
@@ -330,15 +332,16 @@ export class WorldMapController {
 
       // Log audit
       try {
-        await AuditLogger.log({
-          action: 'island_reward_claimed',
-          details: JSON.stringify({
+        await AuditLogger.log(
+          'island_reward_claimed' as any,
+          {
             island_id: islandId,
             island_name: island.name,
             reward_type: island.final_reward_type,
             reward_value: island.final_reward_value || island.final_reward_crew_member_id
-          })
-        }, req, userId);
+          },
+          { userId }
+        );
       } catch (auditError) {
         console.error('Audit log error:', auditError);
       }
