@@ -33,7 +33,6 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
   // Déclencher l'animation de déchirement
   useEffect(() => {
     if (animationPhase === 'opening') {
-      // Créer beaucoup de particules de déchirement
       if (canvasRef.current && particlesRef.current.length === 0) {
         for (let i = 0; i < 100; i++) {
           const angle = Math.random() * Math.PI * 2;
@@ -53,7 +52,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
     }
   }, [animationPhase]);
 
-  // Animation des particules de papier déchiré avec Canvas
+  // Animation des particules
   useEffect(() => {
     if (animationPhase !== 'opening' && animationPhase !== 'deck') return;
 
@@ -68,7 +67,6 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Dessiner et mettre à jour les particules
       particlesRef.current.forEach((particle) => {
         particle.x += particle.vx;
         particle.y += particle.vy;
@@ -116,12 +114,17 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
     if (animating || !cards || revealedCount >= cards.length) return;
 
     setAnimating(true);
+
+    // Attendre la fin complète de l'animation de déchirement (1100ms)
     setTimeout(() => {
+      // React 18+ batche automatiquement ces updates ensemble
       setRevealedCount((prev) => {
         const newCount = prev + 1;
+
         if (newCount >= cards.length) {
-          setTimeout(() => onAnimationComplete?.(), 1000);
+          setTimeout(() => onAnimationComplete?.(), 500);
         }
+
         return newCount;
       });
       setAnimating(false);
@@ -152,14 +155,13 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
     return bounties[rarity] || bounties.common;
   };
 
-  // Créer un poster complet (pour réutilisation)
-  const PosterContent = ({ card, isAnimating = false }: { card: CardType; isAnimating?: boolean }) => (
+  const PosterContent = ({ card }: { card: CardType }) => (
     <div className="absolute inset-0 rounded-lg shadow-2xl border-8 border-black overflow-visible"
       style={{
         background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
         boxShadow: `0 25px 60px ${getRarityColor(card.rarity)}99, 0 0 80px ${getRarityColor(card.rarity)}66, inset 0 2px 0 rgba(255,255,255,0.4), inset 0 -2px 10px rgba(0,0,0,0.15)`,
       }}>
-      {/* Texture papier ancien */}
+      {/* Texture */}
       <div className="absolute inset-0 opacity-15 mix-blend-multiply pointer-events-none">
         {[...Array(8)].map((_, idx) => (
           <div key={idx} className="absolute rounded-full bg-amber-900" style={{
@@ -172,13 +174,13 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
         ))}
       </div>
 
-      {/* Grain du papier */}
+      {/* Grain */}
       <div className="absolute inset-0 opacity-10" style={{
         backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")',
         backgroundSize: '150px 150px'
       }} />
 
-      {/* WANTED titre */}
+      {/* WANTED */}
       <div className="absolute top-2 sm:top-4 left-0 right-0 text-center z-10">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-black tracking-wider select-none"
           style={{
@@ -190,7 +192,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
         </h2>
       </div>
 
-      {/* Image de la carte - dimensions adaptées aux cartes One Piece */}
+      {/* Image - ratio 1:1.4 pour cartes One Piece */}
       <div className="absolute top-10 sm:top-12 left-1/2 transform -translate-x-1/2 w-[140px] h-[196px] sm:w-[175px] sm:h-[245px] md:w-[200px] md:h-[280px] border-4 border-black shadow-lg overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)' }}>
         {card.image_url ? (
@@ -210,19 +212,21 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
         )}
       </div>
 
-      {/* Nom du personnage - BIEN SOUS LE CADRE */}
-      <div className="absolute top-[220px] sm:top-[270px] md:top-[305px] left-0 right-0 text-center px-2 z-20">
-        <p className="text-xs sm:text-sm md:text-base font-bold text-black truncate select-none"
+      {/* Nom - VRAIMENT SOUS le cadre image */}
+      <div className="absolute top-[244px] sm:top-[300px] md:top-[338px] left-0 right-0 text-center px-2 z-20">
+        <p className="text-sm sm:text-base md:text-lg font-bold text-black truncate select-none"
           style={{
-            fontFamily: 'Arial Black, sans-serif',
-            textShadow: '1px 1px 0px rgba(255,255,255,0.5)'
+            fontFamily: 'Arial, sans-serif',
+            fontWeight: '800',
+            textShadow: '0 1px 2px rgba(255,255,255,0.8), 1px 1px 1px rgba(0,0,0,0.2)',
+            WebkitFontSmoothing: 'antialiased'
           }}>
           {card.name}
         </p>
       </div>
 
-      {/* DEAD OR ALIVE - BIEN SOUS LE NOM */}
-      <div className="absolute top-[238px] sm:top-[288px] md:top-[325px] left-0 right-0 text-center z-20">
+      {/* DEAD OR ALIVE - SOUS le nom */}
+      <div className="absolute top-[266px] sm:top-[323px] md:top-[363px] left-0 right-0 text-center z-20">
         <p className="text-xs sm:text-sm md:text-base font-bold text-black tracking-widest select-none"
           style={{
             fontFamily: 'Impact, sans-serif',
@@ -232,11 +236,14 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
         </p>
       </div>
 
-      {/* Prime (Bounty) - EN BAS */}
+      {/* Bounty - parfaitement intégré au poster */}
       <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 text-center z-20">
-        <div className="inline-block px-3 py-1 sm:px-4 sm:py-2 rounded border-3 border-black shadow-lg"
-          style={{ background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)' }}>
-          <p className="text-xs sm:text-sm font-semibold text-gray-700">BOUNTY</p>
+        <div className="inline-block px-3 py-1 sm:px-4 sm:py-2 rounded border-[1.5px] border-black/70"
+          style={{
+            background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
+            boxShadow: 'none'
+          }}>
+          <p className="text-xs sm:text-sm font-semibold text-gray-700" style={{ fontWeight: '600' }}>BOUNTY</p>
           <p className="text-base sm:text-lg md:text-xl font-black select-none"
             style={{
               fontFamily: 'Impact, Arial Black, sans-serif',
@@ -271,7 +278,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
         backgroundSize: '100% 8px, 8px 100%'
       }} />
 
-      {/* Canvas pour les particules */}
+      {/* Canvas particules */}
       <canvas
         ref={canvasRef}
         width={800}
@@ -279,7 +286,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
         className="absolute inset-0 w-full h-full pointer-events-none z-30"
       />
 
-      {/* Phase IDLE - Poster WANTED vierge */}
+      {/* Phase IDLE */}
       {animationPhase === 'idle' && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="relative cursor-pointer transition-all duration-300 hover:scale-105 w-[220px] h-[340px] sm:w-[280px] sm:h-[420px] md:w-[320px] md:h-[480px]" onClick={onClick}>
@@ -287,7 +294,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
               background: 'linear-gradient(135deg, #F5DEB3 0%, #F4E4C1 50%, #EDD9B0 100%)',
               boxShadow: '0 20px 60px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.4), inset 0 -2px 10px rgba(0,0,0,0.15)'
             }}>
-              {/* Texture et grain */}
+              {/* Texture */}
               <div className="absolute inset-0 opacity-20 mix-blend-multiply pointer-events-none">
                 {[...Array(12)].map((_, i) => (
                   <div key={i} className="absolute rounded-full bg-amber-900" style={{
@@ -328,7 +335,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
                     WebkitTextStroke: '1px #2D1810'
                   }}>DEAD OR ALIVE</p>
               </div>
-              {/* Logo Marine */}
+              {/* Logo */}
               <div className="absolute top-4 right-4 w-10 h-10 opacity-70">
                 <div className="text-2xl" style={{ filter: 'grayscale(1) brightness(0.3)' }}>🕊️</div>
               </div>
@@ -354,7 +361,7 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
         </div>
       )}
 
-      {/* Phase DECK - Pile de posters */}
+      {/* Phase DECK */}
       {animationPhase === 'deck' && cards && (
         <div className="absolute inset-0 flex flex-col items-center justify-start sm:justify-center pt-12 sm:pt-0 z-10">
           {/* Instructions */}
@@ -368,22 +375,22 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
           {/* Pile de posters */}
           <div className="relative cursor-pointer hover:scale-105 transition-transform w-[220px] h-[340px] sm:w-[280px] sm:h-[420px] md:w-[320px] md:h-[480px]"
             onClick={handlePosterClick} style={{ perspective: '1500px' }}>
-            {cards.slice(revealedCount, Math.min(revealedCount + 3, cards.length)).map((card, i) => {
-              const isTop = i === 0;
+
+            {/* Posters statiques (NON en cours d'animation) */}
+            {!animating && cards.slice(revealedCount, Math.min(revealedCount + 3, cards.length)).map((card, i) => {
               const offset = i * 8;
 
               return (
-                <div key={`wanted-${revealedCount + i}`}
-                  className={`absolute w-full h-full ${isTop && !animating ? 'hover:translate-y-[-8px] hover:rotate-2 transition-all duration-300' : ''}`}
+                <div key={`wanted-static-${revealedCount + i}`}
+                  className={`absolute w-full h-full ${i === 0 ? 'hover:translate-y-[-8px] hover:rotate-2 transition-all duration-300' : ''}`}
                   style={{
                     transform: `translateY(${offset}px) translateX(${i * 3}px) rotate(${i * 2 - 2}deg)`,
                     zIndex: 10 - i,
                     transformStyle: 'preserve-3d',
-                    visibility: (isTop && animating) ? 'hidden' : 'visible',
                   }}>
                   <div className="relative w-full h-full">
                     <PosterContent card={card} />
-                    {!isTop && (
+                    {i > 0 && (
                       <div className="absolute inset-0 bg-black rounded-lg pointer-events-none" style={{ opacity: i * 0.15 }} />
                     )}
                   </div>
@@ -391,26 +398,26 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
               );
             })}
 
-            {/* Animation de déchirement pour la carte du dessus */}
+            {/* Animation de déchirement (EN COURS) */}
             {animating && cards[revealedCount] && (
               <>
                 {/* Moitié gauche */}
                 <div className="absolute inset-0 poster-tear-left" style={{
                   clipPath: 'polygon(0% 0%, 48% 2%, 45% 10%, 49% 20%, 46% 30%, 50% 40%, 47% 50%, 49% 60%, 46% 70%, 48% 80%, 45% 90%, 47% 98%, 48% 100%, 0% 100%)',
-                  zIndex: 50
+                  zIndex: 100
                 }}>
                   <div className="relative w-full h-full">
-                    <PosterContent card={cards[revealedCount]} isAnimating={true} />
+                    <PosterContent card={cards[revealedCount]} />
                   </div>
                 </div>
 
                 {/* Moitié droite */}
                 <div className="absolute inset-0 poster-tear-right" style={{
                   clipPath: 'polygon(52% 0%, 100% 0%, 100% 100%, 52% 100%, 53% 98%, 51% 90%, 55% 80%, 52% 70%, 54% 60%, 53% 50%, 54% 40%, 51% 30%, 53% 20%, 52% 10%, 55% 2%)',
-                  zIndex: 50
+                  zIndex: 100
                 }}>
                   <div className="relative w-full h-full">
-                    <PosterContent card={cards[revealedCount]} isAnimating={true} />
+                    <PosterContent card={cards[revealedCount]} />
                   </div>
                 </div>
               </>
