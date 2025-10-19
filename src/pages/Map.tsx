@@ -307,8 +307,8 @@ const Map: React.FC = () => {
 
   // Mémoïser la recherche des quêtes pour éviter flatMap à chaque render
   const questsMap = useMemo(() => {
-    if (!mapData) return new Map<string, Quest>();
-    const map = new Map<string, Quest>();
+    if (!mapData) return new globalThis.Map<string, Quest>();
+    const map = new globalThis.Map<string, Quest>();
     mapData.islands.forEach(island => {
       island.quests.forEach(quest => {
         map.set(quest.id, quest);
