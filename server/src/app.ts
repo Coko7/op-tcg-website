@@ -11,6 +11,7 @@ import { VegapullImporter } from './scripts/import-vegapull-data.js';
 import { BoosterModel } from './models/Booster.js';
 import { AchievementService } from './services/AchievementService.js';
 import { AchievementModel } from './models/Achievement.js';
+import { seedWorldMapData } from './scripts/seed-world-map-data.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,6 +35,7 @@ import userRoutes from './routes/users.js';
 import leaderboardRoutes from './routes/leaderboard.js';
 import notificationRoutes from './routes/notifications.js';
 import marketplaceRoutes from './routes/marketplace.js';
+import worldMapRoutes from './routes/worldMapRoutes.js';
 
 const app = express();
 
@@ -152,6 +154,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
+app.use('/api/world', worldMapRoutes);
 
 // Route de santé
 app.get('/health', (req, res) => {
@@ -264,6 +267,25 @@ export const initializeApp = async (): Promise<express.Application> => {
     } catch (achievementError) {
       console.warn('⚠️ Erreur lors de l\'initialisation des achievements:', achievementError);
       console.warn('💡 Vous pouvez initialiser manuellement avec: npm run init-achievements');
+    }
+
+    // Initialiser la carte du monde
+    console.log('🗺️  Vérification et initialisation de la carte du monde...');
+    try {
+      const islandCount = await Database.get<{ count: number }>(`
+        SELECT COUNT(*) as count FROM islands WHERE is_active = 1
+      `);
+
+      if (!islandCount || islandCount.count === 0) {
+        console.log('🏝️  Aucune île trouvée, initialisation de la carte du monde...');
+        await seedWorldMapData();
+        console.log('✅ Carte du monde initialisée avec succès');
+      } else {
+        console.log(`✅ ${islandCount.count} îles déjà présentes`);
+      }
+    } catch (worldMapError) {
+      console.warn('⚠️ Erreur lors de l\'initialisation de la carte du monde:', worldMapError);
+      console.warn('💡 Vous pouvez initialiser manuellement avec: npm run seed-world-map');
     }
 
     console.log('🎉 Application initialisée avec succès');

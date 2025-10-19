@@ -14,6 +14,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Admin from './pages/Admin';
 import Marketplace from './pages/Marketplace';
+import Map from './pages/Map';
 
 function App() {
   return (
@@ -74,6 +75,7 @@ function App() {
             <Route path="achievements" element={<Achievements />} />
             <Route path="leaderboard" element={<Leaderboard />} />
             <Route path="marketplace" element={<Marketplace />} />
+            <Route path="map" element={<Map />} />
           </Route>
         </Routes>
         </Router>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Package, BookOpen, Trophy, User, LogIn, UserPlus, Medal, Shield, ShoppingCart, Menu, X } from 'lucide-react';
+import { Home, Package, BookOpen, Trophy, User, LogIn, UserPlus, Medal, Shield, ShoppingCart, Menu, X, Map as MapIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import UserProfile from './UserProfile';
 import NotificationBell from './NotificationBell';
@@ -55,6 +55,7 @@ const Header: React.FC = () => {
     { to: '/', icon: Home, label: 'Accueil' },
     { to: '/boosters', icon: Package, label: 'Boosters' },
     { to: '/collection', icon: BookOpen, label: 'Collection' },
+    { to: '/map', icon: MapIcon, label: 'Carte' },
     { to: '/achievements', icon: Trophy, label: 'Achievements' },
     { to: '/leaderboard', icon: Medal, label: 'Leaderboard' },
     { to: '/marketplace', icon: ShoppingCart, label: 'Marketplace' },

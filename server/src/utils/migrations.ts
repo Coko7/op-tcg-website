@@ -782,6 +782,157 @@ export class MigrationManager {
       }
     });
 
+    // Migration 17: Système de carte du monde et quêtes
+    this.migrations.push({
+      version: 17,
+      name: 'create_world_map_system',
+      up: async () => {
+        console.log('📦 Migration 17: Création du système de carte du monde...');
+
+        // Table des îles
+        await Database.run(`
+          CREATE TABLE IF NOT EXISTS islands (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            order_index INTEGER NOT NULL,
+            description TEXT,
+            latitude REAL NOT NULL,
+            longitude REAL NOT NULL,
+            unlock_requirement_island_id TEXT,
+            final_reward_type TEXT CHECK(final_reward_type IN ('berrys', 'crew_member')),
+            final_reward_value INTEGER,
+            final_reward_crew_member_id TEXT,
+            is_active BOOLEAN DEFAULT TRUE CHECK(is_active IN (0, 1)),
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (unlock_requirement_island_id) REFERENCES islands(id)
+          )
+        `);
+        console.log('  ✅ Table islands créée');
+
+        // Table des membres d'équipage
+        await Database.run(`
+          CREATE TABLE IF NOT EXISTS crew_members (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            description TEXT,
+            image_url TEXT,
+            unlock_island_id TEXT,
+            order_index INTEGER NOT NULL,
+            is_active BOOLEAN DEFAULT TRUE CHECK(is_active IN (0, 1)),
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (unlock_island_id) REFERENCES islands(id)
+          )
+        `);
+        console.log('  ✅ Table crew_members créée');
+
+        // Table des quêtes
+        await Database.run(`
+          CREATE TABLE IF NOT EXISTS quests (
+            id TEXT PRIMARY KEY,
+            island_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            duration_hours INTEGER NOT NULL CHECK(duration_hours > 0),
+            reward_berrys INTEGER DEFAULT 0 CHECK(reward_berrys >= 0),
+            required_crew_count INTEGER DEFAULT 1 CHECK(required_crew_count >= 1 AND required_crew_count <= 10),
+            specific_crew_member_id TEXT,
+            order_index INTEGER NOT NULL,
+            is_repeatable BOOLEAN DEFAULT TRUE CHECK(is_repeatable IN (0, 1)),
+            is_active BOOLEAN DEFAULT TRUE CHECK(is_active IN (0, 1)),
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (island_id) REFERENCES islands(id) ON DELETE CASCADE,
+            FOREIGN KEY (specific_crew_member_id) REFERENCES crew_members(id)
+          )
+        `);
+        console.log('  ✅ Table quests créée');
+
+        // Table des membres d'équipage débloqués par utilisateur
+        await Database.run(`
+          CREATE TABLE IF NOT EXISTS user_crew_members (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            crew_member_id TEXT NOT NULL,
+            unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (crew_member_id) REFERENCES crew_members(id) ON DELETE CASCADE,
+            UNIQUE(user_id, crew_member_id)
+          )
+        `);
+        console.log('  ✅ Table user_crew_members créée');
+
+        // Table des îles débloquées par utilisateur
+        await Database.run(`
+          CREATE TABLE IF NOT EXISTS user_islands (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            island_id TEXT NOT NULL,
+            unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            completed_at DATETIME,
+            final_reward_claimed BOOLEAN DEFAULT FALSE CHECK(final_reward_claimed IN (0, 1)),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (island_id) REFERENCES islands(id) ON DELETE CASCADE,
+            UNIQUE(user_id, island_id)
+          )
+        `);
+        console.log('  ✅ Table user_islands créée');
+
+        // Table des quêtes actives
+        await Database.run(`
+          CREATE TABLE IF NOT EXISTS active_quests (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            quest_id TEXT NOT NULL,
+            crew_member_ids TEXT NOT NULL,
+            started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            completes_at DATETIME NOT NULL,
+            completed BOOLEAN DEFAULT FALSE CHECK(completed IN (0, 1)),
+            reward_claimed BOOLEAN DEFAULT FALSE CHECK(reward_claimed IN (0, 1)),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (quest_id) REFERENCES quests(id) ON DELETE CASCADE
+          )
+        `);
+        console.log('  ✅ Table active_quests créée');
+
+        // Table de l'historique des quêtes complétées
+        await Database.run(`
+          CREATE TABLE IF NOT EXISTS quest_history (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            quest_id TEXT NOT NULL,
+            crew_member_ids TEXT NOT NULL,
+            completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            reward_berrys INTEGER DEFAULT 0,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (quest_id) REFERENCES quests(id) ON DELETE CASCADE
+          )
+        `);
+        console.log('  ✅ Table quest_history créée');
+
+        // Index pour optimiser les recherches
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_islands_order ON islands(order_index)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_crew_members_order ON crew_members(order_index)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_quests_island_id ON quests(island_id)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_user_crew_members_user_id ON user_crew_members(user_id)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_user_islands_user_id ON user_islands(user_id)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_active_quests_user_id ON active_quests(user_id)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_active_quests_completes_at ON active_quests(completes_at)');
+        await Database.run('CREATE INDEX IF NOT EXISTS idx_quest_history_user_id ON quest_history(user_id)');
+        console.log('  ✅ Index créés');
+
+        console.log('✅ Système de carte du monde créé');
+      },
+      down: async () => {
+        console.log('🔄 Rollback Migration 17...');
+        await Database.run('DROP TABLE IF EXISTS quest_history');
+        await Database.run('DROP TABLE IF EXISTS active_quests');
+        await Database.run('DROP TABLE IF EXISTS user_islands');
+        await Database.run('DROP TABLE IF EXISTS user_crew_members');
+        await Database.run('DROP TABLE IF EXISTS quests');
+        await Database.run('DROP TABLE IF EXISTS crew_members');
+        await Database.run('DROP TABLE IF EXISTS islands');
+      }
+    });
+
     // Trier les migrations par version
     this.migrations.sort((a, b) => a.version - b.version);
   }

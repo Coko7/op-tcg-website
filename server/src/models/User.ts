@@ -177,4 +177,13 @@ export class UserModel {
       today_openings: openingsStats?.today_openings || 0
     };
   }
+
+  static async addBerrys(userId: string, amount: number): Promise<void> {
+    const MAX_BERRYS = 999999999;
+    await Database.run(`
+      UPDATE users
+      SET berrys = MIN(COALESCE(berrys, 0) + ?, ?)
+      WHERE id = ?
+    `, [amount, MAX_BERRYS, userId]);
+  }
 }
