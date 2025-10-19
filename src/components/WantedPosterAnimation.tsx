@@ -193,9 +193,6 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
       {/* Image vide - ratio 1:1.4 pour cartes One Piece */}
       <div className="absolute top-10 sm:top-12 left-1/2 transform -translate-x-1/2 w-[140px] h-[196px] sm:w-[175px] sm:h-[245px] md:w-[200px] md:h-[280px] border-4 border-black shadow-lg overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #E5D6A3 0%, #E4D4B1 50%, #DDD1A0 100%)' }}>
-        <div className="w-full h-full flex items-center justify-center">
-          <span className="text-4xl opacity-30">🃏</span>
-        </div>
       </div>
 
       {/* DEAD OR ALIVE - SOUS le cadre */}
@@ -362,9 +359,9 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
 
       {/* Phase DECK */}
       {animationPhase === 'deck' && cards && (
-        <div className="absolute inset-0 flex flex-col items-center justify-start sm:justify-center pt-12 sm:pt-0 z-10">
-          {/* Instructions */}
-          <div className="absolute top-4 sm:top-8 left-0 right-0 text-center z-40 px-2">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10">
+          {/* Instructions - AU-DESSUS des posters */}
+          <div className="text-center z-40 px-2">
             <div className="inline-block backdrop-blur-sm bg-black/40 py-2 px-4 rounded-lg">
               <p className="text-white font-semibold text-sm sm:text-base mb-1">🎴 Cliquez pour révéler les WANTED !</p>
               <p className="text-amber-300 text-xs sm:text-sm">{revealedCount} / {cards.length} révélés</p>
