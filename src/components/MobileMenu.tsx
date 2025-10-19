@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Package, BookOpen, Trophy, Medal, Shield, ShoppingCart, LogIn, UserPlus, X } from 'lucide-react';
+import { Home, Package, BookOpen, Trophy, Medal, Shield, ShoppingCart, LogIn, UserPlus, X, Map as MapIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface MobileMenuProps {
@@ -17,6 +17,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onClose }) => {
     { to: '/', icon: Home, label: 'Accueil' },
     { to: '/boosters', icon: Package, label: 'Boosters' },
     { to: '/collection', icon: BookOpen, label: 'Collection' },
+    { to: '/map', icon: MapIcon, label: 'Carte' },
     { to: '/achievements', icon: Trophy, label: 'Achievements' },
     { to: '/leaderboard', icon: Medal, label: 'Leaderboard' },
     { to: '/marketplace', icon: ShoppingCart, label: 'Marketplace' },

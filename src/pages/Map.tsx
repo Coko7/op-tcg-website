@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -7,6 +7,150 @@ import { Map as MapIcon, Users, Trophy, Clock, CheckCircle2, Lock, Star, Gift, X
 import GameCard from '../components/ui/GameCard';
 import Button from '../components/ui/Button';
 import ProgressBar from '../components/ui/ProgressBar';
+
+// Composant mémoïsé pour la carte SVG (évite les re-renders inutiles)
+const WorldMapSVG = memo(({ islands, onIslandClick }: {
+  islands: Island[],
+  onIslandClick: (island: Island) => void
+}) => {
+  return (
+    <svg
+      viewBox="0 0 100 60"
+      className="w-full h-full"
+      style={{ filter: 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.2))' }}
+    >
+      {/* Water waves */}
+      <defs>
+        <pattern id="waves" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path
+            d="M0 10 Q 5 8, 10 10 T 20 10"
+            stroke="rgba(59, 130, 246, 0.1)"
+            fill="none"
+            strokeWidth="0.5"
+          />
+        </pattern>
+        <linearGradient id="islandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#1d4ed8" />
+        </linearGradient>
+      </defs>
+
+      <rect width="100" height="60" fill="url(#waves)" />
+
+      {/* Path lines connecting islands */}
+      {islands.map((island, index) => {
+        if (index === 0) return null;
+        const prevIsland = islands[index - 1];
+        const unlocked = island.unlocked || prevIsland.completed;
+
+        return (
+          <line
+            key={`path-${island.id}`}
+            x1={prevIsland.longitude}
+            y1={prevIsland.latitude}
+            x2={island.longitude}
+            y2={island.latitude}
+            stroke={unlocked ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255, 255, 255, 0.1)'}
+            strokeWidth="0.3"
+            strokeDasharray={unlocked ? '0' : '1 1'}
+          />
+        );
+      })}
+
+      {/* Islands */}
+      {islands.map((island) => {
+        const unlocked = island.unlocked;
+        const completed = island.completed;
+        const canClaim = completed && !island.final_reward_claimed;
+
+        return (
+          <g
+            key={island.id}
+            transform={`translate(${island.longitude}, ${island.latitude})`}
+            onClick={() => onIslandClick(island)}
+            className={unlocked ? 'cursor-pointer' : 'cursor-not-allowed'}
+            style={{ transition: 'transform 0.3s' }}
+          >
+            {/* Island circle */}
+            <circle
+              r={unlocked ? '2' : '1.5'}
+              fill={completed ? 'url(#islandGradient)' : unlocked ? 'rgba(59, 130, 246, 0.6)' : 'rgba(255, 255, 255, 0.2)'}
+              stroke={canClaim ? '#fbbf24' : unlocked ? '#3b82f6' : 'rgba(255, 255, 255, 0.3)'}
+              strokeWidth="0.3"
+              className={unlocked ? 'hover:r-3' : ''}
+            />
+
+            {/* Pulse effect for claimable rewards */}
+            {canClaim && (
+              <circle
+                r="2"
+                fill="none"
+                stroke="#fbbf24"
+                strokeWidth="0.2"
+                opacity="0.6"
+              >
+                <animate
+                  attributeName="r"
+                  from="2"
+                  to="4"
+                  dur="2s"
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="opacity"
+                  from="0.6"
+                  to="0"
+                  dur="2s"
+                  repeatCount="indefinite"
+                />
+              </circle>
+            )}
+
+            {/* Lock icon for locked islands */}
+            {!unlocked && (
+              <text
+                x="0"
+                y="0.5"
+                fontSize="1.5"
+                fill="rgba(255, 255, 255, 0.4)"
+                textAnchor="middle"
+              >
+                🔒
+              </text>
+            )}
+
+            {/* Completion star */}
+            {completed && (
+              <text
+                x="0"
+                y="-2.5"
+                fontSize="1.5"
+                textAnchor="middle"
+              >
+                ⭐
+              </text>
+            )}
+
+            {/* Island name */}
+            <text
+              x="0"
+              y="3.5"
+              fontSize="1"
+              fill="white"
+              textAnchor="middle"
+              className="font-semibold"
+              style={{ pointerEvents: 'none' }}
+            >
+              {island.name}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+});
+
+WorldMapSVG.displayName = 'WorldMapSVG';
 
 const Map: React.FC = () => {
   const { user } = useAuth();
@@ -21,6 +165,7 @@ const Map: React.FC = () => {
   const [showQuestModal, setShowQuestModal] = useState(false);
   const [showCrewModal, setShowCrewModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [currentTime, setCurrentTime] = useState(Date.now());
 
   useEffect(() => {
     if (!user) {
@@ -28,12 +173,22 @@ const Map: React.FC = () => {
       return;
     }
     loadMapData();
-    // Rafraîchir toutes les 30 secondes pour mettre à jour les timers
-    const interval = setInterval(loadMapData, 30000);
-    return () => clearInterval(interval);
+    // Rafraîchir les données toutes les 5 minutes seulement
+    const dataInterval = setInterval(loadMapData, 300000);
+    return () => clearInterval(dataInterval);
   }, [user, navigate]);
 
-  const loadMapData = async () => {
+  // Timer séparé pour les countdowns (1 seconde)
+  useEffect(() => {
+    if (mapData && mapData.activeQuests.length > 0) {
+      const timerInterval = setInterval(() => {
+        setCurrentTime(Date.now());
+      }, 1000);
+      return () => clearInterval(timerInterval);
+    }
+  }, [mapData?.activeQuests.length]);
+
+  const loadMapData = useCallback(async () => {
     try {
       const data = await worldMapService.getMapData();
       setMapData(data);
@@ -42,42 +197,42 @@ const Map: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
-  const handleIslandClick = (island: Island) => {
+  const handleIslandClick = useCallback((island: Island) => {
     if (!island.unlocked) {
       showToast('error', 'Cette île n\'est pas encore débloquée');
       return;
     }
     setSelectedIsland(island);
-  };
+  }, [showToast]);
 
-  const handleQuestClick = (quest: Quest) => {
-    if (!mapData) return;
-
+  const handleQuestClick = useCallback((quest: Quest) => {
     setSelectedQuest(quest);
     setSelectedCrew([]);
     setShowQuestModal(true);
-  };
+  }, []);
 
-  const handleCrewSelect = (crewId: string) => {
+  const handleCrewSelect = useCallback((crewId: string) => {
     if (!selectedQuest || !mapData) return;
 
     const crew = mapData.crewMembers.find(c => c.id === crewId && c.unlocked);
     if (!crew) return;
 
-    if (selectedCrew.includes(crewId)) {
-      setSelectedCrew(selectedCrew.filter(id => id !== crewId));
-    } else {
-      if (selectedCrew.length >= selectedQuest.required_crew_count) {
-        showToast('error', `Cette quête nécessite ${selectedQuest.required_crew_count} membre(s) maximum`);
-        return;
+    setSelectedCrew(prev => {
+      if (prev.includes(crewId)) {
+        return prev.filter(id => id !== crewId);
+      } else {
+        if (prev.length >= selectedQuest.required_crew_count) {
+          showToast('error', `Cette quête nécessite ${selectedQuest.required_crew_count} membre(s) maximum`);
+          return prev;
+        }
+        return [...prev, crewId];
       }
-      setSelectedCrew([...selectedCrew, crewId]);
-    }
-  };
+    });
+  }, [selectedQuest, mapData, showToast]);
 
-  const handleStartQuest = async () => {
+  const handleStartQuest = useCallback(async () => {
     if (!selectedQuest || selectedCrew.length !== selectedQuest.required_crew_count) {
       showToast('error', `Sélectionnez exactement ${selectedQuest?.required_crew_count || 0} membre(s)`);
       return;
@@ -96,9 +251,9 @@ const Map: React.FC = () => {
     } finally {
       setActionLoading(false);
     }
-  };
+  }, [selectedQuest, selectedCrew, showToast, loadMapData]);
 
-  const handleCompleteQuest = async (activeQuestId: string) => {
+  const handleCompleteQuest = useCallback(async (activeQuestId: string) => {
     setActionLoading(true);
     try {
       const result = await worldMapService.completeQuest(activeQuestId);
@@ -109,9 +264,9 @@ const Map: React.FC = () => {
     } finally {
       setActionLoading(false);
     }
-  };
+  }, [showToast, loadMapData]);
 
-  const handleClaimIslandReward = async (islandId: string) => {
+  const handleClaimIslandReward = useCallback(async (islandId: string) => {
     setActionLoading(true);
     try {
       const result = await worldMapService.claimIslandReward(islandId);
@@ -128,12 +283,12 @@ const Map: React.FC = () => {
     } finally {
       setActionLoading(false);
     }
-  };
+  }, [mapData, showToast, loadMapData]);
 
-  const getTimeRemaining = (completesAt: string): string => {
-    const now = new Date().getTime();
+  // Mémoïsation des fonctions de temps avec currentTime
+  const getTimeRemaining = useCallback((completesAt: string): string => {
     const target = new Date(completesAt).getTime();
-    const diff = target - now;
+    const diff = target - currentTime;
 
     if (diff <= 0) return 'Terminé !';
 
@@ -144,11 +299,34 @@ const Map: React.FC = () => {
     if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
     if (minutes > 0) return `${minutes}m ${seconds}s`;
     return `${seconds}s`;
-  };
+  }, [currentTime]);
 
-  const isQuestComplete = (completesAt: string): boolean => {
-    return new Date(completesAt).getTime() <= new Date().getTime();
-  };
+  const isQuestComplete = useCallback((completesAt: string): boolean => {
+    return new Date(completesAt).getTime() <= currentTime;
+  }, [currentTime]);
+
+  // Mémoïser la recherche des quêtes pour éviter flatMap à chaque render
+  const questsMap = useMemo(() => {
+    if (!mapData) return new Map<string, Quest>();
+    const map = new Map<string, Quest>();
+    mapData.islands.forEach(island => {
+      island.quests.forEach(quest => {
+        map.set(quest.id, quest);
+      });
+    });
+    return map;
+  }, [mapData]);
+
+  // Mémoïser les stats
+  const stats = useMemo(() => {
+    if (!mapData) return { unlockedCrew: 0, totalCrew: 0, completedIslands: 0, totalIslands: 0 };
+    return {
+      unlockedCrew: mapData.crewMembers.filter(c => c.unlocked).length,
+      totalCrew: mapData.crewMembers.length,
+      completedIslands: mapData.islands.filter(i => i.completed).length,
+      totalIslands: mapData.islands.length
+    };
+  }, [mapData]);
 
   if (loading) {
     return (
@@ -190,7 +368,7 @@ const Map: React.FC = () => {
                 <Users className="w-6 h-6 text-ocean-400 mx-auto mb-1" />
                 <p className="text-sm text-white/60">Équipage</p>
                 <p className="text-xl font-bold text-white">
-                  {mapData.crewMembers.filter(c => c.unlocked).length}/{mapData.crewMembers.length}
+                  {stats.unlockedCrew}/{stats.totalCrew}
                 </p>
               </div>
               <div className="w-px h-12 bg-white/10" />
@@ -198,7 +376,7 @@ const Map: React.FC = () => {
                 <Trophy className="w-6 h-6 text-treasure-400 mx-auto mb-1" />
                 <p className="text-sm text-white/60">Îles</p>
                 <p className="text-xl font-bold text-white">
-                  {mapData.islands.filter(i => i.completed).length}/{mapData.islands.length}
+                  {stats.completedIslands}/{stats.totalIslands}
                 </p>
               </div>
             </div>
@@ -214,9 +392,7 @@ const Map: React.FC = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mapData.activeQuests.map((activeQuest) => {
-                const quest = mapData.islands
-                  .flatMap(i => i.quests)
-                  .find(q => q.id === activeQuest.quest_id);
+                const quest = questsMap.get(activeQuest.quest_id);
                 if (!quest) return null;
 
                 const complete = isQuestComplete(activeQuest.completes_at);
@@ -270,139 +446,7 @@ const Map: React.FC = () => {
 
             {/* SVG Map Container */}
             <div className="w-full h-[600px] relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-ocean-950/30 to-slate-900/30">
-              <svg
-                viewBox="0 0 100 60"
-                className="w-full h-full"
-                style={{ filter: 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.2))' }}
-              >
-                {/* Water waves */}
-                <defs>
-                  <pattern id="waves" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <path
-                      d="M0 10 Q 5 8, 10 10 T 20 10"
-                      stroke="rgba(59, 130, 246, 0.1)"
-                      fill="none"
-                      strokeWidth="0.5"
-                    />
-                  </pattern>
-                  <linearGradient id="islandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#3b82f6" />
-                    <stop offset="100%" stopColor="#1d4ed8" />
-                  </linearGradient>
-                </defs>
-
-                <rect width="100" height="60" fill="url(#waves)" />
-
-                {/* Path lines connecting islands */}
-                {mapData.islands.map((island, index) => {
-                  if (index === 0) return null;
-                  const prevIsland = mapData.islands[index - 1];
-                  const unlocked = island.unlocked || prevIsland.completed;
-
-                  return (
-                    <line
-                      key={`path-${island.id}`}
-                      x1={prevIsland.longitude}
-                      y1={prevIsland.latitude}
-                      x2={island.longitude}
-                      y2={island.latitude}
-                      stroke={unlocked ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255, 255, 255, 0.1)'}
-                      strokeWidth="0.3"
-                      strokeDasharray={unlocked ? '0' : '1 1'}
-                    />
-                  );
-                })}
-
-                {/* Islands */}
-                {mapData.islands.map((island) => {
-                  const unlocked = island.unlocked;
-                  const completed = island.completed;
-                  const canClaim = completed && !island.final_reward_claimed;
-
-                  return (
-                    <g
-                      key={island.id}
-                      transform={`translate(${island.longitude}, ${island.latitude})`}
-                      onClick={() => handleIslandClick(island)}
-                      className={unlocked ? 'cursor-pointer' : 'cursor-not-allowed'}
-                      style={{ transition: 'transform 0.3s' }}
-                    >
-                      {/* Island circle */}
-                      <circle
-                        r={unlocked ? '2' : '1.5'}
-                        fill={completed ? 'url(#islandGradient)' : unlocked ? 'rgba(59, 130, 246, 0.6)' : 'rgba(255, 255, 255, 0.2)'}
-                        stroke={canClaim ? '#fbbf24' : unlocked ? '#3b82f6' : 'rgba(255, 255, 255, 0.3)'}
-                        strokeWidth="0.3"
-                        className={unlocked ? 'hover:r-3' : ''}
-                      />
-
-                      {/* Pulse effect for claimable rewards */}
-                      {canClaim && (
-                        <circle
-                          r="2"
-                          fill="none"
-                          stroke="#fbbf24"
-                          strokeWidth="0.2"
-                          opacity="0.6"
-                        >
-                          <animate
-                            attributeName="r"
-                            from="2"
-                            to="4"
-                            dur="2s"
-                            repeatCount="indefinite"
-                          />
-                          <animate
-                            attributeName="opacity"
-                            from="0.6"
-                            to="0"
-                            dur="2s"
-                            repeatCount="indefinite"
-                          />
-                        </circle>
-                      )}
-
-                      {/* Lock icon for locked islands */}
-                      {!unlocked && (
-                        <text
-                          x="0"
-                          y="0.5"
-                          fontSize="1.5"
-                          fill="rgba(255, 255, 255, 0.4)"
-                          textAnchor="middle"
-                        >
-                          🔒
-                        </text>
-                      )}
-
-                      {/* Completion star */}
-                      {completed && (
-                        <text
-                          x="0"
-                          y="-2.5"
-                          fontSize="1.5"
-                          textAnchor="middle"
-                        >
-                          ⭐
-                        </text>
-                      )}
-
-                      {/* Island name */}
-                      <text
-                        x="0"
-                        y="3.5"
-                        fontSize="1"
-                        fill="white"
-                        textAnchor="middle"
-                        className="font-semibold"
-                        style={{ pointerEvents: 'none' }}
-                      >
-                        {island.name}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
+              <WorldMapSVG islands={mapData.islands} onIslandClick={handleIslandClick} />
             </div>
           </div>
         </GameCard>
