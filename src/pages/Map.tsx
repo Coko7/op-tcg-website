@@ -73,26 +73,26 @@ const WorldMapSVG = memo(({ islands, onIslandClick }: {
           >
             {/* Island circle */}
             <circle
-              r={unlocked ? '2' : '1.5'}
+              r={unlocked ? '2.5' : '2'}
               fill={completed ? 'url(#islandGradient)' : unlocked ? 'rgba(59, 130, 246, 0.6)' : 'rgba(255, 255, 255, 0.2)'}
               stroke={canClaim ? '#fbbf24' : unlocked ? '#3b82f6' : 'rgba(255, 255, 255, 0.3)'}
-              strokeWidth="0.3"
+              strokeWidth="0.4"
               className={unlocked ? 'hover:r-3' : ''}
             />
 
             {/* Pulse effect for claimable rewards */}
             {canClaim && (
               <circle
-                r="2"
+                r="2.5"
                 fill="none"
                 stroke="#fbbf24"
-                strokeWidth="0.2"
+                strokeWidth="0.3"
                 opacity="0.6"
               >
                 <animate
                   attributeName="r"
-                  from="2"
-                  to="4"
+                  from="2.5"
+                  to="5"
                   dur="2s"
                   repeatCount="indefinite"
                 />
@@ -110,8 +110,8 @@ const WorldMapSVG = memo(({ islands, onIslandClick }: {
             {!unlocked && (
               <text
                 x="0"
-                y="0.5"
-                fontSize="1.5"
+                y="0.7"
+                fontSize="2"
                 fill="rgba(255, 255, 255, 0.4)"
                 textAnchor="middle"
               >
@@ -123,8 +123,8 @@ const WorldMapSVG = memo(({ islands, onIslandClick }: {
             {completed && (
               <text
                 x="0"
-                y="-2.5"
-                fontSize="1.5"
+                y="-3"
+                fontSize="2"
                 textAnchor="middle"
               >
                 ⭐
@@ -134,8 +134,8 @@ const WorldMapSVG = memo(({ islands, onIslandClick }: {
             {/* Island name */}
             <text
               x="0"
-              y="3.5"
-              fontSize="1"
+              y="4.5"
+              fontSize="1.2"
               fill="white"
               textAnchor="middle"
               className="font-semibold"
@@ -353,29 +353,29 @@ const Map: React.FC = () => {
   return (
     <div className="min-h-screen pb-24">
       {/* Header */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-              <MapIcon className="w-10 h-10 text-ocean-400" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2 flex items-center gap-2 sm:gap-3">
+              <MapIcon className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-ocean-400" />
               Carte du Monde
             </h1>
-            <p className="text-white/60">Explorez Grand Line et complétez des quêtes épiques</p>
+            <p className="text-sm sm:text-base text-white/60">Explorez Grand Line et complétez des quêtes épiques</p>
           </div>
-          <GameCard variant="ocean" className="px-6 py-4">
-            <div className="flex items-center gap-4">
+          <GameCard variant="ocean" className="px-4 sm:px-6 py-3 sm:py-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <div className="text-center">
-                <Users className="w-6 h-6 text-ocean-400 mx-auto mb-1" />
-                <p className="text-sm text-white/60">Équipage</p>
-                <p className="text-xl font-bold text-white">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-ocean-400 mx-auto mb-1" />
+                <p className="text-xs sm:text-sm text-white/60">Équipage</p>
+                <p className="text-lg sm:text-xl font-bold text-white">
                   {stats.unlockedCrew}/{stats.totalCrew}
                 </p>
               </div>
-              <div className="w-px h-12 bg-white/10" />
+              <div className="w-px h-10 sm:h-12 bg-white/10" />
               <div className="text-center">
-                <Trophy className="w-6 h-6 text-treasure-400 mx-auto mb-1" />
-                <p className="text-sm text-white/60">Îles</p>
-                <p className="text-xl font-bold text-white">
+                <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-treasure-400 mx-auto mb-1" />
+                <p className="text-xs sm:text-sm text-white/60">Îles</p>
+                <p className="text-lg sm:text-xl font-bold text-white">
                   {stats.completedIslands}/{stats.totalIslands}
                 </p>
               </div>
@@ -385,12 +385,12 @@ const Map: React.FC = () => {
 
         {/* Active Quests */}
         {mapData.activeQuests.length > 0 && (
-          <GameCard variant="success" className="mb-8 p-6">
-            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-              <Clock className="w-6 h-6" />
+          <GameCard variant="success" className="mb-6 sm:mb-8 p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
               Quêtes en Cours ({mapData.activeQuests.length})
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {mapData.activeQuests.map((activeQuest) => {
                 const quest = questsMap.get(activeQuest.quest_id);
                 if (!quest) return null;
@@ -430,22 +430,22 @@ const Map: React.FC = () => {
         )}
 
         {/* World Map */}
-        <GameCard className="p-8 relative overflow-hidden">
+        <GameCard className="p-4 sm:p-6 lg:p-8 relative overflow-hidden">
           {/* Background effects */}
           <div className="absolute inset-0 bg-gradient-to-br from-ocean-950/50 via-slate-900/50 to-ocean-950/50" />
           <div className="absolute inset-0">
-            <div className="absolute top-10 left-10 w-96 h-96 bg-ocean-500/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-10 right-10 w-96 h-96 bg-treasure-500/10 rounded-full blur-3xl" />
+            <div className="absolute top-10 left-10 w-48 h-48 sm:w-96 sm:h-96 bg-ocean-500/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-10 right-10 w-48 h-48 sm:w-96 sm:h-96 bg-treasure-500/10 rounded-full blur-3xl" />
           </div>
 
           <div className="relative">
-            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-              <MapIcon className="w-6 h-6 text-ocean-400" />
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2">
+              <MapIcon className="w-5 h-5 sm:w-6 sm:h-6 text-ocean-400" />
               Grand Line
             </h2>
 
             {/* SVG Map Container */}
-            <div className="w-full h-[600px] relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-ocean-950/30 to-slate-900/30">
+            <div className="w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] relative rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-ocean-950/30 to-slate-900/30">
               <WorldMapSVG islands={mapData.islands} onIslandClick={handleIslandClick} />
             </div>
           </div>
@@ -453,27 +453,27 @@ const Map: React.FC = () => {
 
         {/* Island Details Modal */}
         {selectedIsland && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <GameCard className="max-w-4xl w-full max-h-[80vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <h2 className="text-3xl font-bold text-white mb-2">{selectedIsland.name}</h2>
-                    <p className="text-white/60">{selectedIsland.description}</p>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+            <GameCard className="max-w-4xl w-full max-h-[85vh] sm:max-h-[80vh] overflow-y-auto">
+              <div className="p-4 sm:p-6">
+                <div className="flex items-start justify-between mb-4 sm:mb-6 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2 truncate">{selectedIsland.name}</h2>
+                    <p className="text-sm sm:text-base text-white/60">{selectedIsland.description}</p>
                   </div>
                   <button
                     onClick={() => setSelectedIsland(null)}
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-white/60 hover:text-white transition-colors flex-shrink-0"
                   >
-                    <X className="w-6 h-6" />
+                    <X className="w-5 h-5 sm:w-6 sm:h-6" />
                   </button>
                 </div>
 
                 {/* Progress */}
-                <div className="mb-6">
+                <div className="mb-4 sm:mb-6">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-white/80">Progression</span>
-                    <span className="text-sm font-bold text-white">
+                    <span className="text-xs sm:text-sm font-medium text-white/80">Progression</span>
+                    <span className="text-xs sm:text-sm font-bold text-white">
                       {selectedIsland.progress.completed}/{selectedIsland.progress.total} quêtes
                     </span>
                   </div>
@@ -487,13 +487,13 @@ const Map: React.FC = () => {
 
                 {/* Final Reward */}
                 {selectedIsland.completed && !selectedIsland.final_reward_claimed && (
-                  <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-treasure-500/20 to-treasure-600/20 border border-treasure-400/30">
-                    <div className="flex items-center justify-between">
+                  <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl bg-gradient-to-r from-treasure-500/20 to-treasure-600/20 border border-treasure-400/30">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <Gift className="w-8 h-8 text-treasure-400" />
+                        <Gift className="w-6 h-6 sm:w-8 sm:h-8 text-treasure-400 flex-shrink-0" />
                         <div>
-                          <h3 className="font-bold text-white">Récompense Finale Disponible !</h3>
-                          <p className="text-sm text-white/80">
+                          <h3 className="text-sm sm:text-base font-bold text-white">Récompense Finale Disponible !</h3>
+                          <p className="text-xs sm:text-sm text-white/80">
                             {selectedIsland.final_reward_type === 'berrys'
                               ? `${selectedIsland.final_reward_value} Berrys`
                               : `Nouveau membre d'équipage !`}
@@ -504,6 +504,7 @@ const Map: React.FC = () => {
                         variant="treasure"
                         onClick={() => handleClaimIslandReward(selectedIsland.id)}
                         isLoading={actionLoading}
+                        className="w-full sm:w-auto"
                       >
                         Réclamer
                       </Button>
@@ -513,11 +514,11 @@ const Map: React.FC = () => {
 
                 {/* Quests List */}
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                    <Trophy className="w-5 h-5 text-ocean-400" />
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
+                    <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-ocean-400" />
                     Quêtes Disponibles
                   </h3>
-                  <div className="grid gap-4">
+                  <div className="grid gap-3 sm:gap-4">
                     {selectedIsland.quests.map((quest) => {
                       const activeQuest = mapData.activeQuests.find(aq => aq.quest_id === quest.id);
                       const isActive = !!activeQuest;
@@ -525,41 +526,41 @@ const Map: React.FC = () => {
                       return (
                         <div
                           key={quest.id}
-                          className={`p-4 rounded-xl border transition-all ${
+                          className={`p-3 sm:p-4 rounded-xl border transition-all ${
                             isActive
                               ? 'bg-emerald-500/10 border-emerald-400/30'
                               : 'bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer'
                           }`}
                           onClick={() => !isActive && handleQuestClick(quest)}
                         >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-white mb-1">{quest.name}</h4>
-                              <p className="text-sm text-white/60 mb-3">{quest.description}</p>
-                              <div className="flex items-center gap-4 text-sm">
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm sm:text-base font-semibold text-white mb-1">{quest.name}</h4>
+                              <p className="text-xs sm:text-sm text-white/60 mb-2 sm:mb-3 line-clamp-2">{quest.description}</p>
+                              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm">
                                 <div className="flex items-center gap-1 text-white/80">
-                                  <Clock className="w-4 h-4 text-ocean-400" />
+                                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-ocean-400" />
                                   <span>{quest.duration_hours}h</span>
                                 </div>
                                 <div className="flex items-center gap-1 text-white/80">
-                                  <Users className="w-4 h-4 text-ocean-400" />
+                                  <Users className="w-3 h-3 sm:w-4 sm:h-4 text-ocean-400" />
                                   <span>{quest.required_crew_count} membre{quest.required_crew_count > 1 ? 's' : ''}</span>
                                 </div>
                                 <div className="flex items-center gap-1 text-treasure-400 font-medium">
                                   <span>{quest.reward_berrys}</span>
-                                  <img src="/icons/berry.svg" alt="Berry" className="w-4 h-4" onError={(e) => {
+                                  <img src="/icons/berry.svg" alt="Berry" className="w-3 h-3 sm:w-4 sm:h-4" onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                   }} />
                                 </div>
                               </div>
                             </div>
                             {isActive ? (
-                              <div className="flex items-center gap-2 text-emerald-400">
-                                <CheckCircle2 className="w-5 h-5" />
-                                <span className="text-sm font-medium">En cours</span>
+                              <div className="flex items-center gap-2 text-emerald-400 self-start">
+                                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                                <span className="text-xs sm:text-sm font-medium">En cours</span>
                               </div>
                             ) : (
-                              <Button size="sm" variant="primary">
+                              <Button size="sm" variant="primary" className="w-full sm:w-auto">
                                 Démarrer
                               </Button>
                             )}
@@ -576,13 +577,13 @@ const Map: React.FC = () => {
 
         {/* Quest Start Modal with Crew Selection */}
         {showQuestModal && selectedQuest && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <GameCard className="max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <h2 className="text-2xl font-bold text-white mb-2">{selectedQuest.name}</h2>
-                    <p className="text-white/60">{selectedQuest.description}</p>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+            <GameCard className="max-w-2xl w-full max-h-[85vh] sm:max-h-[80vh] overflow-y-auto">
+              <div className="p-4 sm:p-6">
+                <div className="flex items-start justify-between mb-4 sm:mb-6 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-xl sm:text-2xl font-bold text-white mb-1 sm:mb-2">{selectedQuest.name}</h2>
+                    <p className="text-sm sm:text-base text-white/60">{selectedQuest.description}</p>
                   </div>
                   <button
                     onClick={() => {
@@ -590,17 +591,17 @@ const Map: React.FC = () => {
                       setSelectedQuest(null);
                       setSelectedCrew([]);
                     }}
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-white/60 hover:text-white transition-colors flex-shrink-0"
                   >
-                    <X className="w-6 h-6" />
+                    <X className="w-5 h-5 sm:w-6 sm:h-6" />
                   </button>
                 </div>
 
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-white mb-3">
+                <div className="mb-4 sm:mb-6">
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-3">
                     Sélectionnez {selectedQuest.required_crew_count} membre{selectedQuest.required_crew_count > 1 ? 's' : ''} d'équipage
                   </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                     {mapData.crewMembers
                       .filter(c => c.unlocked)
                       .map((crew) => {
@@ -614,7 +615,7 @@ const Map: React.FC = () => {
                             key={crew.id}
                             onClick={() => !isBusy && handleCrewSelect(crew.id)}
                             disabled={isBusy}
-                            className={`p-3 rounded-xl border text-left transition-all ${
+                            className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all ${
                               isSelected
                                 ? 'bg-ocean-500/20 border-ocean-400'
                                 : isBusy
@@ -622,10 +623,10 @@ const Map: React.FC = () => {
                                 : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
                             }`}
                           >
-                            <div className="flex items-center gap-2 mb-1">
-                              {isSelected && <CheckCircle2 className="w-4 h-4 text-ocean-400" />}
-                              {isBusy && <Clock className="w-4 h-4 text-white/40" />}
-                              <span className="font-semibold text-white text-sm">{crew.name}</span>
+                            <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                              {isSelected && <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-ocean-400 flex-shrink-0" />}
+                              {isBusy && <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/40 flex-shrink-0" />}
+                              <span className="font-semibold text-white text-xs sm:text-sm truncate">{crew.name}</span>
                             </div>
                             {isBusy && <p className="text-xs text-white/40">En mission</p>}
                           </button>
@@ -634,10 +635,10 @@ const Map: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <Button
                     variant="primary"
-                    className="flex-1"
+                    className="flex-1 w-full"
                     onClick={handleStartQuest}
                     disabled={selectedCrew.length !== selectedQuest.required_crew_count}
                     isLoading={actionLoading}
@@ -646,6 +647,7 @@ const Map: React.FC = () => {
                   </Button>
                   <Button
                     variant="ghost"
+                    className="w-full sm:w-auto"
                     onClick={() => {
                       setShowQuestModal(false);
                       setSelectedQuest(null);
