@@ -132,13 +132,14 @@ const WantedPosterAnimation: React.FC<WantedPosterAnimationProps> = ({
   };
 
   const getRarityColor = (rarity: string) => {
+    // Couleurs correspondant aux gradients Tailwind de RARITY_COLORS
     const colors: Record<string, string> = {
-      common: '#8B7355',
-      uncommon: '#10B981',
-      rare: '#3B82F6',
-      leader: '#EF4444',
-      super_rare: '#F59E0B',
-      secret_rare: '#A855F7',
+      common: '#6B7280',      // gray-500
+      uncommon: '#10B981',    // green-500
+      rare: '#3B82F6',        // blue-500
+      leader: '#EF4444',      // red-500
+      super_rare: '#A855F7',  // purple-500
+      secret_rare: '#F97316', // orange-500
     };
     return colors[rarity] || colors.common;
   };

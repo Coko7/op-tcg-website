@@ -4,6 +4,7 @@ import { Database } from '../utils/database.js';
 interface RarityCount {
   secret_rare: number;
   super_rare: number;
+  leader: number;
   rare: number;
   uncommon: number;
   common: number;
@@ -14,6 +15,7 @@ interface LeaderboardEntry {
   user_id: string;
   secret_rare: number;
   super_rare: number;
+  leader: number;
   rare: number;
   uncommon: number;
   common: number;
@@ -25,7 +27,8 @@ interface LeaderboardEntry {
 }
 
 // Ordre des raretés de la plus rare à la moins rare pour le tri
-const RARITY_ORDER = ['secret_rare', 'super_rare', 'rare', 'uncommon', 'common'] as const;
+// Leader est plus rare que Rare mais moins rare que SuperRare
+const RARITY_ORDER = ['secret_rare', 'super_rare', 'leader', 'rare', 'uncommon', 'common'] as const;
 
 export class LeaderboardController {
   static async getLeaderboard(req: Request, res: Response): Promise<void> {
@@ -38,6 +41,7 @@ export class LeaderboardController {
           u.favorite_card_id,
           COUNT(CASE WHEN c.rarity = 'secret_rare' THEN 1 END) as secret_rare,
           COUNT(CASE WHEN c.rarity = 'super_rare' THEN 1 END) as super_rare,
+          COUNT(CASE WHEN c.rarity = 'leader' THEN 1 END) as leader,
           COUNT(CASE WHEN c.rarity = 'rare' THEN 1 END) as rare,
           COUNT(CASE WHEN c.rarity = 'uncommon' THEN 1 END) as uncommon,
           COUNT(CASE WHEN c.rarity = 'common' THEN 1 END) as common
@@ -68,6 +72,7 @@ export class LeaderboardController {
             user_id: user.user_id,
             secret_rare: user.secret_rare,
             super_rare: user.super_rare,
+            leader: user.leader,
             rare: user.rare,
             uncommon: user.uncommon,
             common: user.common,

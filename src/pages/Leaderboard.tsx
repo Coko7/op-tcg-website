@@ -8,6 +8,7 @@ interface LeaderboardEntry {
   user_id: string;
   secret_rare: number;
   super_rare: number;
+  leader: number;
   rare: number;
   uncommon: number;
   common: number;
@@ -20,14 +21,16 @@ interface LeaderboardEntry {
 const RARITY_LABELS = {
   secret_rare: 'Secret Rare',
   super_rare: 'Super Rare',
+  leader: 'Leader',
   rare: 'Rare',
   uncommon: 'Peu Commune',
   common: 'Commune'
 };
 
 const RARITY_COLORS = {
-  secret_rare: 'text-yellow-300',
+  secret_rare: 'text-orange-300',
   super_rare: 'text-purple-300',
+  leader: 'text-red-300',
   rare: 'text-blue-300',
   uncommon: 'text-emerald-300',
   common: 'text-slate-300'
@@ -165,7 +168,7 @@ const Leaderboard: React.FC = () => {
                     <div className="mt-3 pt-3 border-t border-white/10">
                       <span className="text-xs sm:text-sm text-slate-300">Total : </span>
                       <span className="text-lg sm:text-xl font-bold text-white">
-                        {entry.secret_rare + entry.super_rare + entry.rare + entry.uncommon + entry.common}
+                        {entry.secret_rare + entry.super_rare + entry.leader + entry.rare + entry.uncommon + entry.common}
                       </span>
                     </div>
                   </div>
