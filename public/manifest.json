@@ -1,0 +1,21 @@
+{
+  "name": "One Piece Booster Game",
+  "short_name": "OP Booster",
+  "description": "Jeu de collection de cartes One Piece - Ouvrez des boosters, collectionnez des cartes et gérez votre collection",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["games", "entertainment"],
+  "prefer_related_applications": false
+}

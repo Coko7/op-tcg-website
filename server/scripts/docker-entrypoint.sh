@@ -15,6 +15,14 @@ if [ ! -f "/app/data/database.sqlite" ]; then
   echo "🏆 Initialisation des achievements..."
   node scripts/init-achievements.js
 
+  # Migration initiale des quêtes depuis JSON (si le fichier existe)
+  if [ -f "/app/data/world-map-quests.json" ]; then
+    echo "🗺️ Migration initiale des quêtes depuis JSON..."
+    node dist/scripts/migrate-quests-from-json.js || echo "⚠️ Erreur migration quêtes (non bloquant)"
+  else
+    echo "ℹ️ Fichier world-map-quests.json non trouvé, les quêtes seront créées par le seed initial"
+  fi
+
   echo "✅ Initialisation terminée!"
 else
   echo "✅ Base de données existante trouvée"
@@ -31,6 +39,14 @@ else
   # Correction de TOUTES les raretés des cartes
   echo "🎴 Vérification et correction de toutes les raretés..."
   node dist/scripts/fix-all-rarities.js || echo "⚠️ Erreur correction raretés (non bloquant)"
+
+  # Migration des quêtes depuis JSON (si le fichier existe)
+  if [ -f "/app/data/world-map-quests.json" ]; then
+    echo "🗺️ Migration des quêtes depuis JSON..."
+    node dist/scripts/migrate-quests-from-json.js || echo "⚠️ Erreur migration quêtes (non bloquant)"
+  else
+    echo "ℹ️ Fichier world-map-quests.json non trouvé, migration des quêtes ignorée"
+  fi
 
   # Vérifier si les achievements existent
   ACHIEVEMENT_COUNT=$(sqlite3 /app/data/database.sqlite "SELECT COUNT(*) FROM achievements;" 2>/dev/null || echo "0")
