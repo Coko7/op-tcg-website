@@ -16,8 +16,9 @@ RUN npm ci --prefer-offline --no-audit
 # Copier le code source
 COPY server/src ./src
 
-# Copier les données JSON pour la migration des quêtes
-COPY server/data ./data
+# Créer le dossier data et copier le fichier JSON des quêtes
+RUN mkdir -p ./data
+COPY server/data/world-map-quests.json ./data/world-map-quests.json
 
 # Compiler TypeScript
 RUN npm run build
