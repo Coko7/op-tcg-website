@@ -16,9 +16,9 @@ RUN npm ci --prefer-offline --no-audit
 # Copier le code source
 COPY server/src ./src
 
-# Créer le dossier data et copier le fichier JSON des quêtes
-RUN mkdir -p ./data
-COPY server/data/world-map-quests.json ./data/world-map-quests.json
+# Créer le dossier config et copier le fichier JSON des quêtes
+RUN mkdir -p ./config
+COPY server/config/world-map-quests.json ./config/world-map-quests.json
 
 # Compiler TypeScript
 RUN npm run build
@@ -72,7 +72,7 @@ COPY --from=builder --chown=nodejs:nodejs /app/dist/scripts/diagnose-rarity-issu
 COPY --from=builder --chown=nodejs:nodejs /app/dist/scripts/migrate-quests-from-json.js ./dist/scripts/
 
 # Copier le fichier JSON des quêtes
-COPY --from=builder --chown=nodejs:nodejs /app/data ./data
+COPY --from=builder --chown=nodejs:nodejs /app/config ./config
 
 # Copier les scripts d'entrypoint
 COPY --chown=nodejs:nodejs server/scripts/docker-entrypoint.sh ./scripts/

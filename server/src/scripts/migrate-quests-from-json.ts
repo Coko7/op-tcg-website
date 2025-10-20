@@ -63,7 +63,7 @@ async function migrateQuestsFromJson() {
     console.log('✅ Base de données initialisée\n');
 
     // Lire le fichier JSON
-    const jsonPath = path.join(__dirname, '../../data/world-map-quests.json');
+    const jsonPath = path.join(__dirname, '../../config/world-map-quests.json');
     console.log(`📖 Lecture du fichier: ${jsonPath}`);
 
     const jsonContent = await fs.readFile(jsonPath, 'utf-8');

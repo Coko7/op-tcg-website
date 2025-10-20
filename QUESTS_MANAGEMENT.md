@@ -12,7 +12,7 @@ Sur l'île 2 (Shells Town), une quête nécessitait 2 membres d'équipage alors 
 
 ### 1. Fichier JSON centralisé
 
-**Fichier:** `server/data/world-map-quests.json`
+**Fichier:** `server/config/world-map-quests.json`
 
 Ce fichier contient toutes les données de la carte du monde :
 - Îles (12 îles)
@@ -74,7 +74,7 @@ Certaines quêtes importantes de l'histoire ont été marquées comme non-répé
 
 ### Étape 1 : Modifier le JSON
 
-Éditez `server/data/world-map-quests.json` avec vos modifications.
+Éditez `server/config/world-map-quests.json` avec vos modifications.
 
 **Exemple - Changer la durée d'une quête:**
 ```json
@@ -208,7 +208,7 @@ La migration des quêtes est **automatique** au démarrage du conteneur Docker !
 
 **Pour modifier les quêtes en production :**
 
-1. Modifier `server/data/world-map-quests.json`
+1. Modifier `server/config/world-map-quests.json`
 2. Rebuild l'image Docker : `docker-compose build backend`
 3. Redémarrer le conteneur : `docker-compose restart backend`
 4. La migration s'exécutera automatiquement au démarrage ✨

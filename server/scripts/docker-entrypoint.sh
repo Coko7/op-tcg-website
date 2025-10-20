@@ -16,7 +16,7 @@ if [ ! -f "/app/data/database.sqlite" ]; then
   node scripts/init-achievements.js
 
   # Migration initiale des quêtes depuis JSON (si le fichier existe)
-  if [ -f "/app/data/world-map-quests.json" ]; then
+  if [ -f "/app/config/world-map-quests.json" ]; then
     echo "🗺️ Migration initiale des quêtes depuis JSON..."
     node dist/scripts/migrate-quests-from-json.js || echo "⚠️ Erreur migration quêtes (non bloquant)"
   else
@@ -41,7 +41,7 @@ else
   node dist/scripts/fix-all-rarities.js || echo "⚠️ Erreur correction raretés (non bloquant)"
 
   # Migration des quêtes depuis JSON (si le fichier existe)
-  if [ -f "/app/data/world-map-quests.json" ]; then
+  if [ -f "/app/config/world-map-quests.json" ]; then
     echo "🗺️ Migration des quêtes depuis JSON..."
     node dist/scripts/migrate-quests-from-json.js || echo "⚠️ Erreur migration quêtes (non bloquant)"
   else
