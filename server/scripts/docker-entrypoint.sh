@@ -15,6 +15,14 @@ if [ ! -f "/app/data/database.sqlite" ]; then
   echo "🏆 Initialisation des achievements..."
   node scripts/init-achievements.js
 
+  # Importer les données Vegapull (packs et cartes)
+  echo "🏴‍☠️ Import des données Vegapull..."
+  if node dist/scripts/import-vegapull-data.js; then
+    echo "✅ Données Vegapull importées avec succès!"
+  else
+    echo "⚠️ Erreur lors de l'import Vegapull (non bloquant)"
+  fi
+
   # Migration initiale des quêtes depuis JSON (si le fichier existe)
   if [ -f "/app/config/world-map-quests.json" ]; then
     echo "🗺️ Migration initiale des quêtes depuis JSON..."
@@ -82,6 +90,14 @@ else
     node scripts/init-achievements.js
   else
     echo "✅ $ACHIEVEMENT_COUNT achievements trouvés dans la base"
+  fi
+
+  # Importer/mettre à jour les données Vegapull (packs et cartes)
+  echo "🏴‍☠️ Import/mise à jour des données Vegapull..."
+  if node dist/scripts/import-vegapull-data.js; then
+    echo "✅ Données Vegapull importées avec succès!"
+  else
+    echo "⚠️ Erreur lors de l'import Vegapull (non bloquant)"
   fi
 fi
 
