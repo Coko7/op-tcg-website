@@ -12,6 +12,7 @@ export default defineConfig({
         name: 'One Piece Booster Game',
         short_name: 'OP Booster',
         description: 'Jeu de collection de cartes One Piece - Ouvrez des boosters, collectionnez des cartes et gérez votre collection',
+        version: '1.1.0',
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',

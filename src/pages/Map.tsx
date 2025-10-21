@@ -485,6 +485,35 @@ const Map: React.FC = () => {
                   />
                 </div>
 
+                {/* Island Completion Reward Preview */}
+                {!selectedIsland.completed && selectedIsland.final_reward_type && (
+                  <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl bg-gradient-to-r from-ocean-500/10 to-treasure-500/10 border border-white/10">
+                    <div className="flex items-start gap-3">
+                      <Star className="w-5 h-5 sm:w-6 sm:h-6 text-treasure-400 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <h3 className="text-sm sm:text-base font-bold text-white mb-1">Récompense de Complétion</h3>
+                        <p className="text-xs sm:text-sm text-white/80">
+                          {selectedIsland.final_reward_type === 'berrys' ? (
+                            <span className="flex items-center gap-1.5">
+                              <span className="font-semibold text-treasure-400">{selectedIsland.final_reward_value} Berrys</span>
+                              <img src="/icons/berry.svg" alt="Berry" className="w-4 h-4" onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }} />
+                            </span>
+                          ) : (
+                            <span className="font-semibold text-ocean-400">
+                              {mapData?.crewMembers.find(c => c.id === selectedIsland.final_reward_crew_member_id)?.name || 'Nouveau membre d\'équipage'}
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-white/60 mt-1">
+                          Complétez toutes les quêtes pour débloquer cette récompense
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Final Reward */}
                 {selectedIsland.completed && !selectedIsland.final_reward_claimed && (
                   <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl bg-gradient-to-r from-treasure-500/20 to-treasure-600/20 border border-treasure-400/30">

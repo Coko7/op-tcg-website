@@ -15,6 +15,7 @@
     "import-vegapull": "tsx src/scripts/import-vegapull-data.ts",
     "init-achievements": "tsx src/scripts/initAchievements.ts",
     "migrate-quests": "tsx src/scripts/migrate-quests-from-json.ts",
+    "rebalance-quests": "tsx src/scripts/rebalance-quest-rewards.ts",
     "seed-world": "tsx src/scripts/seed-world-map-data.ts"
   },
   "keywords": [
