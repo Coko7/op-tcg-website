@@ -40,12 +40,12 @@ export class DashboardController {
       `);
 
       const avgCardsPerUser = await Database.get<any>(`
-        SELECT AVG(total_cards) as avg_per_user
+        SELECT COALESCE(AVG(total_cards), 0) as avg_per_user
         FROM (
           SELECT COUNT(DISTINCT card_id) as total_cards
           FROM user_collections
           GROUP BY user_id
-        )
+        ) as subquery
       `);
 
       // Statistiques boosters
@@ -100,40 +100,40 @@ export class DashboardController {
         success: true,
         data: {
           users: {
-            total: userStats.total_users || 0,
-            admins: userStats.total_admins || 0,
-            active_today: userStats.active_today || 0,
-            active_week: userStats.active_week || 0,
-            new_week: userStats.new_week || 0,
-            total_berrys: userStats.total_berrys || 0,
-            avg_berrys: Math.round(userStats.avg_berrys || 0)
+            total: userStats?.total_users || 0,
+            admins: userStats?.total_admins || 0,
+            active_today: userStats?.active_today || 0,
+            active_week: userStats?.active_week || 0,
+            new_week: userStats?.new_week || 0,
+            total_berrys: userStats?.total_berrys || 0,
+            avg_berrys: Math.round(userStats?.avg_berrys || 0)
           },
           cards: {
-            total: totalCards.total || 0,
-            active: activeCards.active || 0
+            total: totalCards?.total || 0,
+            active: activeCards?.active || 0
           },
           collections: {
-            total: collectionStats.total || 0,
-            total_cards_owned: collectionStats.total_cards_owned || 0,
-            users_with_cards: collectionStats.users_with_cards || 0,
+            total: collectionStats?.total || 0,
+            total_cards_owned: collectionStats?.total_cards_owned || 0,
+            users_with_cards: collectionStats?.users_with_cards || 0,
             avg_per_user: Math.round(avgCardsPerUser?.avg_per_user || 0)
           },
           boosters: {
-            total_openings: boosterStats.total_openings || 0,
-            opened_today: boosterStats.opened_today || 0,
-            opened_week: boosterStats.opened_week || 0
+            total_openings: boosterStats?.total_openings || 0,
+            opened_today: boosterStats?.opened_today || 0,
+            opened_week: boosterStats?.opened_week || 0
           },
           achievements: {
-            total: achievementStats.total || 0,
-            completions: achievementStats.completions || 0,
-            claimed: achievementStats.claimed || 0
+            total: achievementStats?.total || 0,
+            completions: achievementStats?.completions || 0,
+            claimed: achievementStats?.claimed || 0
           },
           security: {
-            failed_logins_24h: securityStats.failed_logins || 0,
-            suspicious_activities_24h: securityStats.suspicious_activities || 0,
-            critical_events_24h: securityStats.critical_events || 0
+            failed_logins_24h: securityStats?.failed_logins || 0,
+            suspicious_activities_24h: securityStats?.suspicious_activities || 0,
+            critical_events_24h: securityStats?.critical_events || 0
           },
-          top_players: topPlayers
+          top_players: topPlayers || []
         }
       });
 
