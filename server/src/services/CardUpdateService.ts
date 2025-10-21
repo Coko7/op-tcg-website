@@ -46,7 +46,7 @@ export class CardUpdateService {
   private vegapullImagesPath: string;
 
   constructor() {
-    this.vegapullDataPath = process.env.VEGAPULL_DATA_PATH || '../data/vegapull';
+    this.vegapullDataPath = process.env.VEGAPULL_DATA_PATH || './data/vegapull';
     this.vegapullImagesPath = process.env.VEGAPULL_IMAGES_PATH || '../public/images/cards';
   }
 

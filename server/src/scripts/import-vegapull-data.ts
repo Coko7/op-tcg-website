@@ -62,7 +62,7 @@ class VegapullImporter {
     // Utiliser le chemin personnalisé, ou la variable d'environnement, ou le chemin par défaut
     this.dataPath = customPath ||
                     process.env.VEGAPULL_DATA_PATH ||
-                    path.join(process.cwd(), '..', 'data', 'vegapull');
+                    path.join(process.cwd(), 'data', 'vegapull');
   }
 
   async importData(): Promise<void> {

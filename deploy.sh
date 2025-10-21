@@ -53,7 +53,6 @@ setup_directories() {
     log_info "Création des répertoires nécessaires..."
 
     mkdir -p data
-    mkdir -p data/vegapull
     mkdir -p public/images/cards
 
     log_success "Répertoires créés"

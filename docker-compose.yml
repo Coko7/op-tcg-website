@@ -34,8 +34,7 @@ services:
       - op_game_backups:/app/backups
       # Logs
       - op_game_logs:/app/logs
-      # Données Vegapull (optionnel - à monter si disponibles)
-      - ./data/vegapull:/app/data/vegapull:ro
+      # Note: Données Vegapull copiées dans l'image Docker, pas de volume nécessaire
       # Images (optionnel - à monter si disponibles)
       - ./public/images:/app/public/images:ro
     networks:
