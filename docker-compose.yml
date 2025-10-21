@@ -14,7 +14,7 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_PATH=/app/data/database.sqlite
-      - VEGAPULL_DATA_PATH=/app/public/data/vegapull
+      - VEGAPULL_DATA_PATH=/app/data/vegapull
       - VEGAPULL_IMAGES_PATH=/app/public/images/cards
       - PORT=5000
       - JWT_SECRET=${JWT_SECRET}
@@ -35,7 +35,7 @@ services:
       # Logs
       - op_game_logs:/app/logs
       # Données Vegapull (optionnel - à monter si disponibles)
-      - ./public/data:/app/public/data:ro
+      - ./data/vegapull:/app/data/vegapull:ro
       # Images (optionnel - à monter si disponibles)
       - ./public/images:/app/public/images:ro
     networks:
