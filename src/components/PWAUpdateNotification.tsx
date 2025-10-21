@@ -87,14 +87,17 @@ const PWAUpdateNotification: React.FC = () => {
     if (waitingWorker) {
       setIsUpdating(true);
 
-      // Envoyer un message au service worker pour qu'il s'active
-      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-
-      // Écouter le contrôle par le nouveau service worker
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
+      // Fonction de rechargement à appeler une seule fois
+      const reloadPage = () => {
         console.log('[PWA] Nouvelle version activée, rechargement...');
         window.location.reload();
-      });
+      };
+
+      // Écouter le contrôle par le nouveau service worker (une seule fois)
+      navigator.serviceWorker.addEventListener('controllerchange', reloadPage, { once: true });
+
+      // Envoyer un message au service worker pour qu'il s'active
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
     }
   };
 

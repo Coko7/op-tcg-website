@@ -24,10 +24,9 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[SW] Mise en cache des fichiers essentiels');
       return cache.addAll(PRECACHE_URLS);
-    }).then(() => {
-      // Forcer l'activation immédiate
-      return self.skipWaiting();
     })
+    // Ne PAS appeler skipWaiting() automatiquement
+    // Attendre que l'utilisateur confirme la mise à jour
   );
 });
 
@@ -45,10 +44,9 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => {
-      // Prendre le contrôle de toutes les pages immédiatement
-      return self.clients.claim();
     })
+    // Ne PAS appeler clients.claim() automatiquement
+    // Le nouveau SW prendra le contrôle après le rechargement confirmé par l'utilisateur
   );
 });
 
