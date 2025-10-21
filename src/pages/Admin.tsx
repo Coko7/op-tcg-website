@@ -9,32 +9,62 @@ import Dialog from '../components/ui/Dialog';
 interface DashboardStats {
   users: {
     total: number;
-    active: number;
-    new_today: number;
     admins: number;
+    active_today: number;
+    active_week: number;
+    new_week: number;
+    total_berrys: number;
+    avg_berrys: number;
+    // Support ancien format
+    active?: number;
+    new_today?: number;
   };
-  economy: {
+  economy?: {
     total_berrys: number;
     avg_berrys: number;
   };
-  boosters: {
-    total_opened: number;
-    total_purchased: number;
-    most_popular: string;
-  };
   cards: {
-    total_collected: number;
-    unique_cards: number;
+    total: number;
+    active: number;
+    // Support ancien format
+    total_collected?: number;
+    unique_cards?: number;
+    avg_per_user?: number;
+  };
+  collections?: {
+    total: number;
+    total_cards_owned: number;
+    users_with_cards: number;
     avg_per_user: number;
+  };
+  boosters: {
+    total_openings: number;
+    opened_today: number;
+    opened_week: number;
+    // Support ancien format
+    total_opened?: number;
+    total_purchased?: number;
+    most_popular?: string;
+  };
+  achievements?: {
+    total: number;
+    completions: number;
+    claimed: number;
   };
   security: {
     failed_logins_24h: number;
-    suspicious_activities: number;
+    suspicious_activities_24h: number;
+    critical_events_24h: number;
+    // Support ancien format
+    suspicious_activities?: number;
   };
   top_players: Array<{
     username: string;
     berrys: number;
-    cards_count: number;
+    total_cards?: number;
+    cards_owned?: number;
+    // Support ancien format
+    cards_count?: number;
   }>;
 }
 
@@ -115,7 +145,11 @@ const Admin: React.FC = () => {
       const activityData = await activityRes.json();
       const notifsData = await notifsRes.json();
 
-      setStats(statsData.stats);
+      console.log('📊 Admin - Stats reçues:', statsData);
+      console.log('📋 Admin - Activities reçues:', activityData);
+      console.log('🔔 Admin - Notifications reçues:', notifsData);
+
+      setStats(statsData.data || statsData.stats);  // Support ancien et nouveau format
       setActivities(activityData.activities || []);
       setNotifications(notifsData.notifications || []);
     } catch (error) {
@@ -250,7 +284,7 @@ const Admin: React.FC = () => {
                 <div className="space-y-2">
                   <p className="text-3xl font-bold">{stats.users.total}</p>
                   <p className="text-sm text-slate-400">
-                    {stats.users.active} actifs • {stats.users.new_today} nouveaux aujourd'hui
+                    {stats.users.active_today || stats.users.active} actifs aujourd'hui • {stats.users.new_week || stats.users.new_today || 0} nouveaux cette semaine
                   </p>
                   <p className="text-sm text-purple-400">{stats.users.admins} admins</p>
                 </div>
@@ -262,10 +296,10 @@ const Admin: React.FC = () => {
                   <Coins className="text-yellow-400" size={24} />
                 </div>
                 <div className="space-y-2">
-                  <p className="text-3xl font-bold">{stats.economy.total_berrys.toLocaleString()}</p>
+                  <p className="text-3xl font-bold">{(stats.users.total_berrys || stats.economy?.total_berrys || 0).toLocaleString()}</p>
                   <p className="text-sm text-slate-400">Total Berrys en circulation</p>
                   <p className="text-sm text-yellow-400">
-                    Moyenne: {Math.round(stats.economy.avg_berrys)} Berrys/joueur
+                    Moyenne: {Math.round(stats.users.avg_berrys || stats.economy?.avg_berrys || 0)} Berrys/joueur
                   </p>
                 </div>
               </div>
@@ -276,10 +310,10 @@ const Admin: React.FC = () => {
                   <Package className="text-green-400" size={24} />
                 </div>
                 <div className="space-y-2">
-                  <p className="text-3xl font-bold">{stats.boosters.total_opened}</p>
-                  <p className="text-sm text-slate-400">Boosters ouverts</p>
+                  <p className="text-3xl font-bold">{stats.boosters.total_openings || stats.boosters.total_opened || 0}</p>
+                  <p className="text-sm text-slate-400">Boosters ouverts au total</p>
                   <p className="text-sm text-green-400">
-                    Plus populaire: {stats.boosters.most_popular}
+                    Aujourd'hui: {stats.boosters.opened_today || 0} • Cette semaine: {stats.boosters.opened_week || 0}
                   </p>
                 </div>
               </div>
@@ -290,12 +324,12 @@ const Admin: React.FC = () => {
                   <Activity className="text-orange-400" size={24} />
                 </div>
                 <div className="space-y-2">
-                  <p className="text-3xl font-bold">{stats.cards.total_collected}</p>
+                  <p className="text-3xl font-bold">{stats.collections?.total_cards_owned || stats.cards.total_collected || 0}</p>
                   <p className="text-sm text-slate-400">
-                    {stats.cards.unique_cards} cartes uniques
+                    {stats.collections?.total || stats.cards.unique_cards || 0} cartes uniques
                   </p>
                   <p className="text-sm text-orange-400">
-                    Moyenne: {stats.cards.avg_per_user} cartes/joueur
+                    Moyenne: {stats.collections?.avg_per_user || stats.cards.avg_per_user || 0} cartes/joueur
                   </p>
                 </div>
               </div>
@@ -306,10 +340,10 @@ const Admin: React.FC = () => {
                   <Shield className="text-red-400" size={24} />
                 </div>
                 <div className="space-y-2">
-                  <p className="text-3xl font-bold text-red-400">{stats.security.failed_logins_24h}</p>
+                  <p className="text-3xl font-bold text-red-400">{stats.security.failed_logins_24h || 0}</p>
                   <p className="text-sm text-slate-400">Échecs de connexion (24h)</p>
                   <p className="text-sm text-red-400">
-                    {stats.security.suspicious_activities} activités suspectes
+                    {stats.security.suspicious_activities_24h || stats.security.suspicious_activities || 0} activités suspectes
                   </p>
                 </div>
               </div>
@@ -337,7 +371,7 @@ const Admin: React.FC = () => {
                         <td className="py-3 text-slate-400">{idx + 1}</td>
                         <td className="py-3 font-semibold">{player.username}</td>
                         <td className="py-3 text-yellow-400">{player.berrys.toLocaleString()}</td>
-                        <td className="py-3 text-blue-400">{player.cards_count}</td>
+                        <td className="py-3 text-blue-400">{player.total_cards || player.cards_count || 0}</td>
                       </tr>
                     ))}
                   </tbody>
