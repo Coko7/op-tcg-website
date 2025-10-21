@@ -73,7 +73,9 @@ server/data/world-map-quests.json
 server/backups/
 server/logs/
 
-# IMPORTANT: server/data/vegapull/ doit être copié dans Docker (ne PAS l'ignorer)
+# IMPORTANT: server/data/vegapull/ doit être copié dans Docker
+# Exception pour server/data/vegapull - doit être inclus dans l'image
+!server/data/vegapull/
 
 # Scripts de développement et diagnostic
 diagnostic.bat
@@ -109,7 +111,8 @@ vite.config.ts.timestamp-*
 audit-report-frontend.json
 test-achievements-api.html
 
-# Cargo/Rust (vegapull pas nécessaire dans les images)
+# Cargo/Rust (dossier vegapull à la racine, PAS server/data/vegapull !)
+# NOTE: server/data/vegapull/ est autorisé via !server/data/vegapull/ plus haut
 vegapull/
 
 # Token et fichiers sensibles
