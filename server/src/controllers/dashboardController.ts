@@ -60,11 +60,17 @@ export class DashboardController {
       // Statistiques achievements
       const achievementStats = await Database.get<any>(`
         SELECT
-          COUNT(DISTINCT id) as total,
-          (SELECT COUNT(*) FROM user_achievements WHERE progress >= target) as completions,
-          (SELECT COUNT(*) FROM user_achievements WHERE is_claimed = 1) as claimed
-        FROM achievements
-        WHERE is_active = 1
+          COUNT(DISTINCT a.id) as total,
+          (SELECT COUNT(*)
+           FROM user_achievements ua
+           JOIN achievements a2 ON ua.achievement_id = a2.id
+           WHERE ua.progress >= a2.threshold AND a2.is_active = 1) as completions,
+          (SELECT COUNT(*)
+           FROM user_achievements ua
+           JOIN achievements a3 ON ua.achievement_id = a3.id
+           WHERE ua.is_claimed = 1 AND a3.is_active = 1) as claimed
+        FROM achievements a
+        WHERE a.is_active = 1
       `);
 
       // Top joueurs par Berrys (incluant les admins)
