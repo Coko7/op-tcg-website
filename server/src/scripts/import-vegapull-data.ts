@@ -116,21 +116,49 @@ class VegapullImporter {
         boosterName += ` [${pack.title_parts.label}]`;
       }
 
-      // Insérer ou mettre à jour le booster
-      await Database.run(`
-        INSERT OR REPLACE INTO boosters (
-          id, name, code, series, description,
-          image_url, is_active, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-      `, [
-        boosterId,
-        boosterName,
-        pack.title_parts.label || pack.id,
-        pack.title_parts.prefix || 'One Piece TCG',
-        pack.raw_title,
-        `/images/boosters/${pack.id}.png`,
-        1
-      ]);
+      // Vérifier si le booster existe déjà
+      const existingBooster = await Database.get<{ id: string }>(`
+        SELECT id FROM boosters WHERE id = ?
+      `, [boosterId]);
+
+      if (existingBooster) {
+        // Mettre à jour le booster existant
+        await Database.run(`
+          UPDATE boosters SET
+            name = ?,
+            code = ?,
+            series = ?,
+            description = ?,
+            image_url = ?,
+            is_active = ?,
+            updated_at = datetime('now')
+          WHERE id = ?
+        `, [
+          boosterName,
+          pack.title_parts.label || pack.id,
+          pack.title_parts.prefix || 'One Piece TCG',
+          pack.raw_title,
+          `/images/boosters/${pack.id}.png`,
+          1,
+          boosterId
+        ]);
+      } else {
+        // Insérer un nouveau booster
+        await Database.run(`
+          INSERT INTO boosters (
+            id, name, code, series, description,
+            image_url, is_active, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+        `, [
+          boosterId,
+          boosterName,
+          pack.title_parts.label || pack.id,
+          pack.title_parts.prefix || 'One Piece TCG',
+          pack.raw_title,
+          `/images/boosters/${pack.id}.png`,
+          1
+        ]);
+      }
 
       // Sauvegarder la correspondance pack_id -> booster_id pour les cartes
       await Database.run(`
