@@ -85,6 +85,8 @@ RUN mkdir -p data backups logs public/images && \
     chown -R nodejs:nodejs /app
 
 # Copier les données Vegapull (packs et cartes) depuis server/data/vegapull
+# Le répertoire contiendra au minimum un .gitkeep pour assurer qu'il existe dans git
+# Les fichiers JSON (packs.json, cards_*.json) seront présents si disponibles
 COPY --chown=nodejs:nodejs server/data/vegapull ./data/vegapull
 
 # Passer à l'utilisateur non-root

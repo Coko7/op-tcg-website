@@ -16,7 +16,11 @@ yarn-error.log*
 *.sqlite3
 *.db
 database/
-data/
+# Ignorer tout le contenu de data/ sauf vegapull/.gitkeep
+data/*
+!data/vegapull/
+data/vegapull/*
+!data/vegapull/.gitkeep
 
 # Logs
 logs/
