@@ -138,7 +138,7 @@ export class CardController {
     try {
       // Validation stricte des inputs
       const page = Math.max(1, parseInt(req.query.page as string) || 1);
-      const limit = Math.max(1, Math.min(parseInt(req.query.limit as string) || 20, 50));
+      const limit = Math.max(1, Math.min(parseInt(req.query.limit as string) || 20, 200)); // Augmenté à 200 pour tous les boosters
       const offset = (page - 1) * limit;
 
       const series = req.query.series as string;

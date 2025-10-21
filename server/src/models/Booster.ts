@@ -76,7 +76,7 @@ export class BoosterModel {
 
   static async findAll(limit: number = 1000, offset: number = 0): Promise<Booster[]> {
     return await Database.all<Booster>(
-      'SELECT * FROM boosters WHERE is_active = 1 ORDER BY release_date DESC, name LIMIT ? OFFSET ?',
+      'SELECT * FROM boosters WHERE is_active = 1 ORDER BY code DESC, name LIMIT ? OFFSET ?',
       [limit, offset]
     );
   }

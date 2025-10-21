@@ -84,6 +84,7 @@ build_frontend() {
 
         # Essayer le build
         if docker build \
+            --no-cache \
             --progress=plain \
             --build-arg BUILDKIT_INLINE_CACHE=1 \
             -f Dockerfile.frontend \
@@ -117,6 +118,7 @@ build_backend() {
     log_info "Build du backend..."
 
     if docker build \
+        --no-cache \
         --progress=plain \
         -f Dockerfile.backend \
         -t op-game-backend:latest \

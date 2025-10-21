@@ -68,6 +68,9 @@ server/data/
 server/backups/
 server/logs/
 
+# IMPORTANT: NE PAS ignorer les données Vegapull (nécessaires pour Docker)
+!data/vegapull/
+
 # Scripts de développement et diagnostic
 diagnostic.bat
 debug.bat
