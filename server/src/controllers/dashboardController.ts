@@ -13,18 +13,29 @@ export class DashboardController {
           COUNT(*) as total_users,
           COUNT(CASE WHEN is_admin = 1 THEN 1 END) as total_admins,
           COUNT(CASE WHEN last_login >= datetime('now', '-24 hours') THEN 1 END) as active_today,
-          COUNT(CASE WHEN created_at >= datetime('now', '-1 day', 'start of day') THEN 1 END) as new_today,
+          COUNT(CASE WHEN last_login >= datetime('now', '-7 days') THEN 1 END) as active_week,
+          COUNT(CASE WHEN created_at >= datetime('now', '-7 days') THEN 1 END) as new_week,
           SUM(berrys) as total_berrys,
           AVG(berrys) as avg_berrys
         FROM users
         WHERE is_active = 1
       `);
 
-      // Statistiques cartes et collections
-      const cardStats = await Database.get<any>(`
+      // Statistiques cartes
+      const totalCards = await Database.get<any>(`
+        SELECT COUNT(*) as total FROM cards WHERE is_active = 1
+      `);
+
+      const activeCards = await Database.get<any>(`
+        SELECT COUNT(*) as active FROM cards WHERE is_active = 1
+      `);
+
+      // Statistiques collections
+      const collectionStats = await Database.get<any>(`
         SELECT
-          COUNT(DISTINCT card_id) as unique_cards,
-          SUM(quantity) as total_collected
+          COUNT(DISTINCT card_id) as total,
+          SUM(quantity) as total_cards_owned,
+          COUNT(DISTINCT user_id) as users_with_cards
         FROM user_collections
       `);
 
@@ -40,29 +51,31 @@ export class DashboardController {
       // Statistiques boosters
       const boosterStats = await Database.get<any>(`
         SELECT
-          COUNT(*) as total_opened,
-          COUNT(CASE WHEN opened_at >= datetime('now', '-7 days') THEN 1 END) as total_purchased
+          COUNT(*) as total_openings,
+          COUNT(CASE WHEN opened_at >= datetime('now', '-24 hours') THEN 1 END) as opened_today,
+          COUNT(CASE WHEN opened_at >= datetime('now', '-7 days') THEN 1 END) as opened_week
         FROM booster_openings
       `);
 
-      // Booster le plus populaire
-      const mostPopularBooster = await Database.get<any>(`
-        SELECT b.name, COUNT(*) as count
-        FROM booster_openings bo
-        JOIN boosters b ON bo.booster_id = b.id
-        GROUP BY bo.booster_id
-        ORDER BY count DESC
-        LIMIT 1
+      // Statistiques achievements
+      const achievementStats = await Database.get<any>(`
+        SELECT
+          COUNT(DISTINCT id) as total,
+          (SELECT COUNT(*) FROM user_achievements WHERE progress >= target) as completions,
+          (SELECT COUNT(*) FROM user_achievements WHERE is_claimed = 1) as claimed
+        FROM achievements
+        WHERE is_active = 1
       `);
 
-      // Top joueurs par Berrys
+      // Top joueurs par Berrys (incluant les admins)
       const topPlayers = await Database.all(`
         SELECT
           username,
           berrys,
-          (SELECT COUNT(DISTINCT card_id) FROM user_collections WHERE user_id = users.id) as cards_count
+          (SELECT COUNT(DISTINCT card_id) FROM user_collections WHERE user_id = users.id) as total_cards,
+          (SELECT COALESCE(SUM(quantity), 0) FROM user_collections WHERE user_id = users.id) as cards_owned
         FROM users
-        WHERE is_active = 1 AND is_admin = 0
+        WHERE is_active = 1
         ORDER BY berrys DESC
         LIMIT 10
       `);
@@ -71,37 +84,48 @@ export class DashboardController {
       const securityStats = await Database.get<any>(`
         SELECT
           COUNT(CASE WHEN action = 'failed_login_attempt' THEN 1 END) as failed_logins,
-          COUNT(CASE WHEN action = 'suspicious_activity' THEN 1 END) as suspicious_activities
+          COUNT(CASE WHEN action = 'suspicious_activity' THEN 1 END) as suspicious_activities,
+          COUNT(CASE WHEN action IN ('critical_error', 'security_breach') THEN 1 END) as critical_events
         FROM audit_logs
         WHERE created_at >= datetime('now', '-24 hours')
       `);
 
       res.json({
         success: true,
-        stats: {
+        data: {
           users: {
             total: userStats.total_users || 0,
-            active: userStats.active_today || 0,
-            new_today: userStats.new_today || 0,
-            admins: userStats.total_admins || 0
-          },
-          economy: {
+            admins: userStats.total_admins || 0,
+            active_today: userStats.active_today || 0,
+            active_week: userStats.active_week || 0,
+            new_week: userStats.new_week || 0,
             total_berrys: userStats.total_berrys || 0,
             avg_berrys: Math.round(userStats.avg_berrys || 0)
           },
-          boosters: {
-            total_opened: boosterStats.total_opened || 0,
-            total_purchased: boosterStats.total_purchased || 0,
-            most_popular: mostPopularBooster?.name || 'N/A'
-          },
           cards: {
-            total_collected: cardStats.total_collected || 0,
-            unique_cards: cardStats.unique_cards || 0,
+            total: totalCards.total || 0,
+            active: activeCards.active || 0
+          },
+          collections: {
+            total: collectionStats.total || 0,
+            total_cards_owned: collectionStats.total_cards_owned || 0,
+            users_with_cards: collectionStats.users_with_cards || 0,
             avg_per_user: Math.round(avgCardsPerUser?.avg_per_user || 0)
+          },
+          boosters: {
+            total_openings: boosterStats.total_openings || 0,
+            opened_today: boosterStats.opened_today || 0,
+            opened_week: boosterStats.opened_week || 0
+          },
+          achievements: {
+            total: achievementStats.total || 0,
+            completions: achievementStats.completions || 0,
+            claimed: achievementStats.claimed || 0
           },
           security: {
             failed_logins_24h: securityStats.failed_logins || 0,
-            suspicious_activities: securityStats.suspicious_activities || 0
+            suspicious_activities_24h: securityStats.suspicious_activities || 0,
+            critical_events_24h: securityStats.critical_events || 0
           },
           top_players: topPlayers
         }
