@@ -7,6 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
       includeAssets: ['icon.svg'],
       manifest: {
         name: 'One Piece Booster Game',
@@ -37,6 +38,11 @@ export default defineConfig({
         lang: 'fr'
       },
       workbox: {
+        // Configuration pour éviter les rechargements en boucle
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
+
         // Cache strategy
         runtimeCaching: [
           {

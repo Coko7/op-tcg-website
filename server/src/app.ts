@@ -121,10 +121,10 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true, // Don't count successful logins
 });
 
-// Rate limiting pour les routes admin (très strict)
+// Rate limiting pour les routes admin (modéré pour permettre le dashboard refresh)
 const adminLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 20 : 100,
+  max: process.env.NODE_ENV === 'production' ? 200 : 500, // Augmenté pour permettre le refresh du dashboard
   message: {
     error: 'Trop de requêtes admin, veuillez réessayer plus tard.'
   },

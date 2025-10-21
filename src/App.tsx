@@ -4,7 +4,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
-import PWAUpdateNotification from './components/PWAUpdateNotification';
 import Home from './pages/Home';
 import Boosters from './pages/Boosters';
 import Collection from './pages/Collection';
@@ -21,7 +20,6 @@ function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <PWAUpdateNotification />
         <Router>
         <Routes>
           {/* Routes d'authentification */}
