@@ -67,10 +67,10 @@ docker-compose logs backend | grep -A 20 "Migration des quêtes"
 
 📋 Vérification des récompenses:
 ──────────────────────────────────────────────────────────────────────
-✅ Chercher de la viande          50 berrys
-✅ Combattre Buggy                375 berrys
-✅ Déjouer le plan de Kuro        900 berrys
-✅ Sauver Robin                   4000 berrys
+✅ Chercher de la viande          5 berrys
+✅ Combattre Buggy                40 berrys
+✅ Déjouer le plan de Kuro        90 berrys
+✅ Sauver Robin                   400 berrys
 ──────────────────────────────────────────────────────────────────────
 
 📊 Total quêtes actives en DB: 36
@@ -89,14 +89,14 @@ docker-compose logs backend | grep -A 20 "Migration des quêtes"
 ```bash
 # Tester l'endpoint des quêtes
 curl http://localhost:5000/api/map/data | jq '.islands[2].quests[1].reward_berrys'
-# Devrait retourner: 375
+# Devrait retourner: 40
 ```
 
 ### Frontend - Interface
 
 1. Ouvrir http://localhost:3000/map
 2. Cliquer sur "Orange Town"
-3. Vérifier que "Combattre Buggy" affiche **375 berrys**
+3. Vérifier que "Combattre Buggy" affiche **40 berrys**
 4. Vérifier la section **"Récompense de Complétion"** s'affiche
 
 ### PWA - Version
@@ -130,7 +130,7 @@ docker-compose up -d
 2. **Vérifier que le JSON est bien dans l'image** :
 ```bash
 docker exec $(docker-compose ps -q backend) cat /app/config/world-map-quests.json | grep "quest_orange_2"
-# Devrait afficher: "reward_berrys": 375
+# Devrait afficher: "reward_berrys": 40
 ```
 
 3. **Exécuter la migration manuellement** :

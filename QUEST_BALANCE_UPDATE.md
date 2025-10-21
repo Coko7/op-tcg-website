@@ -8,14 +8,14 @@ Le système de quêtes a été rééquilibré pour offrir une progression plus c
 
 ### Formule de Base
 ```
-Récompense = (durée_heures × nombre_membres × 50) × (1 + bonus_multi_membre)
+Récompense = (durée_heures × nombre_membres × 5) × (1 + bonus_multi_membre)
 ```
 
 ### Détails
-- **Base**: 50 berrys par heure et par membre
-  - Exemple: 1h + 1 membre = 50 berrys
-  - Exemple: 2h + 1 membre = 100 berrys
-  - Exemple: 1h + 2 membres = 100 berrys
+- **Base**: 5 berrys par heure et par membre
+  - Exemple: 1h + 1 membre = 5 berrys
+  - Exemple: 2h + 1 membre = 10 berrys
+  - Exemple: 1h + 2 membres = 10 berrys
 
 - **Bonus Multi-Membre**: +25% par membre supplémentaire après le premier
   - 2 membres: +25% de bonus
@@ -28,18 +28,18 @@ Récompense = (durée_heures × nombre_membres × 50) × (1 + bonus_multi_membre
 
 | Durée | Membres | Calcul | Récompense |
 |-------|---------|--------|------------|
-| 1h | 1 | 1×1×50 | 50 berrys |
-| 2h | 1 | 2×1×50 | 100 berrys |
-| 3h | 2 | 3×2×50 × 1.25 | 375 berrys |
-| 4h | 3 | 4×3×50 × 1.50 | 900 berrys |
-| 5h | 4 | 5×4×50 × 1.75 | 1,750 berrys |
-| 8h | 5 | 8×5×50 × 2.00 | 4,000 berrys |
-| 10h | 6 | 10×6×50 × 2.25 | 6,750 berrys |
+| 1h | 1 | 1×1×5 | 5 berrys |
+| 2h | 1 | 2×1×5 | 10 berrys |
+| 3h | 2 | 3×2×5 × 1.25 | 40 berrys |
+| 4h | 3 | 4×3×5 × 1.50 | 90 berrys |
+| 5h | 4 | 5×4×5 × 1.75 | 175 berrys |
+| 8h | 5 | 8×5×5 × 2.00 | 400 berrys |
+| 10h | 6 | 10×6×5 × 2.25 | 675 berrys |
 
 ## 📊 Statistiques Avant/Après
 
-- **Total des récompenses**: 15,550 → 37,400 berrys (+140%)
-- **Moyenne par quête**: 432 → 1,039 berrys (+140%)
+- **Total des récompenses**: 15,550 → 3,744 berrys (-76%)
+- **Moyenne par quête**: 432 → 104 berrys (-76%)
 - **Nombre de quêtes**: 36 (inchangé)
 
 ## 🎯 Avantages du Nouveau Système
@@ -96,19 +96,19 @@ npx tsx src/scripts/migrate-quests-from-json.ts
 
 **"Combattre Buggy"** (3h, 2 membres)
 - Avant: 175 berrys
-- Après: 375 berrys (+114%)
+- Après: 40 berrys (-78%)
 
 **"Déjouer le plan de Kuro"** (4h, 3 membres)
 - Avant: 250 berrys
-- Après: 900 berrys (+260%)
+- Après: 90 berrys (-64%)
 
 **"Sauver Robin"** (8h, 5 membres)
 - Avant: 1,000 berrys
-- Après: 4,000 berrys (+300%)
+- Après: 400 berrys (-60%)
 
 **"Se préparer au Nouveau Monde"** (10h, 6 membres)
 - Avant: 1,500 berrys
-- Après: 6,750 berrys (+350%)
+- Après: 675 berrys (-55%)
 
 ## ✅ Checklist de Déploiement
 

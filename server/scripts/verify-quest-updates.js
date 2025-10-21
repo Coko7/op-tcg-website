@@ -37,10 +37,10 @@ try {
 
   // Vérifier quelques quêtes clés
   const testQuests = [
-    { id: 'quest_fuchsia_1', expectedReward: 50, name: 'Chercher de la viande' },
-    { id: 'quest_orange_2', expectedReward: 375, name: 'Combattre Buggy' },
-    { id: 'quest_syrup_2', expectedReward: 900, name: 'Déjouer le plan de Kuro' },
-    { id: 'quest_water7_2', expectedReward: 4000, name: 'Sauver Robin' }
+    { id: 'quest_fuchsia_1', expectedReward: 5, name: 'Chercher de la viande' },
+    { id: 'quest_orange_2', expectedReward: 40, name: 'Combattre Buggy' },
+    { id: 'quest_syrup_2', expectedReward: 90, name: 'Déjouer le plan de Kuro' },
+    { id: 'quest_water7_2', expectedReward: 400, name: 'Sauver Robin' }
   ];
 
   let allCorrect = true;

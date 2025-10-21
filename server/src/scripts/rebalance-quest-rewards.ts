@@ -39,8 +39,8 @@ interface WorldMapConfig {
  * @returns Récompense en berrys
  */
 function calculateQuestReward(durationHours: number, requiredCrewCount: number): number {
-  // Base: 50 berrys par heure par membre (10x la base initiale pour des valeurs plus intéressantes)
-  const baseReward = durationHours * requiredCrewCount * 50;
+  // Base: 5 berrys par heure par membre (comme demandé: 1h + 1 membre = 5 berrys)
+  const baseReward = durationHours * requiredCrewCount * 5;
 
   // Bonus multi-membre: +25% par membre supplémentaire après le premier
   // Cela encourage fortement les quêtes à plusieurs membres

@@ -9,9 +9,9 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 ### ✨ Ajouté
 
 - **Système de quêtes rééquilibré** avec formule mathématique
-  - Base: 50 berrys par heure et par membre
+  - Base: 5 berrys par heure et par membre
   - Bonus multi-membre: +25% par membre supplémentaire après le premier
-  - Les quêtes avec plusieurs membres sont maintenant beaucoup plus rentables
+  - Les quêtes avec plusieurs membres sont maintenant plus rentables proportionnellement
 
 - **Affichage des récompenses de complétion d'île**
   - Nouvelle section dans la modal de détails d'île
@@ -26,12 +26,13 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 ### 🔧 Modifié
 
 - **Récompenses de toutes les quêtes** (36 quêtes)
-  - Total des récompenses: 15,550 → 37,400 berrys (+140%)
-  - Moyenne par quête: 432 → 1,039 berrys
+  - Total des récompenses: 15,550 → 3,744 berrys (-76%)
+  - Moyenne par quête: 432 → 104 berrys
+  - Récompenses plus équilibrées et réalistes
   - Exemples notables:
-    - "Combattre Buggy" (3h, 2p): 175 → 375 berrys
-    - "Déjouer le plan de Kuro" (4h, 3p): 250 → 900 berrys
-    - "Sauver Robin" (8h, 5p): 1,000 → 4,000 berrys
+    - "Combattre Buggy" (3h, 2p): 175 → 40 berrys
+    - "Déjouer le plan de Kuro" (4h, 3p): 250 → 90 berrys
+    - "Sauver Robin" (8h, 5p): 1,000 → 400 berrys
 
 - **Version de l'application**: 0.0.0 → 1.1.0
 - **Manifest PWA**: Ajout de la version dans le manifest
