@@ -64,12 +64,16 @@ server/migration_backup_*.sqlite
 server/database.sqlite
 server/database.sqlite-shm
 server/database.sqlite-wal
-server/data/
+server/data/database.sqlite
+server/data/database.sqlite-shm
+server/data/database.sqlite-wal
+server/data/*.sqlite
+server/data/*.sqlite-*
+server/data/world-map-quests.json
 server/backups/
 server/logs/
 
-# IMPORTANT: NE PAS ignorer les données Vegapull (nécessaires pour Docker)
-!server/data/vegapull/
+# IMPORTANT: server/data/vegapull/ doit être copié dans Docker (ne PAS l'ignorer)
 
 # Scripts de développement et diagnostic
 diagnostic.bat
