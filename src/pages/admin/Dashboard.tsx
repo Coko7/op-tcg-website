@@ -92,8 +92,17 @@ export function AdminDashboard() {
       const statsData = await statsResponse.json();
       const onlineData = await onlineResponse.json();
 
+      console.log('📊 Stats reçues:', statsData);
+      console.log('👥 Online users reçus:', onlineData);
+
+      // Vérifier que les données existent
+      if (!statsData || !statsData.data) {
+        console.error('❌ Pas de données stats:', statsData);
+        throw new Error('Données de statistiques manquantes');
+      }
+
       setStats(statsData.data);
-      setOnlineUsers(onlineData.data.users || []);
+      setOnlineUsers(onlineData.data?.users || []);
       setError(null);
     } catch (err: any) {
       console.error('Erreur chargement dashboard:', err);
@@ -121,8 +130,16 @@ export function AdminDashboard() {
   }
 
   if (!stats) {
-    return null;
+    console.log('⚠️ Stats est null/undefined après chargement');
+    return (
+      <div className="admin-dashboard">
+        <div className="error">⚠️ Aucune donnée disponible</div>
+        <button onClick={loadDashboardData}>Recharger</button>
+      </div>
+    );
   }
+
+  console.log('✅ Affichage du dashboard avec stats:', stats);
 
   return (
     <div className="admin-dashboard">
