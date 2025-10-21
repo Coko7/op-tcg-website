@@ -81,13 +81,13 @@ COPY --chown=nodejs:nodejs server/docker-init.sh ./
 RUN chmod +x ./scripts/*.sh ./docker-init.sh
 
 # Créer les répertoires nécessaires avec les bonnes permissions
-RUN mkdir -p data backups logs public/images && \
+RUN mkdir -p data backups logs public/images vegapull && \
     chown -R nodejs:nodejs /app
 
 # Copier les données Vegapull (packs et cartes) depuis server/data/vegapull
-# Le répertoire contiendra au minimum un .gitkeep pour assurer qu'il existe dans git
-# Les fichiers JSON (packs.json, cards_*.json) seront présents si disponibles
-COPY --chown=nodejs:nodejs server/data/vegapull ./data/vegapull
+# IMPORTANT: Copier dans /app/vegapull (PAS /app/data/vegapull) car /app/data est monté avec un volume
+# Le volume écrase tout ce qui est dans /app/data, donc vegapull doit être ailleurs
+COPY --chown=nodejs:nodejs server/data/vegapull ./vegapull
 
 # Passer à l'utilisateur non-root
 USER nodejs
@@ -98,7 +98,7 @@ EXPOSE 5000
 # Variables d'environnement par défaut
 ENV NODE_ENV=production \
     DATABASE_PATH=/app/data/database.sqlite \
-    VEGAPULL_DATA_PATH=/app/data/vegapull \
+    VEGAPULL_DATA_PATH=/app/vegapull \
     VEGAPULL_IMAGES_PATH=/app/public/images/cards \
     PORT=5000
 

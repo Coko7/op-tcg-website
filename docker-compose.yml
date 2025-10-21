@@ -14,7 +14,7 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_PATH=/app/data/database.sqlite
-      - VEGAPULL_DATA_PATH=/app/data/vegapull
+      - VEGAPULL_DATA_PATH=/app/vegapull
       - VEGAPULL_IMAGES_PATH=/app/public/images/cards
       - PORT=5000
       - JWT_SECRET=${JWT_SECRET}
@@ -34,7 +34,8 @@ services:
       - op_game_backups:/app/backups
       # Logs
       - op_game_logs:/app/logs
-      # Note: Données Vegapull copiées dans l'image Docker, pas de volume nécessaire
+      # Note: Données Vegapull copiées dans /app/vegapull (hors du volume data) lors du build
+      # Pas de volume nécessaire car les données sont dans l'image
       # Images (optionnel - à monter si disponibles)
       - ./public/images:/app/public/images:ro
     networks:
