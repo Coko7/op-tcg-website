@@ -29,55 +29,43 @@
    - CHANGELOG créé
    - Guide de déploiement détaillé
 
-## 🚀 Prochaines Étapes pour Déployer
+## 🚀 Déploiement - 100% Automatique !
 
-### 1. Build Frontend
+### Une Seule Commande
 
 ```bash
-npm run build
+docker-compose up -d --build
 ```
 
-Cela va:
-- Compiler React + TypeScript
-- Générer le nouveau Service Worker (PWA)
-- Créer le manifest avec version 1.1.0
-- Optimiser les assets
+**C'est tout !** Le système fait automatiquement :
 
-### 2. Build Docker (Backend + Frontend)
+1. ✅ Copie `world-map-quests.json` dans l'image Docker
+2. ✅ Build le frontend avec Map.tsx mis à jour
+3. ✅ Exécute la migration des quêtes au démarrage
+4. ✅ Vérifie que les valeurs sont correctes
+5. ✅ Affiche un rapport détaillé dans les logs
 
-```bash
-docker-compose build
-```
+### Rebuild Complet (Recommandé)
 
-Cela va:
-- Compiler le backend TypeScript
-- Copier `world-map-quests.json` mis à jour
-- Copier le script de migration
-- Inclure le frontend buildé
-
-### 3. Déploiement
+Si vous voulez être sûr que tout est à jour :
 
 ```bash
+docker-compose build --no-cache
 docker-compose up -d
 ```
 
-Au démarrage, le serveur va **automatiquement**:
-1. ✅ Détecter `world-map-quests.json`
-2. ✅ Exécuter `migrate-quests-from-json.js`
-3. ✅ Mettre à jour toutes les récompenses
-4. ✅ Préserver la progression des joueurs
-
-### 4. Vérification Post-Déploiement
+### Vérification Post-Déploiement
 
 ```bash
-# Vérifier les logs
-docker-compose logs backend | grep "Migration des quêtes"
+# Voir les logs de migration
+docker-compose logs backend | grep -A 20 "Migration des quêtes"
 
 # Devrait afficher:
-# 🗺️ Migration des quêtes depuis JSON...
-# ✅ 36 quêtes migrées
-# ✅ La progression des joueurs est préservée
+# ✅ Migration des quêtes réussie!
+# ✅ SUCCÈS: Toutes les quêtes sont correctement mises à jour !
 ```
+
+📖 **Documentation complète** : Voir `AUTO_DEPLOY_QUESTS.md`
 
 ## 📊 Résultats Attendus
 

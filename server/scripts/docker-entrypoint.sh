@@ -43,9 +43,35 @@ else
   # Migration des quêtes depuis JSON (si le fichier existe)
   if [ -f "/app/config/world-map-quests.json" ]; then
     echo "🗺️ Migration des quêtes depuis JSON..."
-    node dist/scripts/migrate-quests-from-json.js || echo "⚠️ Erreur migration quêtes (non bloquant)"
+    echo "   Fichier trouvé: /app/config/world-map-quests.json"
+
+    # Afficher le nombre de quêtes dans le JSON
+    QUEST_COUNT=$(grep -o '"id":' /app/config/world-map-quests.json | wc -l)
+    echo "   Quêtes dans le JSON: $QUEST_COUNT"
+
+    # Exécuter la migration avec sortie complète
+    if node dist/scripts/migrate-quests-from-json.js; then
+      echo "✅ Migration des quêtes réussie!"
+
+      # Vérifier que les mises à jour sont bien appliquées
+      echo ""
+      if node scripts/verify-quest-updates.js; then
+        echo ""
+        echo "✅ Vérification réussie: Les quêtes sont à jour!"
+      else
+        echo ""
+        echo "⚠️  ATTENTION: Les quêtes n'ont pas les bonnes valeurs!"
+        echo "   La migration s'est exécutée mais les valeurs ne correspondent pas."
+      fi
+    else
+      echo "❌ ERREUR: Échec de la migration des quêtes!"
+      echo "   La migration a échoué mais le serveur va démarrer quand même."
+      echo "   Vérifiez les logs ci-dessus pour plus de détails."
+    fi
   else
-    echo "ℹ️ Fichier world-map-quests.json non trouvé, migration des quêtes ignorée"
+    echo "⚠️ ATTENTION: Fichier world-map-quests.json NON TROUVÉ!"
+    echo "   Chemin attendu: /app/config/world-map-quests.json"
+    echo "   La migration des quêtes sera ignorée."
   fi
 
   # Vérifier si les achievements existent

@@ -54,6 +54,7 @@ COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 # Copier les scripts JavaScript d'initialisation
 COPY --chown=nodejs:nodejs server/scripts/init-achievements.js ./scripts/
 COPY --chown=nodejs:nodejs server/scripts/run-migrations.js ./scripts/
+COPY --chown=nodejs:nodejs server/scripts/verify-quest-updates.js ./scripts/
 
 # Copier les scripts de maintenance (backup & nettoyage)
 COPY --chown=nodejs:nodejs server/scripts/backup-database.js ./scripts/
