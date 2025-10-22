@@ -209,7 +209,12 @@ const Map: React.FC = () => {
 
   const handleQuestClick = useCallback((quest: Quest) => {
     setSelectedQuest(quest);
-    setSelectedCrew([]);
+    // Auto-sélectionner le membre requis si la quête en nécessite un
+    if (quest.specific_crew_member_id) {
+      setSelectedCrew([quest.specific_crew_member_id]);
+    } else {
+      setSelectedCrew([]);
+    }
     setShowQuestModal(true);
   }, []);
 
@@ -219,8 +224,15 @@ const Map: React.FC = () => {
     const crew = mapData.crewMembers.find(c => c.id === crewId && c.unlocked);
     if (!crew) return;
 
+    // Empêcher la dé-sélection du membre requis
+    const isRequired = selectedQuest.specific_crew_member_id === crewId;
+
     setSelectedCrew(prev => {
       if (prev.includes(crewId)) {
+        if (isRequired) {
+          showToast('error', 'Ce membre est requis pour cette quête');
+          return prev;
+        }
         return prev.filter(id => id !== crewId);
       } else {
         if (prev.length >= selectedQuest.required_crew_count) {
@@ -235,6 +247,12 @@ const Map: React.FC = () => {
   const handleStartQuest = useCallback(async () => {
     if (!selectedQuest || selectedCrew.length !== selectedQuest.required_crew_count) {
       showToast('error', `Sélectionnez exactement ${selectedQuest?.required_crew_count || 0} membre(s)`);
+      return;
+    }
+
+    // Vérifier que le membre requis est sélectionné
+    if (selectedQuest.specific_crew_member_id && !selectedCrew.includes(selectedQuest.specific_crew_member_id)) {
+      showToast('error', 'Cette quête nécessite un membre spécifique');
       return;
     }
 
@@ -382,6 +400,79 @@ const Map: React.FC = () => {
             </div>
           </GameCard>
         </div>
+
+        {/* Crew Gallery */}
+        <GameCard variant="ocean" className="mb-6 sm:mb-8 p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+              <Users className="w-5 h-5 sm:w-6 sm:h-6" />
+              Équipage
+            </h2>
+            <div className="flex items-center gap-3 text-white/60 text-sm">
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg backdrop-blur-sm bg-white/5">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50" />
+                <span className="text-xs">Débloqué</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg backdrop-blur-sm bg-white/5">
+                <div className="w-2.5 h-2.5 rounded-full bg-white/20" />
+                <span className="text-xs">Verrouillé</span>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 sm:gap-4">
+            {mapData.crewMembers.map((crew) => {
+              const isBusy = mapData.activeQuests.some(aq =>
+                JSON.parse(aq.crew_member_ids).includes(crew.id)
+              );
+
+              return (
+                <div
+                  key={crew.id}
+                  className={`relative p-3 rounded-xl backdrop-blur-xl border transition-all ${
+                    crew.unlocked
+                      ? 'bg-gradient-to-br from-white/10 to-white/5 border-white/20 hover:from-white/15 hover:to-white/10 hover:border-white/30 shadow-lg hover:shadow-xl'
+                      : 'bg-white/5 border-white/10 opacity-50'
+                  }`}
+                >
+                  {/* Status Badge */}
+                  <div className="absolute top-2 right-2 flex gap-1">
+                    {crew.unlocked ? (
+                      <div className="w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-500/50 animate-pulse" />
+                    ) : (
+                      <div className="w-3 h-3 rounded-full bg-white/20 backdrop-blur-sm" />
+                    )}
+                    {isBusy && crew.unlocked && (
+                      <div className="backdrop-blur-sm bg-ocean-500/30 rounded-full p-0.5">
+                        <Clock className="w-2.5 h-2.5 text-ocean-300" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Member Info */}
+                  <div className="text-center mt-2">
+                    {crew.unlocked ? (
+                      <>
+                        <div className="text-2xl mb-1">👤</div>
+                        <p className="text-xs sm:text-sm font-semibold text-white truncate">{crew.name}</p>
+                        {isBusy && (
+                          <p className="text-xs text-ocean-300 mt-1 font-medium">En mission</p>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-2xl mb-1 filter blur-sm opacity-60">👤</div>
+                        <p className="text-xs sm:text-sm font-semibold text-white/40">???</p>
+                        <div className="mt-1 inline-flex items-center justify-center w-5 h-5 rounded-full backdrop-blur-sm bg-white/5">
+                          <Lock className="w-3 h-3 text-white/40" />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </GameCard>
 
         {/* Active Quests */}
         {mapData.activeQuests.length > 0 && (
@@ -582,6 +673,14 @@ const Map: React.FC = () => {
                                   }} />
                                 </div>
                               </div>
+                              {quest.specific_crew_member_id && (
+                                <div className="mt-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg backdrop-blur-xl bg-gradient-to-r from-ocean-500/20 to-ocean-600/20 border border-ocean-400/30 w-fit shadow-lg shadow-ocean-500/10">
+                                  <Lock className="w-3 h-3 sm:w-4 sm:h-4 text-ocean-400 flex-shrink-0" />
+                                  <span className="text-xs sm:text-sm text-ocean-300 font-medium">
+                                    Nécessite: {mapData?.crewMembers.find(c => c.id === quest.specific_crew_member_id)?.name || 'Membre spécifique'}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                             {isActive ? (
                               <div className="flex items-center gap-2 text-emerald-400 self-start">
@@ -630,6 +729,23 @@ const Map: React.FC = () => {
                   <h3 className="text-base sm:text-lg font-semibold text-white mb-3">
                     Sélectionnez {selectedQuest.required_crew_count} membre{selectedQuest.required_crew_count > 1 ? 's' : ''} d'équipage
                   </h3>
+                  {selectedQuest.specific_crew_member_id && (
+                    <div className="mb-4 p-3 sm:p-4 rounded-xl backdrop-blur-xl bg-gradient-to-br from-ocean-500/20 via-ocean-600/15 to-ocean-500/20 border border-ocean-400/30 shadow-lg shadow-ocean-500/10">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full backdrop-blur-sm bg-ocean-500/30 flex items-center justify-center">
+                          <Lock className="w-5 h-5 text-ocean-300" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-ocean-300">
+                            Membre spécifique requis
+                          </p>
+                          <p className="text-xs text-white/70 mt-0.5">
+                            Cette quête nécessite {mapData?.crewMembers.find(c => c.id === selectedQuest.specific_crew_member_id)?.name || 'un membre spécifique'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                     {mapData.crewMembers
                       .filter(c => c.unlocked)
@@ -638,25 +754,34 @@ const Map: React.FC = () => {
                         const isBusy = mapData.activeQuests.some(aq =>
                           JSON.parse(aq.crew_member_ids).includes(crew.id)
                         );
+                        const isRequired = selectedQuest.specific_crew_member_id === crew.id;
 
                         return (
                           <button
                             key={crew.id}
                             onClick={() => !isBusy && handleCrewSelect(crew.id)}
                             disabled={isBusy}
-                            className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all ${
-                              isSelected
-                                ? 'bg-ocean-500/20 border-ocean-400'
+                            className={`p-2.5 sm:p-3 rounded-xl backdrop-blur-xl border text-left transition-all ${
+                              isRequired
+                                ? 'bg-gradient-to-br from-ocean-500/30 to-ocean-600/30 border-ocean-400 ring-2 ring-ocean-400/50 shadow-lg shadow-ocean-500/20'
+                                : isSelected
+                                ? 'bg-gradient-to-br from-ocean-500/20 to-ocean-600/20 border-ocean-400/60 shadow-md shadow-ocean-500/10'
                                 : isBusy
-                                ? 'bg-white/5 border-white/10 opacity-50 cursor-not-allowed'
-                                : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                                ? 'bg-white/5 border-white/10 opacity-50 cursor-not-allowed backdrop-blur-sm'
+                                : 'bg-white/5 border-white/10 hover:bg-gradient-to-br hover:from-white/10 hover:to-white/5 hover:border-white/20'
                             }`}
                           >
                             <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                               {isSelected && <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-ocean-400 flex-shrink-0" />}
                               {isBusy && <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/40 flex-shrink-0" />}
+                              {isRequired && !isSelected && <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-ocean-400 flex-shrink-0 animate-pulse" />}
                               <span className="font-semibold text-white text-xs sm:text-sm truncate">{crew.name}</span>
                             </div>
+                            {isRequired && (
+                              <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md backdrop-blur-sm bg-ocean-400/20 border border-ocean-400/40">
+                                <p className="text-xs text-ocean-300 font-medium">REQUIS</p>
+                              </div>
+                            )}
                             {isBusy && <p className="text-xs text-white/40">En mission</p>}
                           </button>
                         );
