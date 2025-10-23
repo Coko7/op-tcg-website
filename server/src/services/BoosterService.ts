@@ -18,13 +18,85 @@ export class BoosterService {
   private static readonly ALTERNATE_CHANCE = 0.10; // 10%
 
   /**
+   * Récupère les raretés disponibles dans un booster spécifique
+   */
+  private static async getAvailableRarities(boosterId?: string): Promise<string[]> {
+    try {
+      let query = `
+        SELECT DISTINCT rarity FROM cards
+        WHERE is_active = 1
+      `;
+      const params: any[] = [];
+
+      if (boosterId) {
+        query += ` AND booster_id = ?`;
+        params.push(boosterId);
+      }
+
+      const results = await Database.all(query, params);
+      return results.map((row: any) => row.rarity);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des raretés disponibles:', error);
+      // Fallback: retourner toutes les raretés si erreur
+      return Object.keys(this.RARITY_WEIGHTS);
+    }
+  }
+
+  /**
+   * Ajuste les poids de rareté en fonction des raretés disponibles dans le booster
+   */
+  private static adjustRarityWeights(availableRarities: string[]): Record<string, number> {
+    // Filtrer les poids pour ne garder que les raretés disponibles
+    const adjustedWeights: Record<string, number> = {};
+    let totalWeight = 0;
+
+    for (const rarity of availableRarities) {
+      if (this.RARITY_WEIGHTS[rarity as keyof typeof BoosterService.RARITY_WEIGHTS]) {
+        const weight = this.RARITY_WEIGHTS[rarity as keyof typeof BoosterService.RARITY_WEIGHTS];
+        adjustedWeights[rarity] = weight;
+        totalWeight += weight;
+      }
+    }
+
+    // Si aucun poids n'a été trouvé, distribuer équitablement
+    if (totalWeight === 0) {
+      const equalWeight = 100 / availableRarities.length;
+      availableRarities.forEach(rarity => {
+        adjustedWeights[rarity] = equalWeight;
+      });
+      return adjustedWeights;
+    }
+
+    // Normaliser les poids pour qu'ils totalisent 100
+    const normalizedWeights: Record<string, number> = {};
+    for (const [rarity, weight] of Object.entries(adjustedWeights)) {
+      normalizedWeights[rarity] = (weight / totalWeight) * 100;
+    }
+
+    return normalizedWeights;
+  }
+
+  /**
    * Génère les cartes pour un booster spécifique
    */
   static async generateBoosterCards(boosterId?: string): Promise<Card[]> {
     const cards: Card[] = [];
 
+    // Identifier les raretés disponibles dans ce booster
+    const availableRarities = await this.getAvailableRarities(boosterId);
+
+    if (availableRarities.length === 0) {
+      throw new Error(`Aucune carte active trouvée pour le booster ${boosterId || 'aléatoire'}`);
+    }
+
+    // Ajuster les poids de rareté en fonction des raretés disponibles
+    const adjustedWeights = this.adjustRarityWeights(availableRarities);
+
+    console.log(`🎲 Raretés disponibles dans le booster ${boosterId || 'aléatoire'}:`, availableRarities);
+    console.log(`🎲 Poids ajustés:`, adjustedWeights);
+
     for (let i = 0; i < this.CARDS_PER_BOOSTER; i++) {
-      const rarity = this.selectRandomRarity();
+      const rarity = this.selectRandomRarity(adjustedWeights);
       const card = await this.getRandomCardByRarity(rarity, boosterId);
 
       if (card) {
@@ -41,18 +113,20 @@ export class BoosterService {
   /**
    * Sélectionne une rareté selon les probabilités définies
    */
-  private static selectRandomRarity(): keyof typeof BoosterService.RARITY_WEIGHTS {
+  private static selectRandomRarity(weights?: Record<string, number>): string {
+    const rarityWeights = weights || this.RARITY_WEIGHTS;
     const random = Math.random() * 100;
     let cumulative = 0;
 
-    for (const [rarity, weight] of Object.entries(this.RARITY_WEIGHTS)) {
+    for (const [rarity, weight] of Object.entries(rarityWeights)) {
       cumulative += weight;
       if (random <= cumulative) {
-        return rarity as keyof typeof BoosterService.RARITY_WEIGHTS;
+        return rarity;
       }
     }
 
-    return 'common'; // Fallback
+    // Fallback: retourner la première rareté disponible
+    return Object.keys(rarityWeights)[0];
   }
 
   /**
