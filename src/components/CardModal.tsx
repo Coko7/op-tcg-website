@@ -35,16 +35,22 @@ const CardModal: React.FC<CardModalProps> = ({
       setGlareY(50);
       setIsHovering(false);
 
-      // Empêcher le scroll de l'arrière-plan uniquement avec overflow
+      // Empêcher le scroll de l'arrière-plan sur mobile
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
     } else {
       // Restaurer le scroll quand le modal est fermé
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     }
 
     return () => {
       // Cleanup au démontage
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     };
   }, [isOpen]);
 
@@ -73,14 +79,14 @@ const CardModal: React.FC<CardModalProps> = ({
   };
 
   const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Désactiver l'effet de tilt sur les écrans tactiles/mobiles
-    if (window.innerWidth < 768) return;
     handleInteraction(e.clientX, e.clientY);
   };
 
   const handleCardTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    // Désactiver complètement l'effet sur mobile
-    return;
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      handleInteraction(touch.clientX, touch.clientY);
+    }
   };
 
   const resetTilt = () => {
@@ -91,8 +97,6 @@ const CardModal: React.FC<CardModalProps> = ({
   };
 
   const handleCardMouseEnter = () => {
-    // Désactiver sur mobile
-    if (window.innerWidth < 768) return;
     setIsHovering(true);
   };
 
@@ -104,13 +108,13 @@ const CardModal: React.FC<CardModalProps> = ({
   };
 
   const handleCardTouchEnd = () => {
-    // Désactiver sur mobile
-    return;
+    setIsHovering(false);
+    setTimeout(() => {
+      resetTilt();
+    }, 100);
   };
 
-  // Désactiver le transform sur mobile
-  const isMobile = window.innerWidth < 768;
-  const transform = isMobile ? 'none' : `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(${isHovering ? 1.05 : 1})`;
+  const transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(${isHovering ? 1.05 : 1})`;
 
   // Vérifier si la carte a un effet holographique (Leader n'a pas d'effet holo IRL)
   const hasHolographicEffect = ['super_rare', 'secret_rare'].includes(card.rarity);
@@ -147,6 +151,9 @@ const CardModal: React.FC<CardModalProps> = ({
               onMouseMove={handleCardMouseMove}
               onMouseEnter={handleCardMouseEnter}
               onMouseLeave={handleCardMouseLeave}
+              onTouchMove={handleCardTouchMove}
+              onTouchEnd={handleCardTouchEnd}
+              onTouchStart={() => setIsHovering(true)}
             >
               <div className={`relative aspect-[2.5/3.5] rounded-xl overflow-hidden shadow-2xl card-${card.rarity.replace('_', '-')}`}>
                 {/* Image de la carte */}
@@ -280,6 +287,12 @@ const CardModal: React.FC<CardModalProps> = ({
                 )}
               </div>
 
+              {/* Indication tactile pour mobile */}
+              {!isHovering && hasHolographicEffect && (
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black/70 text-white text-xs px-3 py-1 rounded-full pointer-events-none opacity-70 md:hidden">
+                  👆 Toucher pour voir l'effet
+                </div>
+              )}
             </div>
 
             {quantity > 1 && (

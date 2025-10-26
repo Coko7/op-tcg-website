@@ -10,7 +10,7 @@ import { useToast } from '../contexts/ToastContext';
 
 type FilterType = 'all' | 'favorites' | Rarity | string; // string pour les IDs de boosters
 
-const CARDS_PER_PAGE = 20;
+const CARDS_PER_PAGE = 30; // Augmenté pour réduire la fréquence de chargement
 
 const Collection: React.FC = () => {
   const toast = useToast();
@@ -30,31 +30,6 @@ const Collection: React.FC = () => {
   const observerTarget = useRef<HTMLDivElement>(null);
   const scrollPositionRef = useRef<number>(0);
   const isLoadingMoreRef = useRef(false);
-  const lastScrollY = useRef<number>(0);
-  const scrollTimeoutRef = useRef<number | null>(null);
-  const isScrollingRef = useRef(false);
-
-  // Protection contre les scroll rapides qui causent des re-renders
-  useEffect(() => {
-    let scrollTimeout: number;
-
-    const handleScroll = () => {
-      lastScrollY.current = window.scrollY;
-      isScrollingRef.current = true;
-
-      // Considérer que le scroll est terminé après 150ms sans mouvement
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        isScrollingRef.current = false;
-      }, 150);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearTimeout(scrollTimeout);
-    };
-  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -143,87 +118,39 @@ const Collection: React.FC = () => {
     }
   }, [searchQuery, selectedFilter]);
 
-  // Infinite scroll observer avec throttle et protection contre scroll rapide
+  // Infinite scroll observer simplifié et optimisé
   useEffect(() => {
-    let throttleTimeout: number | null = null;
-    let checkInterval: number | null = null;
-
-    const loadMoreCards = () => {
-      // Ne pas charger pendant un scroll actif
-      if (isScrollingRef.current) {
-        // Réessayer après que le scroll se soit arrêté
-        if (checkInterval) clearInterval(checkInterval);
-        checkInterval = setInterval(() => {
-          if (!isScrollingRef.current) {
-            clearInterval(checkInterval!);
-            loadMoreCards();
-          }
-        }, 200);
-        return;
-      }
-
-      if (isLoadingMoreRef.current) return;
-
-      isLoadingMoreRef.current = true;
-
-      // Sauvegarder la position de scroll avant la mise à jour
-      const scrollBefore = window.scrollY;
-
-      setDisplayedCards(prev => {
-        const newValue = Math.min(prev + CARDS_PER_PAGE, filteredCards.length);
-
-        // Restaurer la position de scroll après la mise à jour
-        setTimeout(() => {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              if (Math.abs(window.scrollY - scrollBefore) > 50) {
-                window.scrollTo({
-                  top: scrollBefore,
-                  behavior: 'auto'
-                });
-              }
-            });
-          });
-        }, 0);
-
-        return newValue;
-      });
-
-      // Réinitialiser après un délai
-      setTimeout(() => {
-        isLoadingMoreRef.current = false;
-      }, 500);
-    };
-
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && displayedCards < filteredCards.length) {
-          // Empêcher les déclenchements multiples avec un throttle
-          if (throttleTimeout) return;
+        // Ne charger que si on scroll vers le bas et qu'on n'est pas déjà en train de charger
+        if (entries[0].isIntersecting &&
+            !isLoadingMoreRef.current &&
+            displayedCards < filteredCards.length) {
 
-          throttleTimeout = setTimeout(() => {
-            loadMoreCards();
-            throttleTimeout = null;
-          }, 300);
+          isLoadingMoreRef.current = true;
+
+          // Attendre que le scroll se stabilise
+          setTimeout(() => {
+            setDisplayedCards(prev => Math.min(prev + CARDS_PER_PAGE, filteredCards.length));
+
+            // Réinitialiser le flag après un délai plus long
+            setTimeout(() => {
+              isLoadingMoreRef.current = false;
+            }, 1000);
+          }, 200);
         }
       },
-      { threshold: 0.1, rootMargin: '300px' }
+      { threshold: 0.1, rootMargin: '200px' }
     );
 
     const currentTarget = observerTarget.current;
-    if (currentTarget) {
+    if (currentTarget && displayedCards < filteredCards.length) {
       observer.observe(currentTarget);
     }
 
     return () => {
       if (currentTarget) {
         observer.unobserve(currentTarget);
-      }
-      if (throttleTimeout) {
-        clearTimeout(throttleTimeout);
-      }
-      if (checkInterval) {
-        clearInterval(checkInterval);
       }
     };
   }, [displayedCards, filteredCards.length]);
@@ -234,20 +161,9 @@ const Collection: React.FC = () => {
 
   const toggleFavorite = useCallback(async (cardId: string) => {
     try {
-      // Sauvegarder la position de scroll
-      scrollPositionRef.current = window.scrollY || window.pageYOffset;
-
       await GameService.toggleFavorite(cardId);
       const updatedCards = await GameService.getUserCards();
       setUserCards(updatedCards);
-
-      // Restaurer la position de scroll
-      requestAnimationFrame(() => {
-        window.scrollTo({
-          top: scrollPositionRef.current,
-          behavior: 'auto'
-        });
-      });
     } catch (error) {
       console.error('Erreur lors du basculement favori:', error);
     }
@@ -265,25 +181,12 @@ const Collection: React.FC = () => {
 
   const handleSellCard = useCallback(async (cardId: string, quantity: number = 1) => {
     try {
-      // Sauvegarder la position de scroll avant la mise à jour
-      scrollPositionRef.current = window.scrollY || window.pageYOffset;
-
       const result = await GameService.sellCard(cardId, quantity);
       setBerrysBalance(result.new_balance);
 
       // Recharger les cartes de l'utilisateur
       const updatedCards = await GameService.getUserCards();
       setUserCards(updatedCards);
-
-      // Restaurer la position de scroll après le prochain render avec double RAF pour s'assurer que le DOM est mis à jour
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          window.scrollTo({
-            top: scrollPositionRef.current,
-            behavior: 'auto' // Pas d'animation pour un scroll instantané
-          });
-        });
-      });
 
       // Afficher un message de succès
       toast.success(`Carte vendue ! Vous avez gagné ${result.berrys_earned} Berrys. Nouveau solde : ${result.new_balance} Berrys`);

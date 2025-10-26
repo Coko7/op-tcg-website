@@ -14,7 +14,7 @@ interface CardProps {
   className?: string;
 }
 
-const Card: React.FC<CardProps> = ({
+const Card: React.FC<CardProps> = React.memo(({
   card,
   quantity = 1,
   isNew = false,
@@ -211,6 +211,8 @@ const Card: React.FC<CardProps> = ({
       </div>
     </div>
   );
-};
+});
+
+Card.displayName = 'Card';
 
 export default Card;
