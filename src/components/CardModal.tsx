@@ -42,18 +42,18 @@ const CardModal: React.FC<CardModalProps> = ({
       // Empêcher le scroll de l'arrière-plan (sans position fixed pour préserver le scroll)
       document.body.style.overflow = 'hidden';
       document.body.style.paddingRight = '0px'; // Éviter le décalage dû à la scrollbar qui disparaît
-    } else if (scrollPositionRef.current !== null) {
-      // Quand on ferme, restaurer
-      const savedPosition = scrollPositionRef.current;
 
-      // Restaurer les styles du body
-      document.body.style.removeProperty('overflow');
-      document.body.style.removeProperty('padding-right');
+      // Cleanup quand on ferme
+      return () => {
+        const savedPosition = scrollPositionRef.current;
 
-      // Restaurer la position de scroll
-      // Le scroll devrait déjà être à la bonne position car on n'a pas utilisé position: fixed
-      // Mais on force quand même pour être sûr
-      window.scrollTo(0, savedPosition);
+        // Restaurer les styles du body
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+
+        // Restaurer la position de scroll
+        window.scrollTo(0, savedPosition);
+      };
     }
   }, [isOpen]);
 
