@@ -25,11 +25,16 @@
   html {
     background-color: #0f172a;
     min-height: 100%;
+    /* Désactiver le pull-to-refresh sur mobile */
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   body {
     @apply text-cloud-white min-h-screen;
     font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    /* Désactiver le pull-to-refresh sur mobile */
+    overscroll-behavior-y: contain;
     /* Glassmorphism Modern Background */
     background:
       linear-gradient(135deg, #0f172a 0%, #1e293b 100%),

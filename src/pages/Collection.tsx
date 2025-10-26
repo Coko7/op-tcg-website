@@ -28,6 +28,8 @@ const Collection: React.FC = () => {
   const [sellMode, setSellMode] = useState(false);
   const [displayedCards, setDisplayedCards] = useState(CARDS_PER_PAGE);
   const observerTarget = useRef<HTMLDivElement>(null);
+  const scrollPositionRef = useRef<number>(0);
+  const isLoadingMoreRef = useRef(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -113,11 +115,19 @@ const Collection: React.FC = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && displayedCards < filteredCards.length) {
-          setDisplayedCards(prev => Math.min(prev + CARDS_PER_PAGE, filteredCards.length));
+        if (entries[0].isIntersecting && !isLoadingMoreRef.current && displayedCards < filteredCards.length) {
+          isLoadingMoreRef.current = true;
+          setDisplayedCards(prev => {
+            const newValue = Math.min(prev + CARDS_PER_PAGE, filteredCards.length);
+            // Réinitialiser le flag après un court délai pour éviter les déclenchements multiples
+            setTimeout(() => {
+              isLoadingMoreRef.current = false;
+            }, 100);
+            return newValue;
+          });
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1, rootMargin: '100px' }
     );
 
     const currentTarget = observerTarget.current;
@@ -136,15 +146,26 @@ const Collection: React.FC = () => {
     return filteredCards.slice(0, displayedCards);
   }, [filteredCards, displayedCards]);
 
-  const toggleFavorite = async (cardId: string) => {
+  const toggleFavorite = useCallback(async (cardId: string) => {
     try {
+      // Sauvegarder la position de scroll
+      scrollPositionRef.current = window.scrollY || window.pageYOffset;
+
       await GameService.toggleFavorite(cardId);
       const updatedCards = await GameService.getUserCards();
       setUserCards(updatedCards);
+
+      // Restaurer la position de scroll
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: scrollPositionRef.current,
+          behavior: 'auto'
+        });
+      });
     } catch (error) {
       console.error('Erreur lors du basculement favori:', error);
     }
-  };
+  }, []);
 
   const handleCardClick = (card: CardType) => {
     setSelectedCard(card);
@@ -158,12 +179,23 @@ const Collection: React.FC = () => {
 
   const handleSellCard = async (cardId: string, quantity: number = 1) => {
     try {
+      // Sauvegarder la position de scroll avant la mise à jour
+      scrollPositionRef.current = window.scrollY || window.pageYOffset;
+
       const result = await GameService.sellCard(cardId, quantity);
       setBerrysBalance(result.new_balance);
 
       // Recharger les cartes de l'utilisateur
       const updatedCards = await GameService.getUserCards();
       setUserCards(updatedCards);
+
+      // Restaurer la position de scroll après le prochain render
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: scrollPositionRef.current,
+          behavior: 'auto' // Pas d'animation pour un scroll instantané
+        });
+      });
 
       // Afficher un message de succès
       toast.success(`Carte vendue ! Vous avez gagné ${result.berrys_earned} Berrys. Nouveau solde : ${result.new_balance} Berrys`);
