@@ -31,6 +31,13 @@ interface AuthenticatedUser {
   username: string;
   is_admin: boolean;
   berrys?: number;
+  favorite_card_id?: string | null;
+  favorite_card?: {
+    id: string;
+    name: string;
+    image_url: string;
+    rarity: string;
+  } | null;
 }
 
 export class AuthController {
@@ -253,8 +260,27 @@ export class AuthController {
       const user = (req as any).user;
       const stats = await UserModel.getUserStats(user.id);
 
+      // Récupérer les détails de la carte favorite si elle existe (comme le leaderboard)
+      let favoriteCardData = null;
+      if (user.favorite_card_id) {
+        const favoriteCard = await Database.get<any>(`
+          SELECT id, name, image_url, fallback_image_url, rarity
+          FROM cards
+          WHERE id = ? AND is_active = 1
+        `, [user.favorite_card_id]);
+
+        if (favoriteCard) {
+          favoriteCardData = {
+            id: favoriteCard.id,
+            name: favoriteCard.name,
+            image_url: favoriteCard.image_url || favoriteCard.fallback_image_url,
+            rarity: favoriteCard.rarity
+          };
+        }
+      }
+
       res.json({
-        user: AuthController.sanitizeUser(user),
+        user: AuthController.sanitizeUser(user, favoriteCardData),
         stats
       });
 
@@ -295,12 +321,14 @@ export class AuthController {
     };
   }
 
-  private static sanitizeUser(user: any): AuthenticatedUser {
+  private static sanitizeUser(user: any, favoriteCard: any = null): AuthenticatedUser {
     return {
       id: user.id,
       username: user.username,
       is_admin: user.is_admin,
-      berrys: user.berrys || 0
+      berrys: user.berrys || 0,
+      favorite_card_id: user.favorite_card_id || null,
+      favorite_card: favoriteCard
     };
   }
 
