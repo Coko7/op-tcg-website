@@ -30,6 +30,7 @@ const Collection: React.FC = () => {
   const observerTarget = useRef<HTMLDivElement>(null);
   const scrollPositionRef = useRef<number>(0);
   const isLoadingMoreRef = useRef(false);
+  const previousSellMode = useRef(sellMode);
 
   // States pour le dialog de vente par lot
   const [showSellDialog, setShowSellDialog] = useState(false);
@@ -100,18 +101,23 @@ const Collection: React.FC = () => {
       const userCardA = userCards.find(uc => uc.card_id === a.id);
       const userCardB = userCards.find(uc => uc.card_id === b.id);
 
-      // En mode vente, afficher d'abord les cartes vendables (quantité > 1)
-      if (sellMode) {
-        const canSellA = userCardA && userCardA.quantity > 1;
-        const canSellB = userCardB && userCardB.quantity > 1;
+      const isOwnedA = !!userCardA;
+      const isOwnedB = !!userCardB;
 
+      // En mode vente, afficher d'abord les cartes vendables (quantité > 1)
+      if (sellMode && isOwnedA && isOwnedB) {
+        const canSellA = userCardA.quantity > 1;
+        const canSellB = userCardB.quantity > 1;
+
+        // Les cartes vendables viennent en premier
         if (canSellA && !canSellB) return -1;
         if (!canSellA && canSellB) return 1;
+        // Si les deux sont vendables ou les deux ne sont pas vendables, continuer au tri suivant
       }
 
-      // Les cartes possédées viennent en premier
-      if (userCardA && !userCardB) return -1;
-      if (!userCardA && userCardB) return 1;
+      // Les cartes possédées viennent en premier (sauf si on est en mode vente et qu'on a déjà trié)
+      if (isOwnedA && !isOwnedB) return -1;
+      if (!isOwnedA && isOwnedB) return 1;
 
       // Ensuite trier par rareté (du plus rare au plus commun)
       // Leader est plus rare que Rare mais moins rare que SuperRare
@@ -122,15 +128,19 @@ const Collection: React.FC = () => {
 
   // Reset displayedCards when filters change
   useEffect(() => {
+    // Détecter si le mode vente vient de changer
+    const sellModeChanged = previousSellMode.current !== sellMode;
+    previousSellMode.current = sellMode;
+
     // Sauvegarder la position actuelle avant de reset
     const currentScroll = window.scrollY;
     setDisplayedCards(CARDS_PER_PAGE);
 
-    // Si on était en bas de page, ne pas forcer le scroll
-    if (currentScroll < 100) {
-      window.scrollTo(0, 0);
+    // Scroller en haut quand on change de filtre ou qu'on active/désactive le mode vente
+    if (currentScroll < 100 || sellModeChanged) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [searchQuery, selectedFilter]);
+  }, [searchQuery, selectedFilter, sellMode]);
 
   // Infinite scroll observer simplifié et optimisé
   useEffect(() => {
