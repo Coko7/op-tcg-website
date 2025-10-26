@@ -28,6 +28,13 @@ export interface UserCard {
   is_favorite: boolean;
 }
 
+export interface FavoriteCard {
+  id: string;
+  name: string;
+  image_url: string;
+  rarity: Rarity;
+}
+
 export interface User {
   id: string;
   username: string;
@@ -39,6 +46,7 @@ export interface User {
   berrys?: number;
   is_admin?: boolean;
   favorite_card_id?: string | null;
+  favorite_card?: FavoriteCard | null;
 }
 
 export interface BoosterStatus {

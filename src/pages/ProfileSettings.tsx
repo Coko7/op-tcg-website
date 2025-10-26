@@ -11,7 +11,6 @@ const ProfileSettings: React.FC = () => {
   const { user, refreshUser } = useAuth();
   const toast = useToast();
   const [userCards, setUserCards] = useState<UserCard[]>([]);
-  const [favoriteCardId, setFavoriteCardId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,9 +37,6 @@ const ProfileSettings: React.FC = () => {
       setLoading(true);
       const cards = await GameService.getUserCards();
       setUserCards(cards);
-
-      // Récupérer la carte favorite actuelle depuis le contexte utilisateur
-      setFavoriteCardId(user?.favorite_card_id || null);
     } catch (error) {
       console.error('Erreur lors du chargement des cartes:', error);
       toast.error('Erreur lors du chargement de vos cartes');
@@ -53,8 +49,7 @@ const ProfileSettings: React.FC = () => {
     try {
       setSaving(true);
       await GameService.setProfileFavoriteCard(cardId);
-      setFavoriteCardId(cardId);
-      // Rafraîchir les données utilisateur pour mettre à jour le contexte
+      // Rafraîchir les données utilisateur pour mettre à jour le contexte et la carte favorite
       await refreshUser();
       toast.success(cardId ? 'Carte de profil mise à jour !' : 'Carte de profil retirée');
     } catch (error) {
@@ -100,8 +95,6 @@ const ProfileSettings: React.FC = () => {
     }
   };
 
-  const favoriteCard = userCards.find(c => c.card_id === favoriteCardId);
-
   // Filtrer les cartes selon la recherche
   const filteredCards = userCards.filter((card: any) => {
     if (!searchQuery.trim()) return true;
@@ -142,15 +135,15 @@ const ProfileSettings: React.FC = () => {
             {/* Carte actuelle */}
             <div className="mb-6">
               <p className="text-gray-400 text-sm mb-3">Carte actuellement sélectionnée :</p>
-              {favoriteCard ? (
+              {user?.favorite_card ? (
                 <div className="bg-slate-700/50 rounded-lg p-4 flex flex-col items-center">
                   <img
-                    src={(favoriteCard as any).image_url || (favoriteCard as any).fallback_image_url}
-                    alt={(favoriteCard as any).name}
+                    src={user.favorite_card.image_url}
+                    alt={user.favorite_card.name}
                     className="w-48 h-auto rounded-lg shadow-2xl mb-3"
                   />
-                  <p className="text-white font-semibold text-lg">{(favoriteCard as any).name}</p>
-                  <p className="text-gray-400 text-sm mb-3">{(favoriteCard as any).rarity}</p>
+                  <p className="text-white font-semibold text-lg">{user.favorite_card.name}</p>
+                  <p className="text-gray-400 text-sm mb-3">{user.favorite_card.rarity}</p>
                   <button
                     onClick={() => handleSetFavoriteCard(null)}
                     disabled={saving}
@@ -215,7 +208,7 @@ const ProfileSettings: React.FC = () => {
                         onClick={() => handleSetFavoriteCard(card.card_id)}
                         disabled={saving}
                         className={`relative group hover:scale-105 transition-transform disabled:opacity-50 ${
-                          favoriteCardId === card.card_id ? 'ring-2 ring-yellow-400' : ''
+                          user?.favorite_card_id === card.card_id ? 'ring-2 ring-yellow-400' : ''
                         }`}
                       >
                         <img
@@ -228,7 +221,7 @@ const ProfileSettings: React.FC = () => {
                             Sélectionner
                           </span>
                         </div>
-                        {favoriteCardId === card.card_id && (
+                        {user?.favorite_card_id === card.card_id && (
                           <div className="absolute top-1 right-1 bg-yellow-500 rounded-full p-1">
                             <Star size={12} className="text-white fill-current" />
                           </div>

@@ -29,12 +29,20 @@ interface AuthResponse {
   message: string;
 }
 
+interface FavoriteCard {
+  id: string;
+  name: string;
+  image_url: string;
+  rarity: string;
+}
+
 interface User {
   id: string;
   username: string;
   is_admin: boolean;
   berrys?: number;
   favorite_card_id?: string | null;
+  favorite_card?: FavoriteCard | null;
 }
 
 class ApiService {
