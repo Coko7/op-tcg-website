@@ -30,6 +30,31 @@ const Collection: React.FC = () => {
   const observerTarget = useRef<HTMLDivElement>(null);
   const scrollPositionRef = useRef<number>(0);
   const isLoadingMoreRef = useRef(false);
+  const lastScrollY = useRef<number>(0);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isScrollingRef = useRef(false);
+
+  // Protection contre les scroll rapides qui causent des re-renders
+  useEffect(() => {
+    let scrollTimeout: NodeJS.Timeout;
+
+    const handleScroll = () => {
+      lastScrollY.current = window.scrollY;
+      isScrollingRef.current = true;
+
+      // Considérer que le scroll est terminé après 150ms sans mouvement
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 150);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -108,26 +133,81 @@ const Collection: React.FC = () => {
 
   // Reset displayedCards when filters change
   useEffect(() => {
+    // Sauvegarder la position actuelle avant de reset
+    const currentScroll = window.scrollY;
     setDisplayedCards(CARDS_PER_PAGE);
+
+    // Si on était en bas de page, ne pas forcer le scroll
+    if (currentScroll < 100) {
+      window.scrollTo(0, 0);
+    }
   }, [searchQuery, selectedFilter]);
 
-  // Infinite scroll observer
+  // Infinite scroll observer avec throttle et protection contre scroll rapide
   useEffect(() => {
+    let throttleTimeout: NodeJS.Timeout | null = null;
+    let checkInterval: NodeJS.Timeout | null = null;
+
+    const loadMoreCards = () => {
+      // Ne pas charger pendant un scroll actif
+      if (isScrollingRef.current) {
+        // Réessayer après que le scroll se soit arrêté
+        if (checkInterval) clearInterval(checkInterval);
+        checkInterval = setInterval(() => {
+          if (!isScrollingRef.current) {
+            clearInterval(checkInterval!);
+            loadMoreCards();
+          }
+        }, 200);
+        return;
+      }
+
+      if (isLoadingMoreRef.current) return;
+
+      isLoadingMoreRef.current = true;
+
+      // Sauvegarder la position de scroll avant la mise à jour
+      const scrollBefore = window.scrollY;
+
+      setDisplayedCards(prev => {
+        const newValue = Math.min(prev + CARDS_PER_PAGE, filteredCards.length);
+
+        // Restaurer la position de scroll après la mise à jour
+        setTimeout(() => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (Math.abs(window.scrollY - scrollBefore) > 50) {
+                window.scrollTo({
+                  top: scrollBefore,
+                  behavior: 'auto'
+                });
+              }
+            });
+          });
+        }, 0);
+
+        return newValue;
+      });
+
+      // Réinitialiser après un délai
+      setTimeout(() => {
+        isLoadingMoreRef.current = false;
+      }, 500);
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isLoadingMoreRef.current && displayedCards < filteredCards.length) {
-          isLoadingMoreRef.current = true;
-          setDisplayedCards(prev => {
-            const newValue = Math.min(prev + CARDS_PER_PAGE, filteredCards.length);
-            // Réinitialiser le flag après un court délai pour éviter les déclenchements multiples
-            setTimeout(() => {
-              isLoadingMoreRef.current = false;
-            }, 100);
-            return newValue;
-          });
+        if (entries[0].isIntersecting && displayedCards < filteredCards.length) {
+          // Empêcher les déclenchements multiples avec un throttle
+          if (throttleTimeout) return;
+
+          throttleTimeout = setTimeout(() => {
+            loadMoreCards();
+            throttleTimeout = null;
+          }, 300);
         }
       },
-      { threshold: 0.1, rootMargin: '100px' }
+      { threshold: 0.1, rootMargin: '300px' }
     );
 
     const currentTarget = observerTarget.current;
@@ -138,6 +218,12 @@ const Collection: React.FC = () => {
     return () => {
       if (currentTarget) {
         observer.unobserve(currentTarget);
+      }
+      if (throttleTimeout) {
+        clearTimeout(throttleTimeout);
+      }
+      if (checkInterval) {
+        clearInterval(checkInterval);
       }
     };
   }, [displayedCards, filteredCards.length]);
@@ -167,17 +253,17 @@ const Collection: React.FC = () => {
     }
   }, []);
 
-  const handleCardClick = (card: CardType) => {
+  const handleCardClick = useCallback((card: CardType) => {
     setSelectedCard(card);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setIsModalOpen(false);
     setSelectedCard(null);
-  };
+  }, []);
 
-  const handleSellCard = async (cardId: string, quantity: number = 1) => {
+  const handleSellCard = useCallback(async (cardId: string, quantity: number = 1) => {
     try {
       // Sauvegarder la position de scroll avant la mise à jour
       scrollPositionRef.current = window.scrollY || window.pageYOffset;
@@ -189,11 +275,13 @@ const Collection: React.FC = () => {
       const updatedCards = await GameService.getUserCards();
       setUserCards(updatedCards);
 
-      // Restaurer la position de scroll après le prochain render
+      // Restaurer la position de scroll après le prochain render avec double RAF pour s'assurer que le DOM est mis à jour
       requestAnimationFrame(() => {
-        window.scrollTo({
-          top: scrollPositionRef.current,
-          behavior: 'auto' // Pas d'animation pour un scroll instantané
+        requestAnimationFrame(() => {
+          window.scrollTo({
+            top: scrollPositionRef.current,
+            behavior: 'auto' // Pas d'animation pour un scroll instantané
+          });
         });
       });
 
@@ -203,7 +291,7 @@ const Collection: React.FC = () => {
       console.error('Erreur lors de la vente de la carte:', error);
       toast.error(error.message || 'Impossible de vendre cette carte');
     }
-  };
+  }, [toast]);
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -232,7 +320,7 @@ const Collection: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6" style={{ willChange: 'scroll-position' }}>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
         <Link
           to="/"
@@ -438,7 +526,10 @@ const Collection: React.FC = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+          <div
+            className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6"
+            style={{ minHeight: `${Math.ceil(filteredCards.length / 5) * 350}px` }}
+          >
             {visibleCards.map((card) => {
               const userCard = userCards.find(uc => uc.card_id === card.id);
               const isOwned = !!userCard;
@@ -447,7 +538,7 @@ const Collection: React.FC = () => {
 
               return (
                 <div
-                  key={card.id}
+                  key={`card-${card.id}-${isOwned ? userCard.quantity : 'not-owned'}`}
                   className={`relative transition-all duration-300 hover:scale-105 ${!isOwned ? 'opacity-40 grayscale hover:opacity-60' : ''}`}
                 >
                   {isOwned ? (
