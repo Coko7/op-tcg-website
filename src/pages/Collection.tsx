@@ -31,12 +31,12 @@ const Collection: React.FC = () => {
   const scrollPositionRef = useRef<number>(0);
   const isLoadingMoreRef = useRef(false);
   const lastScrollY = useRef<number>(0);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeoutRef = useRef<number | null>(null);
   const isScrollingRef = useRef(false);
 
   // Protection contre les scroll rapides qui causent des re-renders
   useEffect(() => {
-    let scrollTimeout: NodeJS.Timeout;
+    let scrollTimeout: number;
 
     const handleScroll = () => {
       lastScrollY.current = window.scrollY;
@@ -145,8 +145,8 @@ const Collection: React.FC = () => {
 
   // Infinite scroll observer avec throttle et protection contre scroll rapide
   useEffect(() => {
-    let throttleTimeout: NodeJS.Timeout | null = null;
-    let checkInterval: NodeJS.Timeout | null = null;
+    let throttleTimeout: number | null = null;
+    let checkInterval: number | null = null;
 
     const loadMoreCards = () => {
       // Ne pas charger pendant un scroll actif
