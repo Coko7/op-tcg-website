@@ -30,7 +30,7 @@ const CardModal: React.FC<CardModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      // Sauvegarder la position de scroll actuelle
+      // Sauvegarder la position de scroll actuelle AVANT de modifier les styles
       scrollPositionRef.current = window.scrollY;
 
       setTiltX(0);
@@ -39,35 +39,22 @@ const CardModal: React.FC<CardModalProps> = ({
       setGlareY(50);
       setIsHovering(false);
 
-      // Empêcher le scroll de l'arrière-plan sur mobile
+      // Empêcher le scroll de l'arrière-plan (sans position fixed pour préserver le scroll)
       document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollPositionRef.current}px`;
-      document.body.style.width = '100%';
-    } else {
-      // Restaurer le scroll et la position sauvegardée
+      document.body.style.paddingRight = '0px'; // Éviter le décalage dû à la scrollbar qui disparaît
+    } else if (scrollPositionRef.current !== null) {
+      // Quand on ferme, restaurer
       const savedPosition = scrollPositionRef.current;
 
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
+      // Restaurer les styles du body
+      document.body.style.removeProperty('overflow');
+      document.body.style.removeProperty('padding-right');
 
-      // Utiliser requestAnimationFrame pour s'assurer que le scroll se fait après le rendu
-      if (savedPosition > 0) {
-        requestAnimationFrame(() => {
-          window.scrollTo(0, savedPosition);
-        });
-      }
+      // Restaurer la position de scroll
+      // Le scroll devrait déjà être à la bonne position car on n'a pas utilisé position: fixed
+      // Mais on force quand même pour être sûr
+      window.scrollTo(0, savedPosition);
     }
-
-    // Cleanup en cas de démontage du composant pendant qu'il est ouvert
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-    };
   }, [isOpen]);
 
   if (!isOpen) return null;
