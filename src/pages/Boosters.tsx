@@ -399,6 +399,7 @@ const Boosters: React.FC = () => {
             berrysBalance={berrysBalance}
             isDisabled={animationPhase !== 'idle'}
             onBoosterSelect={handleBoosterSelect}
+            selectedBoosterId={animationPhase === 'idle' ? selectedBooster?.id : undefined}
           />
         </div>
       )}

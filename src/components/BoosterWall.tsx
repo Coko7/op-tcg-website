@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Filter, Gift, Package } from 'lucide-react';
 import { BoosterPack } from '../data/onePieceCards';
 import BoosterPosterCard from './BoosterPosterCard';
@@ -9,6 +9,7 @@ interface BoosterWallProps {
   berrysBalance: number;
   isDisabled: boolean;
   onBoosterSelect: (booster: BoosterPack) => void;
+  selectedBoosterId?: string;
 }
 
 type FilterType = 'all' | 'free' | 'starter' | 'booster';
@@ -19,14 +20,29 @@ const BoosterWall: React.FC<BoosterWallProps> = ({
   berrysBalance,
   isDisabled,
   onBoosterSelect,
+  selectedBoosterId,
 }) => {
   const [filter, setFilter] = useState<FilterType>('all');
+  const boosterRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // Scroll vers le booster sélectionné quand on revient à la page
+  useEffect(() => {
+    if (selectedBoosterId && boosterRefs.current[selectedBoosterId]) {
+      setTimeout(() => {
+        boosterRefs.current[selectedBoosterId]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }, 100);
+    }
+  }, [selectedBoosterId]);
 
   // Filtrer les boosters selon le filtre sélectionné
   const filteredBoosters = boosters.filter((booster) => {
     switch (filter) {
       case 'free':
-        return canOpenFree;
+        // Pour le filtre "gratuits", afficher tous les boosters si on peut en ouvrir un gratuitement
+        return true;
       case 'starter':
         return booster.series === 'Starter Deck';
       case 'booster':
@@ -36,8 +52,8 @@ const BoosterWall: React.FC<BoosterWallProps> = ({
     }
   });
 
-  // Si le filtre est 'free', on affiche tous les boosters mais on met en avant celui qui peut être ouvert
-  const displayBoosters = filter === 'free' && canOpenFree ? boosters : filteredBoosters;
+  // Si le filtre est 'free' et qu'on ne peut pas ouvrir gratuitement, n'afficher aucun booster
+  const displayBoosters = filter === 'free' && !canOpenFree ? [] : filteredBoosters;
 
   return (
     <div className="space-y-6">
@@ -117,14 +133,20 @@ const BoosterWall: React.FC<BoosterWallProps> = ({
       {displayBoosters.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
           {displayBoosters.map((booster) => (
-            <BoosterPosterCard
+            <div
               key={booster.id}
-              booster={booster}
-              canOpenFree={canOpenFree}
-              berrysBalance={berrysBalance}
-              isDisabled={isDisabled}
-              onClick={onBoosterSelect}
-            />
+              ref={(el) => {
+                boosterRefs.current[booster.id] = el;
+              }}
+            >
+              <BoosterPosterCard
+                booster={booster}
+                canOpenFree={canOpenFree}
+                berrysBalance={berrysBalance}
+                isDisabled={isDisabled}
+                onClick={onBoosterSelect}
+              />
+            </div>
           ))}
         </div>
       ) : (
