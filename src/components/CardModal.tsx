@@ -44,7 +44,7 @@ const CardModal: React.FC<CardModalProps> = ({
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollPositionRef.current}px`;
       document.body.style.width = '100%';
-    } else if (scrollPositionRef.current > 0) {
+    } else {
       // Restaurer le scroll et la position sauvegardée
       const savedPosition = scrollPositionRef.current;
 
@@ -54,10 +54,20 @@ const CardModal: React.FC<CardModalProps> = ({
       document.body.style.width = '';
 
       // Utiliser requestAnimationFrame pour s'assurer que le scroll se fait après le rendu
-      requestAnimationFrame(() => {
-        window.scrollTo(0, savedPosition);
-      });
+      if (savedPosition > 0) {
+        requestAnimationFrame(() => {
+          window.scrollTo(0, savedPosition);
+        });
+      }
     }
+
+    // Cleanup en cas de démontage du composant pendant qu'il est ouvert
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;

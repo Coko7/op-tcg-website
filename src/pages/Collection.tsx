@@ -128,19 +128,44 @@ const Collection: React.FC = () => {
 
   // Reset displayedCards when filters change
   useEffect(() => {
-    // Détecter si le mode vente vient de changer
-    const sellModeChanged = previousSellMode.current !== sellMode;
-    previousSellMode.current = sellMode;
-
     // Sauvegarder la position actuelle avant de reset
     const currentScroll = window.scrollY;
     setDisplayedCards(CARDS_PER_PAGE);
 
-    // Scroller en haut quand on change de filtre ou qu'on active/désactive le mode vente
-    if (currentScroll < 100 || sellModeChanged) {
+    // Scroller en haut quand on change de filtre
+    if (currentScroll < 100) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [searchQuery, selectedFilter, sellMode]);
+  }, [searchQuery, selectedFilter]);
+
+  // Gérer le changement de mode vente
+  useEffect(() => {
+    // Détecter si le mode vente vient de changer
+    const sellModeChanged = previousSellMode.current !== sellMode;
+
+    if (sellModeChanged) {
+      previousSellMode.current = sellMode;
+
+      // Si on active le mode vente, compter les cartes vendables et les afficher toutes
+      if (sellMode) {
+        const sellableCount = filteredCards.filter(card => {
+          const userCard = userCards.find(uc => uc.card_id === card.id);
+          return userCard && userCard.quantity > 1;
+        }).length;
+
+        // Afficher au minimum toutes les cartes vendables + une page normale
+        const minCardsToShow = Math.max(sellableCount + CARDS_PER_PAGE, CARDS_PER_PAGE);
+        setDisplayedCards(minCardsToShow);
+      } else {
+        // Retour au mode normal
+        setDisplayedCards(CARDS_PER_PAGE);
+      }
+
+      // Scroller en haut
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sellMode]);
 
   // Infinite scroll observer simplifié et optimisé
   useEffect(() => {
