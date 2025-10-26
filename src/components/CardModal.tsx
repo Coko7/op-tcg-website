@@ -26,9 +26,13 @@ const CardModal: React.FC<CardModalProps> = ({
   const [glareY, setGlareY] = useState(50);
   const [isHovering, setIsHovering] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const scrollPositionRef = useRef(0);
 
   useEffect(() => {
     if (isOpen) {
+      // Sauvegarder la position de scroll actuelle
+      scrollPositionRef.current = window.scrollY;
+
       setTiltX(0);
       setTiltY(0);
       setGlareX(50);
@@ -38,18 +42,22 @@ const CardModal: React.FC<CardModalProps> = ({
       // Empêcher le scroll de l'arrière-plan sur mobile
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollPositionRef.current}px`;
       document.body.style.width = '100%';
     } else {
-      // Restaurer le scroll quand le modal est fermé
+      // Restaurer le scroll et la position sauvegardée
       document.body.style.overflow = '';
       document.body.style.position = '';
+      document.body.style.top = '';
       document.body.style.width = '';
+      window.scrollTo(0, scrollPositionRef.current);
     }
 
     return () => {
       // Cleanup au démontage
       document.body.style.overflow = '';
       document.body.style.position = '';
+      document.body.style.top = '';
       document.body.style.width = '';
     };
   }, [isOpen]);
@@ -321,8 +329,8 @@ const CardModal: React.FC<CardModalProps> = ({
 
               <div className="flex flex-wrap gap-2 mb-4">
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  card.rarity === 'secret_rare' ? 'bg-purple-600 text-white' :
-                  card.rarity === 'super_rare' ? 'bg-yellow-600 text-white' :
+                  card.rarity === 'secret_rare' ? 'bg-yellow-600 text-white' :
+                  card.rarity === 'super_rare' ? 'bg-purple-600 text-white' :
                   card.rarity === 'leader' ? 'bg-red-600 text-white' :
                   card.rarity === 'rare' ? 'bg-blue-600 text-white' :
                   card.rarity === 'uncommon' ? 'bg-green-600 text-white' :

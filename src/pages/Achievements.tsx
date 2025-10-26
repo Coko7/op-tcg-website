@@ -62,13 +62,26 @@ export default function Achievements() {
     ? achievements
     : achievements.filter(a => a.category === selectedCategory);
 
-  const groupedAchievements = filteredAchievements.reduce((acc, achievement) => {
-    if (!acc[achievement.category]) {
-      acc[achievement.category] = [];
-    }
-    acc[achievement.category].push(achievement);
-    return acc;
-  }, {} as Record<string, AchievementWithProgress[]>);
+  const groupedAchievements = filteredAchievements
+    // Trier : réclamables en premier, puis par progression
+    .sort((a, b) => {
+      const aCanClaim = a.progress >= a.threshold && !a.is_claimed;
+      const bCanClaim = b.progress >= b.threshold && !b.is_claimed;
+
+      // Si a est réclamable et pas b, a vient en premier
+      if (aCanClaim && !bCanClaim) return -1;
+      // Si b est réclamable et pas a, b vient en premier
+      if (!aCanClaim && bCanClaim) return 1;
+      // Sinon, trier par pourcentage de progression (décroissant)
+      return b.completion_percentage - a.completion_percentage;
+    })
+    .reduce((acc, achievement) => {
+      if (!acc[achievement.category]) {
+        acc[achievement.category] = [];
+      }
+      acc[achievement.category].push(achievement);
+      return acc;
+    }, {} as Record<string, AchievementWithProgress[]>);
 
   if (loading) {
     return (

@@ -31,6 +31,11 @@ const Collection: React.FC = () => {
   const scrollPositionRef = useRef<number>(0);
   const isLoadingMoreRef = useRef(false);
 
+  // States pour le dialog de vente par lot
+  const [showSellDialog, setShowSellDialog] = useState(false);
+  const [cardToSell, setCardToSell] = useState<{ card: CardType; maxQuantity: number } | null>(null);
+  const [sellQuantity, setSellQuantity] = useState(1);
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -95,6 +100,15 @@ const Collection: React.FC = () => {
       const userCardA = userCards.find(uc => uc.card_id === a.id);
       const userCardB = userCards.find(uc => uc.card_id === b.id);
 
+      // En mode vente, afficher d'abord les cartes vendables (quantité > 1)
+      if (sellMode) {
+        const canSellA = userCardA && userCardA.quantity > 1;
+        const canSellB = userCardB && userCardB.quantity > 1;
+
+        if (canSellA && !canSellB) return -1;
+        if (!canSellA && canSellB) return 1;
+      }
+
       // Les cartes possédées viennent en premier
       if (userCardA && !userCardB) return -1;
       if (!userCardA && userCardB) return 1;
@@ -104,7 +118,7 @@ const Collection: React.FC = () => {
       const rarityOrder = ['secret_rare', 'super_rare', 'leader', 'rare', 'uncommon', 'common'];
       return rarityOrder.indexOf(a.rarity) - rarityOrder.indexOf(b.rarity);
     });
-  }, [allCards, userCards, searchQuery, selectedFilter]);
+  }, [allCards, userCards, searchQuery, selectedFilter, sellMode]);
 
   // Reset displayedCards when filters change
   useEffect(() => {
@@ -179,9 +193,23 @@ const Collection: React.FC = () => {
     setSelectedCard(null);
   }, []);
 
-  const handleSellCard = useCallback(async (cardId: string, quantity: number = 1) => {
+  const openSellDialog = useCallback((card: CardType, maxQuantity: number) => {
+    setCardToSell({ card, maxQuantity });
+    setSellQuantity(1);
+    setShowSellDialog(true);
+  }, []);
+
+  const closeSellDialog = useCallback(() => {
+    setShowSellDialog(false);
+    setCardToSell(null);
+    setSellQuantity(1);
+  }, []);
+
+  const handleSellCard = useCallback(async () => {
+    if (!cardToSell) return;
+
     try {
-      const result = await GameService.sellCard(cardId, quantity);
+      const result = await GameService.sellCard(cardToSell.card.id, sellQuantity);
       setBerrysBalance(result.new_balance);
 
       // Recharger les cartes de l'utilisateur
@@ -189,12 +217,15 @@ const Collection: React.FC = () => {
       setUserCards(updatedCards);
 
       // Afficher un message de succès
-      toast.success(`Carte vendue ! Vous avez gagné ${result.berrys_earned} Berrys. Nouveau solde : ${result.new_balance} Berrys`);
+      const totalEarned = result.berrys_earned;
+      toast.success(`${sellQuantity}x ${cardToSell.card.name} vendues pour ${totalEarned} Berrys !`);
+
+      closeSellDialog();
     } catch (error: any) {
       console.error('Erreur lors de la vente de la carte:', error);
       toast.error(error.message || 'Impossible de vendre cette carte');
     }
-  }, [toast]);
+  }, [cardToSell, sellQuantity, toast, closeSellDialog]);
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -455,7 +486,7 @@ const Collection: React.FC = () => {
                       {sellMode && canSell && (
                         <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-11/12">
                           <button
-                            onClick={() => handleSellCard(card.id, 1)}
+                            onClick={() => openSellDialog(card, userCard.quantity - 1)}
                             className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-3 rounded-lg shadow-lg transition-colors flex items-center justify-center gap-2"
                           >
                             <Coins size={16} />
@@ -523,6 +554,98 @@ const Collection: React.FC = () => {
           isOpen={isModalOpen}
           onClose={closeModal}
         />
+      )}
+
+      {/* Dialog de vente par lot */}
+      {showSellDialog && cardToSell && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border-2 border-yellow-500/30">
+            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+              <Coins className="text-yellow-400" />
+              Vendre {cardToSell.card.name}
+            </h2>
+
+            <div className="space-y-4 mb-6">
+              <div className="bg-gray-800/50 rounded-lg p-4">
+                <div className="text-sm text-gray-400 mb-1">Prix unitaire</div>
+                <div className="text-2xl font-bold text-yellow-400">
+                  {CARD_SELL_PRICES[cardToSell.card.rarity]} Berrys
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Quantité à vendre (max: {cardToSell.maxQuantity})
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max={cardToSell.maxQuantity}
+                  value={sellQuantity}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 1;
+                    setSellQuantity(Math.min(Math.max(1, value), cardToSell.maxQuantity));
+                  }}
+                  className="w-full px-4 py-3 bg-gray-800 border-2 border-gray-700 rounded-lg text-white text-lg font-bold focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                />
+
+                {/* Boutons rapides */}
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => setSellQuantity(1)}
+                    className="flex-1 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
+                  >
+                    1
+                  </button>
+                  {cardToSell.maxQuantity >= 5 && (
+                    <button
+                      onClick={() => setSellQuantity(Math.min(5, cardToSell.maxQuantity))}
+                      className="flex-1 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
+                    >
+                      5
+                    </button>
+                  )}
+                  {cardToSell.maxQuantity >= 10 && (
+                    <button
+                      onClick={() => setSellQuantity(Math.min(10, cardToSell.maxQuantity))}
+                      className="flex-1 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
+                    >
+                      10
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setSellQuantity(cardToSell.maxQuantity)}
+                    className="flex-1 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
+                  >
+                    Max
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-green-900/30 border border-green-600/30 rounded-lg p-4">
+                <div className="text-sm text-green-300 mb-1">Total à recevoir</div>
+                <div className="text-3xl font-bold text-green-400">
+                  {CARD_SELL_PRICES[cardToSell.card.rarity] * sellQuantity} Berrys
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={closeSellDialog}
+                className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-semibold transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleSellCard}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black rounded-lg font-bold transition-all shadow-lg"
+              >
+                Vendre
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

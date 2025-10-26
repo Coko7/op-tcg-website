@@ -113,8 +113,8 @@ const Card: React.FC<CardProps> = React.memo(({
           {/* Rarity and type */}
           <div className="flex items-center justify-center flex-wrap gap-1 sm:gap-2 text-xs mt-1 sm:mt-2">
             <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded font-medium text-xs ${
-              card.rarity === 'secret_rare' ? 'bg-purple-600 text-white' :
-              card.rarity === 'super_rare' ? 'bg-yellow-600 text-white' :
+              card.rarity === 'secret_rare' ? 'bg-yellow-600 text-white' :
+              card.rarity === 'super_rare' ? 'bg-purple-600 text-white' :
               card.rarity === 'leader' ? 'bg-red-600 text-white' :
               card.rarity === 'rare' ? 'bg-blue-600 text-white' :
               card.rarity === 'uncommon' ? 'bg-green-600 text-white' :

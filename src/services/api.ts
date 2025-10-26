@@ -70,6 +70,11 @@ class ApiService {
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
 
+        // Gestion spécifique du rate limiting (429)
+        if (response.status === 429) {
+          throw new Error('⏱️ Trop de requêtes ! Veuillez patienter quelques instants avant de réessayer.');
+        }
+
         // Si le token a expiré, essayer de le rafraîchir
         if (response.status === 401 && errorData?.code === 'TOKEN_EXPIRED' && this.refreshToken) {
           const refreshed = await this.refreshAccessToken();
