@@ -38,6 +38,7 @@ export interface User {
   unique_cards: number;
   berrys?: number;
   is_admin?: boolean;
+  favorite_card_id?: string | null;
 }
 
 export interface BoosterStatus {

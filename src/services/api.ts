@@ -34,6 +34,7 @@ interface User {
   username: string;
   is_admin: boolean;
   berrys?: number;
+  favorite_card_id?: string | null;
 }
 
 class ApiService {

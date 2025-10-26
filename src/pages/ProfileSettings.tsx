@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Star, Lock, Save, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Star, Lock, Save, Eye, EyeOff, Search } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { GameService } from '../services/gameService';
 import { UserCard } from '../types';
@@ -8,12 +8,13 @@ import { useToast } from '../contexts/ToastContext';
 import { apiService } from '../services/api';
 
 const ProfileSettings: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const toast = useToast();
   const [userCards, setUserCards] = useState<UserCard[]>([]);
   const [favoriteCardId, setFavoriteCardId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Changement de mot de passe
   const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -38,9 +39,8 @@ const ProfileSettings: React.FC = () => {
       const cards = await GameService.getUserCards();
       setUserCards(cards);
 
-      // Récupérer la carte favorite actuelle
-      const favoriteCardId = (user as any)?.favorite_card_id;
-      setFavoriteCardId(favoriteCardId || null);
+      // Récupérer la carte favorite actuelle depuis le contexte utilisateur
+      setFavoriteCardId(user?.favorite_card_id || null);
     } catch (error) {
       console.error('Erreur lors du chargement des cartes:', error);
       toast.error('Erreur lors du chargement de vos cartes');
@@ -54,6 +54,8 @@ const ProfileSettings: React.FC = () => {
       setSaving(true);
       await GameService.setProfileFavoriteCard(cardId);
       setFavoriteCardId(cardId);
+      // Rafraîchir les données utilisateur pour mettre à jour le contexte
+      await refreshUser();
       toast.success(cardId ? 'Carte de profil mise à jour !' : 'Carte de profil retirée');
     } catch (error) {
       console.error('Erreur lors de la définition de la carte favorite:', error);
@@ -99,6 +101,17 @@ const ProfileSettings: React.FC = () => {
   };
 
   const favoriteCard = userCards.find(c => c.card_id === favoriteCardId);
+
+  // Filtrer les cartes selon la recherche
+  const filteredCards = userCards.filter((card: any) => {
+    if (!searchQuery.trim()) return true;
+
+    const query = searchQuery.toLowerCase();
+    return (
+      card.name?.toLowerCase().includes(query) ||
+      card.character?.toLowerCase().includes(query)
+    );
+  });
 
   if (!user) return null;
 
@@ -156,15 +169,47 @@ const ProfileSettings: React.FC = () => {
             {/* Grille de sélection */}
             <div>
               <p className="text-gray-400 text-sm mb-3">Choisir une nouvelle carte :</p>
+
+              {/* Champ de recherche */}
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Rechercher par nom ou personnage..."
+                    className="w-full pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  />
+                </div>
+                {searchQuery && (
+                  <p className="text-gray-400 text-xs mt-2">
+                    {filteredCards.length} carte{filteredCards.length !== 1 ? 's' : ''} trouvée{filteredCards.length !== 1 ? 's' : ''} sur {userCards.length}
+                  </p>
+                )}
+              </div>
+
               {loading ? (
                 <div className="text-center py-8">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                   <p className="text-gray-400 mt-2">Chargement...</p>
                 </div>
+              ) : filteredCards.length === 0 ? (
+                <div className="bg-slate-900/50 rounded-lg p-8 text-center">
+                  <p className="text-gray-400">Aucune carte trouvée</p>
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="text-blue-400 hover:text-blue-300 text-sm mt-2 transition-colors"
+                    >
+                      Effacer la recherche
+                    </button>
+                  )}
+                </div>
               ) : (
                 <div className="max-h-96 overflow-y-auto bg-slate-900/50 rounded-lg p-3">
                   <div className="grid grid-cols-3 gap-3">
-                    {userCards.map((card: any) => (
+                    {filteredCards.map((card: any) => (
                       <button
                         key={card.card_id}
                         onClick={() => handleSetFavoriteCard(card.card_id)}
