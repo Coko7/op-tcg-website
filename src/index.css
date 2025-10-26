@@ -35,9 +35,6 @@
     font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
     /* Désactiver le pull-to-refresh sur mobile */
     overscroll-behavior-y: contain;
-    /* Optimisations pour le scroll sur mobile */
-    -webkit-tap-highlight-color: transparent;
-    touch-action: pan-y;
     /* Glassmorphism Modern Background */
     background:
       linear-gradient(135deg, #0f172a 0%, #1e293b 100%),
@@ -853,21 +850,5 @@
 
   .scrollbar-stable::-webkit-scrollbar-thumb:hover {
     background: rgba(59, 130, 246, 0.7);
-  }
-
-  /* Optimisations de performance pour le scroll sur mobile */
-  @media (max-width: 768px) {
-    /* Désactiver les transitions pendant le scroll pour améliorer les performances */
-    .grid > * {
-      transform: translateZ(0);
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-    }
-
-    /* Optimiser le rendu des cartes */
-    .card-common, .card-uncommon, .card-rare, .card-leader, .card-super-rare, .card-secret-rare {
-      will-change: auto;
-      transform: translateZ(0);
-    }
   }
 }

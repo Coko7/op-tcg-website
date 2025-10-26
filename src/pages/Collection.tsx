@@ -320,7 +320,7 @@ const Collection: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-4 sm:space-y-6" style={{ willChange: 'scroll-position' }}>
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
         <Link
           to="/"
@@ -526,10 +526,7 @@ const Collection: React.FC = () => {
             )}
           </div>
 
-          <div
-            className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6"
-            style={{ minHeight: `${Math.ceil(filteredCards.length / 5) * 350}px` }}
-          >
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
             {visibleCards.map((card) => {
               const userCard = userCards.find(uc => uc.card_id === card.id);
               const isOwned = !!userCard;
@@ -538,8 +535,8 @@ const Collection: React.FC = () => {
 
               return (
                 <div
-                  key={`card-${card.id}-${isOwned ? userCard.quantity : 'not-owned'}`}
-                  className={`relative transition-all duration-300 hover:scale-105 ${!isOwned ? 'opacity-40 grayscale hover:opacity-60' : ''}`}
+                  key={card.id}
+                  className={`relative transition-all duration-300 ${!isOwned ? 'opacity-40 grayscale md:hover:opacity-60' : ''}`}
                 >
                   {isOwned ? (
                     <>

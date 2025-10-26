@@ -38,7 +38,7 @@ const Card: React.FC<CardProps> = ({
 
   return (
     <div
-      className={`relative bg-gray-900 rounded-xl overflow-hidden shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer ${rarityClass} ${className}`}
+      className={`relative bg-gray-900 rounded-xl overflow-hidden shadow-2xl md:hover:scale-105 transition-all duration-300 cursor-pointer ${rarityClass} ${className}`}
       onClick={handleCardClick}
     >
       {isNew && (
@@ -79,8 +79,7 @@ const Card: React.FC<CardProps> = ({
               card.rarity === 'super_rare' || card.rarity === 'secret_rare' ? 'holographic-effect' : ''
             }`}
             style={{
-              contentVisibility: 'auto',
-              willChange: 'transform'
+              contentVisibility: 'auto'
             }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
