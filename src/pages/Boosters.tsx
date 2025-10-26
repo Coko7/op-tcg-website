@@ -10,6 +10,7 @@ import Timer from '../components/Timer';
 import WantedPosterAnimation from '../components/WantedPosterAnimation';
 import Dialog from '../components/ui/Dialog';
 import { useDialog } from '../hooks/useDialog';
+import BoosterWall from '../components/BoosterWall';
 
 type AnimationPhase = 'idle' | 'opening' | 'deck' | 'revealing' | 'complete';
 
@@ -234,6 +235,106 @@ const Boosters: React.FC = () => {
     });
   };
 
+  const handleBoosterSelect = (booster: BoosterPack) => {
+    // Mettre à jour le booster sélectionné
+    setSelectedBooster(booster);
+
+    // Si on peut ouvrir gratuitement, on ouvre directement
+    if (canOpen && animationPhase === 'idle') {
+      handleOpenBoosterWithBooster(booster);
+    }
+    // Sinon, on propose d'acheter avec des Berrys
+    else if (animationPhase === 'idle') {
+      handleBuyWithBerrysWithBooster(booster);
+    }
+  };
+
+  const handleOpenBoosterWithBooster = async (booster: BoosterPack) => {
+    if (!canOpen || animationPhase !== 'idle') return;
+
+    setAnimationPhase('opening');
+
+    // Appeler l'API immédiatement pour avoir les cartes pendant l'animation
+    const result = await GameService.openBooster(booster.id);
+    if (result) {
+      setBoosterResult(result);
+
+      // Attendre la fin de l'animation de déchirement du poster
+      // 1000ms (déchirement du poster en deux moitiés)
+      setTimeout(() => {
+        setAnimationPhase('deck');
+        setRevealedCards(0);
+      }, 1000);
+
+      // Mettre à jour le statut
+      if (result.available_boosters !== undefined) {
+        setBoosterStatus((prev: any) => prev ? {
+          ...prev,
+          available_boosters: result.available_boosters!,
+          next_booster_time: result.next_booster_time ? new Date(result.next_booster_time) : undefined
+        } : null);
+        setCanOpen(result.available_boosters > 0);
+      }
+    }
+  };
+
+  const handleBuyWithBerrysWithBooster = async (booster: BoosterPack) => {
+    if (animationPhase !== 'idle' || berrysBalance < BOOSTER_BERRY_PRICE) return;
+
+    showDialog({
+      title: 'Acheter un booster',
+      message: `Voulez-vous acheter "${booster.name}" pour ${BOOSTER_BERRY_PRICE} Berrys ?`,
+      type: 'confirm',
+      confirmText: 'Acheter',
+      cancelText: 'Annuler',
+      showCancel: true,
+      onConfirm: async () => {
+        handleClose();
+        setAnimationPhase('opening');
+
+        try {
+          const result = await GameService.buyBoosterWithBerrys(booster.id);
+          if (result) {
+            setBoosterResult(result);
+
+            // Attendre la fin de l'animation de déchirement du poster
+            // 1000ms (déchirement du poster en deux moitiés)
+            setTimeout(() => {
+              setAnimationPhase('deck');
+              setRevealedCards(0);
+            }, 1000);
+
+            // Mettre à jour le solde de Berrys
+            const newBalance = await GameService.getBerrysBalance();
+            setBerrysBalance(newBalance);
+
+            // Mettre à jour le statut des boosters
+            if (result.available_boosters !== undefined) {
+              setBoosterStatus((prev: any) => prev ? {
+                ...prev,
+                available_boosters: result.available_boosters!,
+                next_booster_time: result.next_booster_time ? new Date(result.next_booster_time) : undefined
+              } : null);
+              setCanOpen(result.available_boosters > 0);
+            }
+          }
+        } catch (error: any) {
+          showDialog({
+            title: 'Erreur',
+            message: error.message || 'Erreur lors de l\'achat du booster',
+            type: 'error',
+            confirmText: 'OK',
+            showCancel: false,
+            onConfirm: () => {
+              handleClose();
+              setAnimationPhase('idle');
+            }
+          });
+        }
+      }
+    });
+  };
+
 
   if (loading) {
     return (
@@ -274,132 +375,31 @@ const Boosters: React.FC = () => {
         </div>
       </div>
 
-      <div className="text-center px-2">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
-          Ouvrir un Booster Pack
-        </h1>
-        <p className="text-slate-300 text-sm sm:text-base mb-4 sm:mb-6">
-          Chaque booster contient 5 cartes avec au moins 1 carte rare !
-        </p>
-
-        {/* Sélecteur de booster */}
-        <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border-2 border-white/10 hover:border-white/20 mb-6 sm:mb-8 max-w-2xl mx-auto shadow-2xl transition-all duration-300">
-          <div className="flex items-center justify-between gap-2">
-            <button
-              onClick={prevBooster}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/80 hover:text-white transition-all duration-300 backdrop-blur-md shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
-              disabled={animationPhase !== 'idle'}
-            >
-              <ChevronLeft size={20} />
-            </button>
-
-            <div className="text-center flex-1 min-w-0">
-              {loading ? (
-                <div className="animate-pulse px-2">
-                  <div className="h-5 sm:h-6 bg-blue-600 rounded mb-2"></div>
-                  <div className="h-3 sm:h-4 bg-blue-700 rounded mb-2"></div>
-                  <div className="h-3 sm:h-4 bg-blue-700 rounded mb-3"></div>
-                  <div className="h-2 sm:h-3 bg-blue-800 rounded"></div>
-                </div>
-              ) : selectedBooster ? (
-                <>
-                  <h3 className="text-base sm:text-xl font-bold text-white mb-1 sm:mb-2 truncate px-2">{selectedBooster.name}</h3>
-                  <div className="text-xs sm:text-sm text-slate-300 mb-1 sm:mb-2">
-                    <span className="font-semibold">{selectedBooster.code}</span> • {selectedBooster.series}
-                  </div>
-                  <p className="text-xs sm:text-sm text-slate-400 mb-2 sm:mb-3 line-clamp-2 px-2">{selectedBooster.description}</p>
-                  <div className="text-xs text-slate-500">
-                    {selectedBooster.cardCount} cartes • {new Date(selectedBooster.releaseDate).toLocaleDateString('fr-FR')}
-                  </div>
-                </>
-              ) : (
-                <div className="text-red-400 text-sm">Erreur de chargement</div>
-              )}
-            </div>
-
-            <button
-              onClick={nextBooster}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/80 hover:text-white transition-all duration-300 backdrop-blur-md shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
-              disabled={animationPhase !== 'idle'}
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-
-          <div className="flex justify-center mt-3 sm:mt-4 space-x-2">
-            {availableBoosters.map((_, index) => (
-              <div
-                key={index}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index === boosterIndex ? 'bg-ocean-400 scale-125 shadow-lg shadow-ocean-500/50' : 'bg-white/20'
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-
+      {/* Mur de Posters - Affichage uniquement en phase idle */}
       {animationPhase === 'idle' && (
-        <div className="text-center space-y-6 sm:space-y-8">
-          <div className="mb-8">
-            <WantedPosterAnimation
-              isOpening={false}
-              animationPhase={animationPhase}
-              onClick={handleOpenBooster}
-            />
-          </div>
-
-          <div className="space-y-3 sm:space-y-4 px-4">
-            <button
-              onClick={handleOpenBooster}
-              disabled={!canOpen}
-              className={`text-sm sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-bold transition-all duration-300 w-full sm:w-auto shadow-2xl backdrop-blur-xl border-2 ${
-                canOpen
-                  ? 'bg-gradient-to-r from-ocean-500/90 to-ocean-600/90 hover:from-ocean-600 hover:to-ocean-700 text-white hover:scale-105 border-ocean-400/30 shadow-ocean-500/40'
-                  : 'bg-white/5 text-white/30 cursor-not-allowed border-white/10'
-              }`}
-            >
-              {canOpen ? (
-                <span className="flex items-center justify-center space-x-2">
-                  <Sparkles size={18} />
-                  <span>Ouvrir le Booster gratuit!</span>
-                  <Sparkles size={18} />
-                </span>
-              ) : (
-                'Booster gratuit indisponible'
-              )}
-            </button>
-
-            {!canOpen && (
-              <div className="text-center">
-                <div className="text-slate-300 mb-2 text-sm sm:text-base">ou</div>
-                <button
-                  onClick={handleBuyWithBerrys}
-                  disabled={berrysBalance < BOOSTER_BERRY_PRICE}
-                  className={`text-sm sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-bold transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto sm:mx-auto shadow-2xl backdrop-blur-xl border-2 ${
-                    berrysBalance >= BOOSTER_BERRY_PRICE
-                      ? 'bg-gradient-to-r from-treasure-500/90 to-treasure-600/90 hover:from-treasure-600 hover:to-treasure-700 text-white hover:scale-105 border-treasure-400/30 shadow-treasure-500/40'
-                      : 'bg-white/5 text-white/30 cursor-not-allowed border-white/10'
-                  }`}
-                >
-                  <Coins size={18} />
-                  <span>Acheter ({BOOSTER_BERRY_PRICE} Berrys)</span>
-                </button>
-                {berrysBalance < BOOSTER_BERRY_PRICE && (
-                  <p className="text-red-400 text-xs sm:text-sm mt-2">
-                    Besoin de {BOOSTER_BERRY_PRICE - berrysBalance} Berrys de plus
-                  </p>
-                )}
-              </div>
-            )}
-
+        <div className="px-2">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
+              Mur des Boosters
+            </h1>
+            <p className="text-slate-300 text-sm sm:text-base">
+              Chaque booster contient 5 cartes avec au moins 1 carte rare ! Cliquez sur un poster pour l'ouvrir.
+            </p>
             {!canOpen && timeUntilNext > 0 && boosterStatus && (
-              <p className="text-slate-300 text-xs sm:text-sm">
+              <div className="mt-3 text-slate-300 text-xs sm:text-sm">
                 Prochain booster gratuit dans{' '}
                 <Timer targetTime={boosterStatus.next_booster_time || null} />
-              </p>
+              </div>
             )}
           </div>
+
+          <BoosterWall
+            boosters={availableBoosters}
+            canOpenFree={canOpen}
+            berrysBalance={berrysBalance}
+            isDisabled={animationPhase !== 'idle'}
+            onBoosterSelect={handleBoosterSelect}
+          />
         </div>
       )}
 

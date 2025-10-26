@@ -851,4 +851,18 @@
   .scrollbar-stable::-webkit-scrollbar-thumb:hover {
     background: rgba(59, 130, 246, 0.7);
   }
+
+  /* Animation pulse lente pour les boosters gratuits */
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
 }
