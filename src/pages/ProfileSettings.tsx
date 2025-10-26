@@ -15,6 +15,14 @@ const ProfileSettings: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // DEBUG: Afficher les infos utilisateur
+  useEffect(() => {
+    console.log('=== DEBUG ProfileSettings ===');
+    console.log('user:', user);
+    console.log('user.favorite_card_id:', user?.favorite_card_id);
+    console.log('user.favorite_card:', user?.favorite_card);
+  }, [user]);
+
   // Changement de mot de passe
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordData, setPasswordData] = useState({
@@ -48,9 +56,17 @@ const ProfileSettings: React.FC = () => {
   const handleSetFavoriteCard = async (cardId: string | null) => {
     try {
       setSaving(true);
+      console.log('=== Sélection carte favorite ===');
+      console.log('cardId:', cardId);
+
       await GameService.setProfileFavoriteCard(cardId);
+      console.log('Carte favorite mise à jour côté serveur');
+
       // Rafraîchir les données utilisateur pour mettre à jour le contexte et la carte favorite
       await refreshUser();
+      console.log('Utilisateur rafraîchi');
+      console.log('Nouveau user.favorite_card:', user?.favorite_card);
+
       toast.success(cardId ? 'Carte de profil mise à jour !' : 'Carte de profil retirée');
     } catch (error) {
       console.error('Erreur lors de la définition de la carte favorite:', error);

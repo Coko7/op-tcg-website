@@ -121,11 +121,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       const response = await apiService.getCurrentUser();
+      console.log('[AuthContext] refreshUser - response complète:', response);
+      console.log('[AuthContext] response.user:', response.user);
+      console.log('[AuthContext] response.user.favorite_card:', response.user?.favorite_card);
       setAuthState(prev => ({
         ...prev,
         user: response.user,
         stats: response.stats,
       }));
+      console.log('[AuthContext] État mis à jour');
     } catch (error) {
       console.error('Failed to refresh user:', error);
       await logout();

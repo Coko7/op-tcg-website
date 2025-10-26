@@ -1029,11 +1029,14 @@ export class UserController {
       // Récupérer les détails de la carte favorite si elle existe
       let favoriteCardData = null;
       if (user.favorite_card_id) {
+        console.log('[getCurrentUser] Récupération carte favorite:', user.favorite_card_id);
         const favoriteCard = await Database.get<any>(`
           SELECT id, name, image_url, fallback_image_url, rarity
           FROM cards
           WHERE id = ? AND is_active = 1
         `, [user.favorite_card_id]);
+
+        console.log('[getCurrentUser] Carte trouvée:', favoriteCard);
 
         if (favoriteCard) {
           favoriteCardData = {
@@ -1042,11 +1045,12 @@ export class UserController {
             image_url: favoriteCard.image_url || favoriteCard.fallback_image_url,
             rarity: favoriteCard.rarity
           };
+          console.log('[getCurrentUser] favoriteCardData:', favoriteCardData);
         }
       }
 
       // Retourner les infos utilisateur (sans le password_hash)
-      res.json({
+      const responseData = {
         success: true,
         user: {
           id: user.id,
@@ -1059,7 +1063,10 @@ export class UserController {
           favorite_card_id: user.favorite_card_id,
           favorite_card: favoriteCardData
         }
-      });
+      };
+
+      console.log('[getCurrentUser] Réponse envoyée:', JSON.stringify(responseData, null, 2));
+      res.json(responseData);
     } catch (error) {
       console.error('Erreur récupération utilisateur:', error);
       res.status(500).json({ error: 'Erreur serveur' });
