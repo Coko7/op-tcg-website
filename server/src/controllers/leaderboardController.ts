@@ -12,7 +12,6 @@ interface RarityCount {
 
 interface LeaderboardEntry {
   username: string;
-  user_id: string;
   secret_rare: number;
   super_rare: number;
   leader: number;
@@ -69,7 +68,6 @@ export class LeaderboardController {
           const entry: LeaderboardEntry = {
             rank: index + 1,
             username: user.username,
-            user_id: user.user_id,
             secret_rare: user.secret_rare,
             super_rare: user.super_rare,
             leader: user.leader,
